@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>TaxDashboard</title>
     <base href="/" />
+    <link rel="stylesheet" href="lib/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="lib/bootstrap/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="css/app.css" />
-    <link rel="stylesheet" href="css/reboot.css" />
     <link rel="stylesheet" href="TaxDashboard.styles.css" />
     <link rel="icon" href="data:,">
 </head>
@@ -15,7 +16,15 @@
 
     <div class="status-bar-safe-area"></div>
 
-    <div id="app">Loading...</div>
+    <div id="app" class="h-100">
+        <div class="container h-100">
+            <div class="row h-100 justify-content-center align-items-center text-center">
+                <div class="spinner-border text-primary" style="width:3rem; height:3rem;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -24,6 +33,7 @@
     </div>
 
     <script src="_framework/blazor.webview.js" autostart="false"></script>
+    <script src="lib/bootstrap/bootstrap.min.js"></script>
 
 </body>
 

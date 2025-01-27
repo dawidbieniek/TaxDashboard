@@ -1,10 +1,7 @@
 ﻿/*#if (SampleContent)*/
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
-a, .btn-link {
-    color: #006bb7;
+    height: 100%;
 }
 
 .btn-primary {
@@ -86,3 +83,51 @@ h1:focus {
         padding-left: env(safe-area-inset-left);
     }
 }
+
+:root {
+    --aside-width: 16rem;
+}
+
+.aside {
+    width: var(--aside-width);
+    height: 100%;
+    background-color: var(--bs-light);
+    position: fixed;
+}
+
+content {
+    display: block;
+    margin-left: var(--aside-width);
+}
+
+.navbar-vertical {
+    font-size: large;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+.navbar-vertical .nav-link {
+    padding-left:0.5rem;
+    margin-bottom:0.25rem;
+}
+
+    .navbar-vertical .navbar-nav {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+        .navbar-vertical .navbar-nav .nav {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin-left: 0.5rem;
+        }
+
+        .navbar-vertical .navbar-nav .nav-pills .nav-link {
+            margin-left: 1rem;
+        }
+
+            .navbar-vertical .navbar-nav .nav-pills .nav-link::before {
+                content: "> ";
+            }

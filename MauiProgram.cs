@@ -1,7 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.Fast.Components.FluentUI;
-
-using TaxDashboard.Models;
 
 namespace TaxDashboard
 {
@@ -18,7 +15,6 @@ namespace TaxDashboard
                 });
 
             builder.Services.AddMauiBlazorWebView();
-            builder.Services.AddFluentUIComponents();
             builder.Services.RegisterAppServices();
 
 #if DEBUG
