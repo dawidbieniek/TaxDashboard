@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-
+﻿using TaxDashboard.Initialization;
 using TaxDashboard.Models;
+using TaxDashboard.Services;
 
 namespace TaxDashboard;
 
@@ -8,10 +8,9 @@ internal static class DependencyInjection
 {
     public static IServiceCollection RegisterAppServices(this IServiceCollection services)
     {
-        //File.Delete(AppDbContextExtensions.DatabaseFilePath);
-
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite($"Filename={AppDbContextExtensions.DatabaseFilePath}"));
+        DatabaseInitializer.RegisterDataServcies(services);
+        services.AddTransient<InitializationPage>();
+        services.AddTransient<TestService>();
 
         return services;
     }

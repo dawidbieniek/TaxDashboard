@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Reflection;
+
+using Microsoft.EntityFrameworkCore;
 
 using TaxDashboard.Models.Entities;
 
@@ -9,19 +11,10 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
     public DbSet<Client> Clients { get; set; } = default!;
     public DbSet<JPKV7> JPKV7s { get; set; } = default!;
     public DbSet<Bank> Banks { get; set; } = default!;
-}
 
-public static class AppDbContextExtensions
-{
-    public static readonly string DatabaseFilePath = Path.Combine(FileSystem.AppDataDirectory, "data.db3");
-
-    public static void CreateDbIfNotExists(this IServiceProvider provider)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        using IServiceScope scope = provider.CreateScope();
-        IServiceProvider services = scope.ServiceProvider;
-
-        AppDbContext dbContext = services.GetRequiredService<AppDbContext>();
-        dbContext.Database.EnsureCreated();
-        AppDbSeeder.SeedData(dbContext);
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }

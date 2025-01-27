@@ -35,32 +35,33 @@ public static class AppDbSeeder
         new() { Name = "Velo Bank" },
     ];
 
-    public static void SeedData(AppDbContext context)
+    public static async Task SeedRequiredDataAsync(AppDbContext context)
     {
-        if (!context.Banks.Any())
-            context.Banks.AddRange(Banks);
+        foreach (Bank bank in Banks)
+        {
+            if (!context.Banks.Any(b => b.Name == bank.Name))
+                await context.Banks.AddAsync(bank);
+        }
 
-        SeedTestClient(context);
-
-        context.SaveChanges();
+        await context.SaveChangesAsync();
     }
 
-    private static void SeedTestClient(AppDbContext context)
+    public static async Task SeedDebugDataAsync(AppDbContext context)
     {
-#if !DEBUG
-        return;
-#endif
+        await SeedTestClient(context);
+        await context.SaveChangesAsync();
+    }
 
-        //if (context.Clients.Any())
-        //    return;
+    private static async Task SeedTestClient(AppDbContext context)
+    {
         context.Clients.RemoveRange(context.Clients);
 
         Client client = new()
         {
             JoinDateTime = DateTime.Now,
-            Bank = Banks[0],
+            Bank = context.Banks.First(),
         };
 
-        context.Clients.Add(client);
+        await context.Clients.AddAsync(client);
     }
 }

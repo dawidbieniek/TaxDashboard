@@ -2,6 +2,9 @@
 @inject TaxDashboard.Models.AppDbContext db
 
 @using Microsoft.EntityFrameworkCore
+@using TaxDashboard.Services
+
+@inject TestService test
 
 <h1>Hello, world!</h1>
 
@@ -11,8 +14,8 @@ Welcome to your new app.
 @if (@db.Clients.Count() > 0)
 {
     <FluentLabel>@db.Clients.First().FullName</FluentLabel>
-    <FluentLabel>@(db.Clients.FirstOrDefault().JPKV7HandledDates?.FirstOrDefault()?.ContextDate.ToString() ?? "abc")</FluentLabel>
-    <FluentLabel>@(db.Clients.Include(c => c.Bank).FirstOrDefault().Bank?.Name ?? "abc")</FluentLabel>
+@*     <FluentLabel>@(db.Clients.FirstOrDefault().JPKV7HandledDates?.FirstOrDefault()?.ContextDate.ToString() ?? "abc")</FluentLabel>
+    <FluentLabel>@(db.Clients.Include(c => c.Bank).FirstOrDefault().Bank?.Name ?? "abc")</FluentLabel> *@
 }
 @* <FluentLabel>@db.Clients.First().Invoices.Count()</FluentLabel> *@
 <FluentIcon Value="@(new Icons.Regular.Size24.Save())" />

@@ -26,11 +26,7 @@ namespace TaxDashboard
             builder.Logging.AddDebug();
 #endif
 
-            var app = builder.Build();
-
-            app.Services.CreateDbIfNotExists();
-
-            return app;
+            return builder.Build();
         }
     }
 }
