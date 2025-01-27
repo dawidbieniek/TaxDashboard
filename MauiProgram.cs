@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Fast.Components.FluentUI;
 
+using TaxDashboard.Models;
+
 namespace TaxDashboard
 {
     public static class MauiProgram
@@ -17,13 +19,18 @@ namespace TaxDashboard
 
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddFluentUIComponents();
+            builder.Services.RegisterAppServices();
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
             builder.Logging.AddDebug();
 #endif
 
-            return builder.Build();
+            var app = builder.Build();
+
+            app.Services.CreateDbIfNotExists();
+
+            return app;
         }
     }
 }
