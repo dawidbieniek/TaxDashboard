@@ -1,0 +1,69 @@
+﻿@inject ClientsService ClientsService
+
+<nav class="navbar bg-light">
+    <div class="container-fluid">
+        <div class="d-flex">
+            <input class="dropdown@(_incorrectClientName ? " border-1 border-danger" : "")" list="clientList" type="text" placeholder="Klient" autocomplete="on" @onchange="ChangeSelectedClient" value="@(StartingClient?.FullName ?? "")" />
+            <datalist id="clientList">
+                @foreach (Client client in _allClients)
+                {
+                    <option>@client.FullName</option>
+                }
+            </datalist>
+            @if (ShowDateSelector)
+            {
+                <ContextDateSelector StartingDateContext="@StartingDateContext" OnSelectedDateContextChanged="@OnSelectedDateContextChanged"/>
+            }
+        </div>
+    </div>
+</nav>
+
+@code {
+    private Client _selectedClient = default!;
+    private bool _incorrectClientName = false;
+
+    [Parameter]
+    public Client? StartingClient { get; set; }
+    [Parameter]
+    public EventCallback<Client> OnSelectedClientChanged { get; set; }
+    [Parameter]
+    public bool ShowDateSelector { get; set; } = true;
+    [Parameter]
+    public DateOnly? StartingDateContext { get; set; }
+    [Parameter]
+    public EventCallback<DateOnly> OnSelectedDateContextChanged { get; set; }
+
+    private IEnumerable<Client> _allClients = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _allClients = await ClientsService.GetAllAsync();
+        if (StartingClient is null)
+        {
+            _selectedClient = _allClients.First();
+            await OnSelectedClientChanged.InvokeAsync(_selectedClient);
+        }
+        else
+            _selectedClient = StartingClient;
+    }
+
+    private void ChangeSelectedClient(ChangeEventArgs e)
+    {
+        _incorrectClientName = !SelectClientFromName((string)e.Value!);
+    }
+
+    private bool SelectClientFromName(string name)
+    {
+        foreach(Client client in _allClients)
+        {
+            if(client.FullName.Equals(name, StringComparison.OrdinalIgnoreCase))
+            {
+                _selectedClient = client;
+                OnSelectedClientChanged.InvokeAsync(_selectedClient);
+                return true;
+            }
+        }
+
+        return false;
+    }
+}

@@ -10,7 +10,8 @@ internal static class DependencyInjection
     {
         DatabaseInitializer.RegisterDataServcies(services);
         services.AddTransient<InitializationPage>();
-        services.AddTransient<TestService>();
+        services.AddTransient<ClientsService>();
+        services.AddTransient<BanksService>();
 
         return services;
     }

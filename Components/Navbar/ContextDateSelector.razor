@@ -1,0 +1,80 @@
+﻿<select class="form-select ms-4" @onchange="ChangeSelectedYear" value="@_selectedYear">
+    @foreach (int year in SelectableYears)
+    {
+        @if (_selectedYear.HasValue && _selectedYear.Value == year)
+        {
+            <option value="@year" selected>@year</option>
+        }
+        else
+        {
+            <option value="@year">@year</option>
+        }
+    }
+</select>
+
+<div class="d-flex gap-1 ms-4">
+    @for (int i = 1; i <= MonthLabels.Length; i++)
+    {
+        string id = $"month{i}";
+        int monthValue = i;
+        @if (_selectedMonth.HasValue && _selectedMonth.Value == i)
+        {
+            <input type="radio" class="btn-check" name="months" id="@id" autocomplete="off" @onclick="@(() => ChangeSelectedMonth(monthValue))" checked>
+        }
+        else
+        {
+            <input type="radio" class="btn-check" name="months" id="@id" autocomplete="off" @onclick="@(() => ChangeSelectedMonth(monthValue))">
+        }
+        <label class="btn" for="@id">@(MonthLabels[i - 1])</label>
+    }
+</div>
+
+@code {
+
+    private static readonly string[] MonthLabels = ["Sty", "Lut", "Mar", "Kwi", "Maj", "Cze", "Lip", "Sie", "Wrz", "Paź", "Lis", "Gru"];
+    private static readonly int[] SelectableYears = [2024, 2025];
+
+    private int? _selectedMonth;
+    private int? _selectedYear;
+
+    [Parameter]
+    public DateOnly? StartingDateContext { get; set; }
+    [Parameter]
+    public EventCallback<DateOnly> OnSelectedDateContextChanged { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        if (StartingDateContext.HasValue)
+        {
+            _selectedMonth = StartingDateContext.Value.Month;
+            _selectedYear = StartingDateContext.Value.Year;
+        }
+        else
+            _selectedYear = SelectableYears[0];
+    }
+
+    private void ChangeSelectedMonth(int month)
+    {
+        _selectedMonth = month;
+
+        UpdateSelectedContextDate();
+    }
+
+    private void ChangeSelectedYear(ChangeEventArgs e)
+    {
+        _selectedYear = int.Parse((string)e.Value!);
+
+        UpdateSelectedContextDate();
+    }
+
+    private void UpdateSelectedContextDate()
+    {
+        StartingDateContext = _selectedYear.HasValue && _selectedMonth.HasValue
+            ? new(_selectedYear.Value, _selectedMonth.Value, 1)
+            : null;
+
+        if (StartingDateContext.HasValue)
+            OnSelectedDateContextChanged.InvokeAsync(StartingDateContext.Value);
+    }
+}

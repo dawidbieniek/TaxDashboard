@@ -58,10 +58,20 @@ public static class AppDbSeeder
 
         Client client = new()
         {
+            Name = "Test",
+            Surname = "Client",
             JoinDateTime = DateTime.Now,
             Bank = context.Banks.First(),
         };
+        Client client2 = new()
+        {
+            Name = "Test2",
+            Surname = "Client2",
+            JoinDateTime = DateTime.Now,
+            Bank = context.Banks.First(b => b.Name == Banks[5].Name),
+        };
 
         await context.Clients.AddAsync(client);
+        await context.Clients.AddAsync(client2);
     }
 }

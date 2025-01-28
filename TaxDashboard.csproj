@@ -41,6 +41,7 @@
         <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
         <NuGetAudit>False</NuGetAudit>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -66,10 +67,6 @@
         <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Services\" />
     </ItemGroup>
 
 </Project>
