@@ -1,7 +1,7 @@
 ﻿<select class="form-select ms-4" @onchange="ChangeSelectedYear" value="@_selectedYear">
     @foreach (int year in SelectableYears)
     {
-        @if (_selectedYear.HasValue && _selectedYear.Value == year)
+        @if (_selectedYear == year)
         {
             <option value="@year" selected>@year</option>
         }
@@ -17,7 +17,7 @@
     {
         string id = $"month{i}";
         int monthValue = i;
-        @if (_selectedMonth.HasValue && _selectedMonth.Value == i)
+        @if (_selectedMonth == i)
         {
             <input type="radio" class="btn-check" name="months" id="@id" autocomplete="off" @onclick="@(() => ChangeSelectedMonth(monthValue))" checked>
         }
@@ -34,8 +34,8 @@
     private static readonly string[] MonthLabels = ["Sty", "Lut", "Mar", "Kwi", "Maj", "Cze", "Lip", "Sie", "Wrz", "Paź", "Lis", "Gru"];
     private static readonly int[] SelectableYears = [2024, 2025];
 
-    private int? _selectedMonth;
-    private int? _selectedYear;
+    private int _selectedMonth;
+    private int _selectedYear;
 
     [Parameter]
     public DateOnly? StartingDateContext { get; set; }
@@ -51,7 +51,10 @@
             _selectedYear = StartingDateContext.Value.Year;
         }
         else
+        {
             _selectedYear = SelectableYears[0];
+            _selectedMonth = 1;
+        }
     }
 
     private void ChangeSelectedMonth(int month)
@@ -70,11 +73,7 @@
 
     private void UpdateSelectedContextDate()
     {
-        StartingDateContext = _selectedYear.HasValue && _selectedMonth.HasValue
-            ? new(_selectedYear.Value, _selectedMonth.Value, 1)
-            : null;
-
-        if (StartingDateContext.HasValue)
-            OnSelectedDateContextChanged.InvokeAsync(StartingDateContext.Value);
+        DateOnly dateContext = new(_selectedYear, _selectedMonth, 1);
+        OnSelectedDateContextChanged.InvokeAsync(dateContext);
     }
 }

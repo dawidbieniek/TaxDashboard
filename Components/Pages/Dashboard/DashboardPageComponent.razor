@@ -1,0 +1,15 @@
+﻿@if(Initialized)
+{
+    @ChildContent
+}
+else
+{
+    <LoadingIcon/>
+}
+
+@code {
+    [Parameter]
+    public bool Initialized { get; set; } = false;
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; } = default!;
+}

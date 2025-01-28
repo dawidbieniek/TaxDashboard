@@ -2,24 +2,14 @@
 
 @using TaxDashboard.Components.Navbar
 
-@inject ClientsService ClientsService
+@inherits DashboardPageBase
+
 @inject BanksService BanksService
 
-<ClientSelector  StartingClient="@_client" OnSelectedClientChanged="(client) => _client = client" OnSelectedDateContextChanged="(date) => _date = date"/>
-
-@(_date.HasValue ? _date.ToString() : "Brak daty")
-@(_client?.FullName ?? "NoClient")
+<DashboardPageComponent Initialized="@Initialized">
+    <ClientSelector StartingClient="@Client" StartingDateContext="@ContextDate" OnSelectedClientChanged="ChangeSelectedClient" OnSelectedDateContextChanged="ChangeDateContext" />
+    @(Client?.FullName ?? "NoClient")
+</DashboardPageComponent>
 
 @code {
-    private bool show = true;
-    private Client _client;
-    private DateOnly? _date = null;
-
-    private IEnumerable<Bank> _banks;
-
-    protected override async Task OnParametersSetAsync()
-    {
-        _client = (await ClientsService.GetAllAsync())[0];
-        _banks = await BanksService.GetAllAsync();
-    }
 }

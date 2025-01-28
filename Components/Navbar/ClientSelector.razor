@@ -3,7 +3,7 @@
 <nav class="navbar bg-light">
     <div class="container-fluid">
         <div class="d-flex">
-            <input class="dropdown@(_incorrectClientName ? " border-1 border-danger" : "")" list="clientList" type="text" placeholder="Klient" autocomplete="on" @onchange="ChangeSelectedClient" value="@(StartingClient?.FullName ?? "")" />
+            <input class="dropdown@(_incorrectClientName ? " border-1 border-danger" : "")" style="min-height:38px" list="clientList" type="text" placeholder="Klient" autocomplete="on" @onchange="ChangeSelectedClient" value="@(StartingClient?.FullName ?? "")" />
             <datalist id="clientList">
                 @foreach (Client client in _allClients)
                 {
@@ -19,7 +19,7 @@
 </nav>
 
 @code {
-    private Client _selectedClient = default!;
+    private Client? _selectedClient;
     private bool _incorrectClientName = false;
 
     [Parameter]
@@ -38,13 +38,14 @@
     protected override async Task OnInitializedAsync()
     {
         _allClients = await ClientsService.GetAllAsync();
-        if (StartingClient is null)
+
+        if (StartingClient is not null)
         {
-            _selectedClient = _allClients.First();
-            await OnSelectedClientChanged.InvokeAsync(_selectedClient);
+            _selectedClient = StartingClient;
+            _incorrectClientName = false;
         }
         else
-            _selectedClient = StartingClient;
+            _incorrectClientName = true;
     }
 
     private void ChangeSelectedClient(ChangeEventArgs e)

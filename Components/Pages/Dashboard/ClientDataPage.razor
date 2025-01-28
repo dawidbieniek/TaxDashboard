@@ -1,0 +1,14 @@
+﻿@page "/data"
+
+@using TaxDashboard.Components.Navbar
+
+@inherits DashboardPageBase
+
+<DashboardPageComponent Initialized="@Initialized">
+    <ClientSelector ShowDateSelector="false" StartingClient="@Client" OnSelectedClientChanged="ChangeSelectedClient" />
+    @(Client?.FullName ?? "NoClient")
+    But this time its different lol
+</DashboardPageComponent>
+
+@code {
+}
