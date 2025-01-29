@@ -1,91 +1,73 @@
 ﻿@page "/list"
 
 @using BlazorTable
+@using TaxDashboard.Util
 
-<h1>Edit Mode</h1>
+@inject ClientsService ClientsService
 
-<button class="btn btn-sm btn-danger" title="Toggle Edit Mode" @onclick="@((x) => ToggleEdit())">Toggle Edit Mode</button>
-<br />
-<br />
-<Table TableItem="PersonData" Items="data" PageSize="15" @ref="Table" ColumnReorder="true">
-    <Column TableItem="PersonData" Title="Id" Field="@(x => x.id)" Sortable="true" Filterable="true" Width="10%" DefaultSortColumn="true">
-        <EditTemplate>
-            <input type="number" @bind-value="@context.id" class="form-control form-control-sm" />
-        </EditTemplate>
-    </Column>
-    <Column TableItem="PersonData" Title="Full Name" Field="@(x => x.full_name)" Sortable="true" Filterable="true" Width="20%">
-        <EditTemplate>
-            <input type="text" @bind-value="@context.full_name" class="form-control form-control-sm" />
-        </EditTemplate>
-    </Column>
-    <Column TableItem="PersonData" Title="Email" Field="@(x => x.email)" Sortable="true" Filterable="true" Width="20%">
-        <Template>
-            <a href="mailto:@context.email">@context.email</a>
-        </Template>
-        <EditTemplate>
-            <input type="email" @bind-value="@context.email" class="form-control form-control-sm" />
-        </EditTemplate>
-    </Column>
-    <Column TableItem="PersonData" Title="Paid" Field="@(x => x.paid)" Sortable="true" Filterable="true" Width="10%">
-        <Template>
-            @context.paid.ToString()
-        </Template>
-        <EditTemplate>
-            <input type="checkbox" @bind-value="@context.paid" class="form-control form-control-sm" checked="@(context.paid)" />
-        </EditTemplate>
-    </Column>
-    <Column TableItem="PersonData" Title="Price" Field="@(x => x.price)" Sortable="true" Filterable="true" Width="10%" Format="C">
-        <EditTemplate>
-            <input type="number" step=".01" @bind-value="@context.price" class="form-control form-control-sm" />
-        </EditTemplate>
-    </Column>
-    <Column TableItem="PersonData" Title="Created Date" Field="@(x => x.created_date)" Sortable="true" Filterable="true" Width="10%">
-        <Template>
-            @(context.created_date.HasValue ? context.created_date.Value.ToShortDateString() : string.Empty)
-        </Template>
-        <EditTemplate>
-            <input type="date" @bind-value="@context.created_date" class="form-control form-control-sm" />
-        </EditTemplate>
-    </Column>
-    <Pager ShowPageNumber="true" ShowTotalCount="true" />
-</Table>
+<div class="client-table">
+    <Table TableItem="Client" Items="@_allClients" PageSize="15" TableClass="table table-striped table-hover table-bordered table-sm small w-100">
+        <Column TableItem="Client" Title="Id" Field="@(x => x.Id)" Sortable="true" Filterable="true" DefaultSortColumn="true" Width="10%" />
+        <Column TableItem="Client" Title="Imię" Field="@(x => x.FullName)" Sortable="true" Filterable="true" Width="10%" />
+        <Column TableItem="Client" Title="NIP" Field="@(x => x.NIP)" Sortable="true" Filterable="true" Width="10%" />
+        <Column TableItem="Client" Title="Email" Field="@(x => x.Email)" Sortable="true" Filterable="true" Width="10%">
+            <Template>
+                <a href="mailto:@(context.Email)">@context.Email</a>
+            </Template>
+        </Column>
+        <Column TableItem="Client" Title="Telefon" Field="@(x => x.PhoneNumber)" Sortable="true" Filterable="true" Width="10%" />
+        <Column TableItem="Client" Title="Zawieszony" Field="@(x => x.Suspended)" Sortable="true" Filterable="true" Width="10%">
+            <Template>
+                <InputCheckbox class="form-check-input m-1" style="transform:scale(1.5);" @bind-Value="@context.Suspended" @bind-Value:after="@(() => ClientsService.UpdateAsync(context))" />
+            </Template>
+        </Column>
+        <Column TableItem="Client" Title="Bank" Field="@(x => x.Bank.Name)" Sortable="true" Filterable="true" />
+        <Column TableItem="Client" Title="Data założenia" Field="@(x => x.JoinDateTime)" Format="yyyy-MM-dd" Sortable="true" Filterable="true" Width="10%" />
+        <Column TableItem="Client" Title="Kasa fiskalna" Field="@(x => x.UseCashRegister)" Sortable="true" Filterable="true" Width="10%">
+            <Template>
+                <input class="form-check-input m-1" style="transform:scale(1.5);" type="checkbox" disabled checked="@context.UseCashRegister" />
+            </Template>
+        </Column>
+        <Column TableItem="Client" Title="Umowa o pracę" Field="@(x => x.EmploymentContract)" Sortable="true" Filterable="true" Width="10%">
+            <Template>
+                <input class="form-check-input m-1" style="transform:scale(1.5);" type="checkbox" disabled checked="@context.EmploymentContract" />
+            </Template>
+        </Column>
+        <Column TableItem="Client" Title="VAT" Field="@(x => x.VAT)" Sortable="true" Filterable="true" Width="10%">
+            <Template>
+                <input class="form-check-input m-1" style="transform:scale(1.5);" type="checkbox" disabled checked="@context.VAT" />
+            </Template>
+        </Column>
+        <Column TableItem="Client" Title="Metoda kasowa" Field="@(x => x.CashMethod)" Sortable="true" Filterable="true" Width="10%">
+            <Template>
+                <input class="form-check-input m-1" style="transform:scale(1.5);" type="checkbox" disabled checked="@context.CashMethod" />
+            </Template>
+        </Column>
+        <Column TableItem="Client" Title="Abonament" Field="@(x => x.Subscription)" Sortable="true" Filterable="true" Width="10%" />
+        <Column TableItem="Client" Title="Koszt abonamentu" Field="@(x => x.SubscriptionPrice)" Format="C2" Sortable="true" Filterable="true" Width="10%" />
+        <Column TableItem="Client" Title="Kwota autoryzacyjna" Field="@(x => x.AuthorizationPrice)" Format="C2" Sortable="true" Filterable="true" Width="10%" />
+        <Column TableItem="Client" Title="Podatek" Field="@(x => x.TaxType)" Sortable="true" Filterable="true" Width="10%" >
+            <Template>@(context.TaxType.GetDescriptor())</Template>    
+        </Column>
+        <Column TableItem="Client" Title="Ulga" Field="@(x => x.ReductionType)" Sortable="true" Filterable="true" Width="10%">
+            <Template>@(context.ReductionType.GetDescriptor())</Template>
+        </Column>
+        <Column TableItem="Client" Title="Rozliczanie PIT" Field="@(x => x.PITPaymentType)" Sortable="true" Filterable="true" Width="10%">
+            <Template>@(context.PITPaymentType.GetDescriptor())</Template>
+        </Column>
+        <Column TableItem="Client" Title="Opłacanie VAT" Field="@(x => x.VATPaymentType)" Sortable="true" Filterable="true" Width="10%">
+            <Template>@(context.VATPaymentType.GetDescriptor())</Template>
+        </Column>
+        <Pager ShowPageNumber="true" ShowTotalCount="true" />
+    </Table>
+</div>
 
 @code
 {
-
-    private ITable<PersonData> Table;
-
-    private PersonData[] data;
+    private List<Client> _allClients = [];
 
     protected override async Task OnInitializedAsync()
     {
-        data = [
-            new(){full_name="Klient", email="emial1", paid=true, price=312M, cc_type=CreditCard.MasterCard, created_date = DateTime.Now},
-            new(){full_name="Klient2", email="email2", paid=true, price=123M, cc_type=CreditCard.MasterCard, created_date = DateTime.Now},
-            new(){full_name="Klient3", email="email3", paid=false, price=0.4M, cc_type=CreditCard.Visa, created_date = DateTime.Now},
-        ];
-    }
-
-    public class PersonData
-    {
-        public int? id { get; set; }
-        public string full_name { get; set; }
-        public string email { get; set; }
-        public bool? paid { get; set; }
-        public decimal? price { get; set; }
-        public CreditCard? cc_type { get; set; }
-        public DateTime? created_date { get; set; }
-    }
-
-    public enum CreditCard
-    {
-        none = 0,
-        MasterCard = 1,
-        Visa = 2
-    }
-
-    private void ToggleEdit()
-    {
-        Table.ToggleEditMode();
+        _allClients = [.. await ClientsService.GetAllWithDetailsAsync()];
     }
 }

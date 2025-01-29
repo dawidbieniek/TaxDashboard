@@ -7,6 +7,16 @@ namespace TaxDashboard.Services;
 
 public class ClientsService(IDbContextFactory<AppDbContext> contextFactory) : CrudService<Client>(contextFactory)
 {
+    public async Task<ICollection<Client>> GetAllWithDetailsAsync()
+    {
+        using AppDbContext context = await ContextFactory.CreateDbContextAsync();
+#pragma warning disable IDE0305 // Simplify collection initialization
+        return context.Clients
+            .Include(c => c.Bank)
+            .ToList();
+#pragma warning restore IDE0305 // Simplify collection initialization
+    }
+
     public override async Task<Client?> GetDetailsAsync(int id)
     {
         using AppDbContext context = await ContextFactory.CreateDbContextAsync();
