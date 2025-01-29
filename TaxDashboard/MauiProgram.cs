@@ -2,6 +2,8 @@
 
 using Blazored.LocalStorage;
 
+using BlazorTable;
+
 using Microsoft.Extensions.Logging;
 
 namespace TaxDashboard
@@ -19,6 +21,7 @@ namespace TaxDashboard
                 });
 
             builder.Services.AddMauiBlazorWebView();
+            builder.Services.AddBlazorTable();
             builder.Services.RegisterAppServices();
             builder.Services.AddBlazoredLocalStorage();
 
