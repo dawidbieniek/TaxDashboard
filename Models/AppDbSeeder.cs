@@ -49,12 +49,26 @@ public static class AppDbSeeder
     public static async Task SeedDebugDataAsync(AppDbContext context)
     {
         await SeedTestClient(context);
+        await SeedIncomes(context);
         await context.SaveChangesAsync();
     }
 
     private static async Task SeedTestClient(AppDbContext context)
     {
         context.Clients.RemoveRange(context.Clients);
+        context.VATUEs.RemoveRange(context.VATUEs);
+        context.JPKV7s.RemoveRange(context.JPKV7s);
+
+        JPKV7 jpk = new()
+        {
+            ChangedDateTime = new(2024, 1, 1, 10, 20, 10),
+            ContextDate = new(2024, 1, 1),
+        };
+        VATUE vatue = new()
+        {
+            ChangedDateTime = new(2024, 1, 1, 10, 20, 10),
+            ContextDate = new(2024, 2, 1),
+        };
 
         Client client = new()
         {
@@ -63,6 +77,9 @@ public static class AppDbSeeder
             JoinDateTime = DateTime.Now,
             Bank = context.Banks.First(),
         };
+        client.JPKV7HandledDates.Add(jpk);
+        client.VATUEHandledDates.Add(vatue);
+
         Client client2 = new()
         {
             Name = "Test2",
@@ -73,5 +90,23 @@ public static class AppDbSeeder
 
         await context.Clients.AddAsync(client);
         await context.Clients.AddAsync(client2);
+    }
+
+    private static async Task SeedIncomes(AppDbContext context)
+    {
+        context.Incomes.RemoveRange(context.Incomes);
+
+        Client client = context.Clients.Local.FirstOrDefault() ?? context.Clients.First();
+
+        List<Income> incomes = [
+            new() { Client = client, Amount = 1000, Date = new(2024, 1, 1) },
+            new() { Client = client, Amount = 500, Date = new(2024, 2, 1) },
+            new() { Client = client, Amount = 1500, Date = new(2024, 3, 1) },
+            new() { Client = client, Amount = 2000, Date = new(2024, 4, 1) },
+            new() { Client = client, Amount = 500, Date = new(2024, 1, 1) },
+            new() {Client = client, Amount = 100, Date = new(2024, 6, 1) },
+        ];
+
+        await context.AddRangeAsync(incomes);
     }
 }

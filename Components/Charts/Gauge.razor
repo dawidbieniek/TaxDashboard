@@ -1,0 +1,60 @@
+﻿@using ApexCharts
+
+<div class="d-flex flex-column align-items-center justify-content-center h-100 position-relative">
+    <div style="@(_showLoadingIcon?"visibility:hidden;":"")">
+        <ApexChart @ref="@_chartRef" TItem="GaugeValue" OnBeforeMount="HideLoadingIcon">
+            <ApexPointSeries TItem="GaugeValue"
+            SeriesType=SeriesType.RadialBar
+            Items=@([new GaugeValue {Percentage = Value / ValueLimit * 100, Label = Label}])
+            Name="@Label"
+            XValue="@(e => e.Label)"
+            YValue="@(e => e.Percentage)" />
+        </ApexChart>
+        <div class="h5 w-100 text-center@(_valueClass)">@Value.ToString("C2", GlobalSettings.CurrencyCulture)</div>
+    </div>
+    @if(_showLoadingIcon)
+    {
+        <div class="position-absolute top-50 start-50 translate-middle">
+            <LoadingIcon/>
+        </div>
+    }
+</div>
+
+@code {
+    private const decimal WarningColorPercentage = 0.8M;
+
+    private string _valueClass = string.Empty;
+    private ApexChart<GaugeValue> _chartRef = default!;
+
+    private bool _showLoadingIcon = true;
+
+    [Parameter]
+    public string Label { get; set; } = string.Empty;
+    [Parameter]
+    public decimal Value { get; set; }
+    [Parameter]
+    public decimal ValueLimit { get; set; } = 10;
+
+    protected override void OnParametersSet()
+    {
+        if (Value >= ValueLimit * WarningColorPercentage)
+        {
+            if (Value >= ValueLimit)
+            {
+                _valueClass = " text-danger";
+                return;
+            }
+            _valueClass = " text-warning";
+        }
+
+        //TODO: UPdate chart options
+    }
+
+    private void HideLoadingIcon()
+    {
+        _showLoadingIcon = false;
+        StateHasChanged();
+    }
+
+    public Task UpdateChartAsync() => _chartRef.UpdateSeriesAsync();
+}

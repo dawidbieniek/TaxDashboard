@@ -12,7 +12,7 @@ internal static class DependencyInjection
         services.AddTransient<InitializationPage>();
         services.AddTransient<ClientsService>();
         services.AddTransient<BanksService>();
-
+        services.AddTransient<IncomesService>();
         return services;
     }
 }

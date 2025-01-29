@@ -21,7 +21,7 @@ public class DashboardPageBase : ComponentBase
 
     protected bool Initialized { get; private set; } = false;
 
-    protected Client? Client { get; private set; }
+    protected virtual Client? Client { get; set; }
     protected DateOnly? ContextDate { get; private set; }
 
     protected override void BuildRenderTree(RenderTreeBuilder builder)
@@ -31,11 +31,11 @@ public class DashboardPageBase : ComponentBase
 
     protected async Task ChangeSelectedClient(Client client)
     {
-        Client = client;
+        Client = await ClientsService.GetDetailsAsync(client.Id);
         await LocalStorage.SetItemAsync(StorageClientIdKey, client.Id);
     }
 
-    protected async Task ChangeDateContext(DateOnly date)
+    protected virtual async Task ChangeDateContext(DateOnly date)
     {
         ContextDate = date;
         await LocalStorage.SetItemAsync(StorageDateContextKey, date);
@@ -45,17 +45,19 @@ public class DashboardPageBase : ComponentBase
     {
         int? storedClientId = await LocalStorage.GetItemAsync<int>(StorageClientIdKey);
         if (storedClientId.HasValue)
-            Client = await ClientsService.GetAsync(storedClientId.Value);
+            Client = await ClientsService.GetDetailsAsync(storedClientId.Value);
+
+        Client ??= await ClientsService.GetFirstWithDetailsAsync();
 
         DateOnly? storedDateContext = await LocalStorage.GetItemAsync<DateOnly>(StorageDateContextKey);
         if (storedDateContext.HasValue)
             ContextDate = storedDateContext.Value;
 
-        // HACK: Will I need to keep initialized set to end of childs overrides?
+        await OnAfterRequiredInitializedAsync();
 
         Initialized = true;
         StateHasChanged();
-
-        // _banks = await BanksService.GetAllAsync();
     }
+
+    protected virtual Task OnAfterRequiredInitializedAsync() => Task.CompletedTask;
 }

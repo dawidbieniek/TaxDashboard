@@ -31,7 +31,7 @@ public abstract class CrudService<T>(IDbContextFactory<AppDbContext> contextFact
         return entity;
     }
 
-    public async Task UpdateAsync(T entity)
+    public virtual async Task UpdateAsync(T entity)
     {
         using AppDbContext context = ContextFactory.CreateDbContext();
         context.Entry(entity).State = EntityState.Modified;

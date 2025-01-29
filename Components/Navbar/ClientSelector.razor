@@ -1,18 +1,20 @@
 ﻿@inject ClientsService ClientsService
 
-<nav class="navbar bg-light">
+<nav class="navbar bg-light border-black border-bottom border-2">
     <div class="container-fluid">
         <div class="d-flex">
-            <input class="dropdown@(_incorrectClientName ? " border-1 border-danger" : "")" style="min-height:38px" list="clientList" type="text" placeholder="Klient" autocomplete="on" @onchange="ChangeSelectedClient" value="@(StartingClient?.FullName ?? "")" />
-            <datalist id="clientList">
-                @foreach (Client client in _allClients)
-                {
-                    <option>@client.FullName</option>
-                }
-            </datalist>
+            <div class="dropdown@(_incorrectClientName ? " border-1 border-danger" : "")">
+                <input class="form-select" style="min-height:38px; min-width:14rem;" list="clientList" type="text" placeholder="Klient" autocomplete="on" @onchange="ChangeSelectedClient" value="@(StartingClient?.FullName ?? "")" />
+                <datalist id="clientList">
+                    @foreach (Client client in _allClients)
+                    {
+                        <option>@client.FullName</option>
+                    }
+                </datalist>
+            </div>
             @if (ShowDateSelector)
             {
-                <ContextDateSelector StartingDateContext="@StartingDateContext" OnSelectedDateContextChanged="@OnSelectedDateContextChanged"/>
+                <ContextDateSelector ClientSettlements="@(_selectedClient?.Settlements ?? [])" StartingDateContext="@StartingDateContext" OnSelectedDateContextChanged="@OnSelectedDateContextChanged" />
             }
         </div>
     </div>
@@ -55,9 +57,9 @@
 
     private bool SelectClientFromName(string name)
     {
-        foreach(Client client in _allClients)
+        foreach (Client client in _allClients)
         {
-            if(client.FullName.Equals(name, StringComparison.OrdinalIgnoreCase))
+            if (client.FullName.Equals(name, StringComparison.OrdinalIgnoreCase))
             {
                 _selectedClient = client;
                 OnSelectedClientChanged.InvokeAsync(_selectedClient);

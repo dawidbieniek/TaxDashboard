@@ -1,0 +1,121 @@
+﻿<div class="card-body row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 gy-3">
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="vatR" @bind="@Client.VATRHandled" @bind:after="@UpdateClient">
+        <label class="btn btn-outline-secondary toggle-button" for="vatR"><b>VAT-R</b></label>
+    </div>
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="ceidg1" @bind="@Client.CEIDG1Handled" @bind:after="@UpdateClient">
+        <label class="btn btn-outline-secondary toggle-button" for="ceidg1"><b>CEIDG-1</b></label>
+    </div>
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="zus" @bind="@Client.ZUSHandled" @bind:after="@UpdateClient">
+        <label class="btn btn-outline-secondary toggle-button" for="zus"><b>ZUS</b></label>
+    </div>
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="invoiced" @bind="@Client.Invoiced" @bind:after="@UpdateClient">
+        <label class="btn btn-outline-secondary toggle-button" for="invoiced"><b>Zafakturowany</b></label>
+    </div>
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="zusDra" checked="@(Client.ZUSDraHandledDate is not null)" @onchange="@ChangeZusDra">
+        <label class="btn btn-outline-secondary toggle-button" for="zusDra"><b>ZUS DRA</b>@(Client.ZUSDraHandledDate is not null ? Client.ZUSDraHandledDate.Value.ToString("\nyyyy-MM-dd\nHH:mm") : "")</label>
+    </div>
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="tax" checked="@(Client.TaxHandledDate is not null)" @onchange="@ChangeTax">
+        <label class="btn btn-outline-secondary toggle-button" for="tax"><b>Podatek</b>@(Client.TaxHandledDate is not null ? Client.TaxHandledDate.Value.ToString("\nyyyy-MM-dd\nHH:mm") : "")</label>
+    </div>
+    <div class="col">
+        @{
+            JPKV7? currentJpk = CurrentJpkV7;
+            <input type="checkbox" class="btn-check visually-hidden" id="jpkv7" checked="@(currentJpk is not null)" @onchange="@ChangeJpkV7">
+            <label class="btn btn-outline-secondary toggle-button" for="jpkv7"><b>JPK V7</b>@(currentJpk is not null ? currentJpk.ChangedDateTime.ToString("\nyyyy-MM-dd\nHH:mm") : "")</label>
+        }
+    </div>
+    <div class="col">
+        @{
+            VATUE? currentVat = CurrentVatUe;
+            <input type="checkbox" class="btn-check visually-hidden" id="vatue"checked="@(currentVat is not null)" @onchange="@ChangeVatUe">
+            <label class="btn btn-outline-secondary toggle-button" for="vatue"><b>VAT UE</b>@(currentVat is not null ? currentVat.ChangedDateTime.ToString("\nyyyy-MM-dd\nHH:mm") : "")</label>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public Client Client { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public DateOnly? ContextDate { get; set; }
+    [Parameter]
+    public ClientsService? ClientsService { get; set; }
+
+    private JPKV7? CurrentJpkV7 => ContextDate is null ? null : Client.JPKV7HandledDates.FirstOrDefault(jpk => jpk.ContextDate == ContextDate.Value);
+
+    private VATUE? CurrentVatUe => ContextDate is null ? null : Client.VATUEHandledDates.FirstOrDefault(vat => vat.ContextDate == ContextDate.Value);
+
+    private async Task UpdateClient()
+    {
+        if (ClientsService is null)
+            return;
+
+        await ClientsService.UpdateAsync(Client);
+    }
+
+    private async Task ChangeZusDra(ChangeEventArgs e)
+    {
+        Client.ZUSDraHandledDate = (bool)e.Value! ? DateTime.Now : null;
+        await UpdateClient();
+    }
+
+    private async Task ChangeTax(ChangeEventArgs e)
+    {
+        Client.TaxHandledDate = (bool)e.Value! ? DateTime.Now : null;
+        await UpdateClient();
+    }
+
+    private async Task ChangeJpkV7(ChangeEventArgs e)
+    {
+        JPKV7 currentJpkV7 = CurrentJpkV7;
+
+        if ((bool)e.Value!)
+        {
+            if (currentJpkV7 is not null)
+                currentJpkV7.ChangedDateTime = DateTime.Now;
+            else
+            {
+                Client.JPKV7HandledDates.Add(new()
+                    {
+                        ContextDate = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1),
+                        ChangedDateTime = DateTime.Now,
+                        Client = Client
+                    });
+            }
+        }
+        else if (currentJpkV7 is not null)
+            Client.JPKV7HandledDates.Remove(currentJpkV7);
+
+        await UpdateClient();
+    }
+
+    private async Task ChangeVatUe(ChangeEventArgs e)
+    {
+        VATUE currentVatUe = CurrentVatUe;
+
+        if ((bool)e.Value!)
+        {
+            if (currentVatUe is not null)
+                currentVatUe.ChangedDateTime = DateTime.Now;
+            else
+            {
+                Client.VATUEHandledDates.Add(new()
+                    {
+                        ContextDate = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1),
+                        ChangedDateTime = DateTime.Now,
+                        Client = Client
+                    });
+            }
+        }
+        else if (currentVatUe is not null)
+            Client.VATUEHandledDates.Remove(currentVatUe);
+
+        await UpdateClient();
+    }
+}

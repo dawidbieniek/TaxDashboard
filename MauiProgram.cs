@@ -1,4 +1,6 @@
-﻿using Blazored.LocalStorage;
+﻿using ApexCharts;
+
+using Blazored.LocalStorage;
 
 using Microsoft.Extensions.Logging;
 
@@ -19,6 +21,19 @@ namespace TaxDashboard
             builder.Services.AddMauiBlazorWebView();
             builder.Services.RegisterAppServices();
             builder.Services.AddBlazoredLocalStorage();
+
+            builder.Services.AddApexCharts(opt =>
+            {
+                opt.GlobalOptions = new ApexChartBaseOptions()
+                {
+#if DEBUG
+                    Debug = true,
+#endif
+                    Theme = new() { Palette = PaletteType.Palette1, Mode = Mode.Dark },
+                    Chart = new() { Background = "transparent", },
+                    PlotOptions = new() { RadialBar = new() { StartAngle = -135, EndAngle = 135, OffsetY = -35, } },
+                };
+            });
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();

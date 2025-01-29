@@ -1,15 +1,190 @@
 ﻿@page "/"
 
+@using TaxDashboard.Components.Charts
 @using TaxDashboard.Components.Navbar
+@using ApexCharts
 
 @inherits DashboardPageBase
 
-@inject BanksService BanksService
+@inject IncomesService IncomesService
 
 <DashboardPageComponent Initialized="@Initialized">
     <ClientSelector StartingClient="@Client" StartingDateContext="@ContextDate" OnSelectedClientChanged="ChangeSelectedClient" OnSelectedDateContextChanged="ChangeDateContext" />
-    @(Client?.FullName ?? "NoClient")
+
+    @if (Client is null)
+    {
+        <div class="alert alert-danger text-center">Wybierz klienta</div>
+    }
+    else
+    {
+        <div class="container-fluid flex-row mt-3">
+            <div class="row">
+                <div class="col-12 col-lg-3">
+                    @* VAT gauge *@
+                    <div class="card bg-light mb-4">
+                        <div class="card-body gauge-card">
+                            <div style="height:25px" />
+                            <Gauge @ref="@_vatGaugeRef" Label="Limit do VAT" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@VatGaugeLimit" />
+                        </div>
+                    </div>
+                    @* ZUS gauge *@
+                    <div class="card bg-light mb-4">
+                        <div class="card-body gauge-card">
+                            <div style="height:25px" />
+                            @if (Client.ReductionType == Models.Enums.ReductionType.ZUSPlus)
+                            {
+                                <Gauge @ref="@_zusGaugeRef" Label="Mały ZUS Plus" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@ZusGaugeLimit" />
+                            }
+                            else
+                            {
+                                <div class="text-secondary text-center w-100 mt-5">Klient nie jest na Małym ZUSie Plus</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-3">
+                    @* Fiscal gauge *@
+                    <div class="card bg-light mb-4">
+                        <div class="card-body gauge-card">
+                            <div class="col form-check form-switch" style="margin-top:-.5rem;">
+                                <label class="form-check-label overflow-hidden" style="height:1.5rem;" for="cashMethod">Używaj kasy fiskalnej</label>
+                                <InputCheckbox id="cashMethod" class="form-check-input" type="checkbox" @bind-Value="Client.UseCashRegister" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" />
+                            </div>
+                            @if (Client.UseCashRegister)
+                            {
+                                <Gauge @ref="@_fiscalGaugeRef" Label="Kasy fiskalne" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@FiscalGaugeLimit" />
+                            }
+                            else
+                            {
+                                <div class="text-secondary text-center w-100 mt-5">Klient nie używa kasy fiskalnej</div>
+                            }
+                        </div>
+                    </div>
+                    @* Invoices *@
+                    <div class="card bg-light mb-4">
+                        <div class="card-body gauge-card">
+                            <TaxDashboard.Components.Pages.Dashboard.Components.InvoicesCard Client="@Client" ContextDate="@ContextDate" ClientsService="ClientsService" OnSettlementStateChanged="@(() => StateHasChanged())"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-6">
+                    @* Income chart *@
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Miesięczne przychody</h5>
+                            <ApexChart @ref="_incomeChartRef" TItem="Income" Title="" Height="@("200px")" XAxisType="XAxisType.Category">
+                                <ApexPointSeries TItem="Income"
+                                                 Color="var(--bs-primary)"
+                                                 Items="_currentYearIncomes"
+                                                 SeriesType="@SeriesType.Area"
+                                                 ShowDataLabels
+                                                 XValue="@(e => e.Date.Month)"
+                                                 YAggregate="@(e => e.Sum(e => e.Amount))" />
+                            </ApexChart>
+                            <label class="form-label" for="income">Przychody w tym miesiącu</label>
+                            <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncome" />
+                        </div>
+                    </div>@* Button panel *@
+                    <div class="card bg-light mb-4">
+                        <TaxDashboard.Components.Pages.Dashboard.Components.ButtonPanel Client="@Client" ContextDate="@ContextDate" ClientsService="@ClientsService" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </DashboardPageComponent>
 
 @code {
+    private const decimal VatGaugeLimit = 100_000;
+    private const decimal FiscalGaugeLimit = 20_000;
+    private const decimal ZusGaugeLimit = 50_000;
+
+    private Income? _currentMonthIncome;
+    private List<Income> _currentYearIncomes = [];
+
+    private ApexChart<Income> _incomeChartRef = default!;
+    private Gauge _vatGaugeRef = default!;
+    private Gauge? _fiscalGaugeRef = default!;
+    private Gauge? _zusGaugeRef = default!;
+
+    private string CurrentMonthIncome
+    {
+        get => (_currentMonthIncome?.Amount ?? 0).ToString("C2");
+        set
+        {
+            if (Decimal.TryParse(value, GlobalSettings.CurrencyNumberStyles, GlobalSettings.CurrencyCulture, out decimal currency))
+            {
+                _currentMonthIncome!.Amount = Math.Round(currency, 2);
+                IncomesService.UpdateAsync(_currentMonthIncome).Wait();
+
+                UpdateIncomeCharts();
+            }
+        }
+    }
+
+    protected override Task OnAfterRequiredInitializedAsync()
+    {
+        if (ContextDate.HasValue)
+        {
+            _currentMonthIncome = GetCurrentMonthIncomeOrCreateNew(ContextDate.Value);
+            _currentYearIncomes = GetCurrentYearIncomes(ContextDate.Value);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    protected override async Task ChangeDateContext(DateOnly date)
+    {
+        await base.ChangeDateContext(date);
+
+        if (Client is null)
+            return;
+
+        _currentMonthIncome = GetCurrentMonthIncomeOrCreateNew(date);
+        _currentYearIncomes = GetCurrentYearIncomes(date);
+
+        UpdateIncomeCharts();
+    }
+
+    private Income GetCurrentMonthIncomeOrCreateNew(DateOnly date)
+    {
+        Income? income = Client!.Incomes
+            .Where(i => i.Date == date)
+            .FirstOrDefault();
+
+        if (income is null)
+        {
+            income = new Income() { Client = Client, Amount = 0, Date = date };
+            Client!.Incomes.Add(income);
+        };
+
+        return income;
+    }
+
+    private List<Income> GetCurrentYearIncomes(DateOnly date)
+    {
+        IEnumerable<Income> existingIncomes = Client!.Incomes
+            .Where(i => i.Date.Year == date.Year);
+
+        IEnumerable<Income> monthlyIncomes = Enumerable.Range(1, 12)
+            .Select(month => new Income { Amount = 0, Date = new DateOnly(date.Year, month, 1) });
+
+        return monthlyIncomes
+            .Select(monthlyIncome => existingIncomes
+                .FirstOrDefault(existingIncome => existingIncome.Date.Month == monthlyIncome.Date.Month && existingIncome.Date.Year == monthlyIncome.Date.Year)
+                ?? monthlyIncome)
+            .ToList();
+    }
+
+    private void UpdateIncomeCharts()
+    {
+        List<Task> tasks = [_incomeChartRef.UpdateSeriesAsync(), _vatGaugeRef.UpdateChartAsync()];
+        if (_fiscalGaugeRef is not null)
+            tasks.Add(_fiscalGaugeRef.UpdateChartAsync());
+        if (_zusGaugeRef is not null)
+            tasks.Add(_zusGaugeRef.UpdateChartAsync());
+
+        _ = Task.WhenAll(tasks);
+    }
+
 }

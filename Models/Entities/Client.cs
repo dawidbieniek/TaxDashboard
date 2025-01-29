@@ -1,21 +1,28 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 using TaxDashboard.Models.Enums;
+using TaxDashboard.Validators;
 
 namespace TaxDashboard.Models.Entities;
 
 public class Client : Entity
 {
+    [MaxLength(64, ErrorMessage = "Imię jest zbyt długie (max 64)")]
     public string Name { get; set; } = string.Empty;
+    [MaxLength(64, ErrorMessage = "Nazwisko jest zbyt długie (max 64)")]
     public string Surname { get; set; } = string.Empty;
     public required DateTime JoinDateTime { get; set; }
     public string NIP { get; set; } = string.Empty;
+    [PhoneOrEmpty(ErrorMessage = "Nieprawidłowy numer telefonu")]
     public string PhoneNumber { get; set; } = string.Empty;
+    [EmailOrEmpty(ErrorMessage = "Nieprawidłowy adres email")]
     public string Email { get; set; } = string.Empty;
 
     public bool Suspended { get; set; } = false;
 
     public bool UseCashRegister { get; set; } = false;
+    [MaxLength(64, ErrorMessage = "Typ abonamenu jest zbyt długi (max 64)")]
     public string Subscription { get; set; } = string.Empty;
     public required Bank Bank { get; set; }
     public bool EmploymentContract { get; set; } = false;
@@ -40,6 +47,7 @@ public class Client : Entity
     public List<InvoiceCount> Invoices { get; set; } = [];
     public List<Income> Incomes { get; set; } = [];
     public List<ClientNote> Notes { get; set; } = [];
+    public List<Settlement> Settlements { get; set; } = [];
 
     [NotMapped]
     public string FullName => $"{Name} {Surname}";

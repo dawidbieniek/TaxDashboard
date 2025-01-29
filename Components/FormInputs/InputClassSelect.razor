@@ -1,0 +1,58 @@
+﻿﻿@using Microsoft.AspNetCore.Components.Forms
+@using System.Diagnostics.CodeAnalysis
+
+@typeparam T
+@inherits InputBase<T>
+
+<InputSelect @bind-Value="@InternalSelectValue" @attributes="@AdditionalAttributes">
+    @foreach(T item in Options)
+    {
+        <option value="@Selector(item)">@Selector(item)</option>
+    }
+</InputSelect>
+
+@code
+{
+    private string? InternalSelectValue
+    {
+        get
+        {
+            if(CurrentValue is null && DefaultValue is not null)
+            {
+                CurrentValue = DefaultValue;
+                _ = ValueChanged.InvokeAsync(CurrentValue);
+            }
+
+            return CurrentValue is null ? string.Empty : Selector(CurrentValue!);
+        }
+        set
+        {
+            CurrentValueAsString = value;
+            _ = ValueChanged.InvokeAsync(CurrentValue);
+        }
+    }
+
+    [Parameter, EditorRequired]
+    public IEnumerable<T> Options { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public Func<T, string> Selector { get; set; } = null!;
+
+    [Parameter]
+    public T? DefaultValue { get; set; }
+
+    protected override bool TryParseValueFromString(string? value, [MaybeNullWhen(false)] out T result, [NotNullWhen(false)] out string validationErrorMessage)
+    {
+        T? foundResult = Options.FirstOrDefault(v => Selector(v) == value);
+        if (foundResult is null)
+        {
+            result = default!;
+            validationErrorMessage = $"There is no {value} in {nameof(Options)}";
+            return false;
+        }
+
+        result = foundResult;
+        validationErrorMessage = null!;
+        return true;
+    }
+}

@@ -63,6 +63,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Blazor-ApexCharts" Version="5.0.1" />
         <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
         <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
