@@ -82,7 +82,7 @@
                                                  YAggregate="@(e => e.Sum(e => e.Amount))" />
                             </ApexChart>
                             <label class="form-label" for="income">Przychody w tym miesiącu</label>
-                            <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncome" />
+                            <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncome" onclick="this.select();" />
                         </div>
                     </div>@* Button panel *@
                     <div class="card bg-light mb-4">

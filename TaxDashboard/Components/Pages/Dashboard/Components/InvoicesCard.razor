@@ -2,11 +2,11 @@
 <div class="d-flex gap-2 mb-3">
     <div class="col mb-2">
         <label class="form-label" for="sell">Sprzedażowe</label>
-        <InputNumber id="sell" class="form-control" @bind-Value="@CurrentSellInvoiceAmount" />
+        <InputNumber id="sell" class="form-control" @bind-Value="@CurrentSellInvoiceAmount" onclick="this.select();" />
     </div>
     <div class="col mb-2">
         <label class="form-label" for="cost">Kosztowe</label>
-        <InputNumber id="cost" class="form-control" @bind-Value="@CurrentCostInvoiceAmount" />
+        <InputNumber id="cost" class="form-control" @bind-Value="@CurrentCostInvoiceAmount" onclick="this.select();" />
     </div>
 </div>
 <div class="col">
