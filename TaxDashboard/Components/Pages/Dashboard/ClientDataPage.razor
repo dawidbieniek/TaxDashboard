@@ -188,8 +188,6 @@
     </div>
 </div>
 
-
-
 @code {
     private IEnumerable<Bank> _allBanks = [];
     private EditContext _clientEditContext = default!;
@@ -250,7 +248,10 @@
     private async Task UpdateClientAsync()
     {
         if (Client is not null && _clientEditContext.IsModified())
+        {
+            _clientEditContext = new(Client);
             await ClientsService.UpdateAsync(Client);
+        }
     }
 
     private ValueTask OnLocationChanging(LocationChangingContext context)
@@ -272,6 +273,9 @@
 
     private void ForceNavigation()
     {
+        if (_lastNavigationTarget is null)
+            return;
+
         _ignoreChanges = true;
         Navigation.NavigateTo(_lastNavigationTarget);
     }
