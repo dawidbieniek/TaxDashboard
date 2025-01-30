@@ -233,3 +233,7 @@ content {
 .client-table table th:nth-child(19) {
     min-width: 100px;
 }
+
+.client-table table th:nth-child(20) {
+    min-width: 30px;
+}

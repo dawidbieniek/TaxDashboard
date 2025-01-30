@@ -3,10 +3,14 @@
 @using BlazorTable
 @using TaxDashboard.Util
 
+@implements IAsyncDisposable
+
 @inject ClientsService ClientsService
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 <div class="client-table container-fluid flex-row pt-3">
-    <Table TableItem="Client" Items="@_allClients" PageSize="15" TableClass="table table-striped table-hover table-bordered table-sm small w-100 rounded">
+    <Table TableItem="Client" Items="@_allClients" PageSize="15" TableClass="table table-striped table-hover table-bordered table-sm small w-100 rounded" TableRowClass="@((c) => c.Suspended ? "text-decoration-line-through text-danger" : "")">
         <Column TableItem="Client" Title="Id" Field="@(x => x.Id)" Sortable="true" Filterable="true" DefaultSortColumn="true" Width="10%" />
         <Column TableItem="Client" Title="Imię" Field="@(x => x.FullName)" Sortable="true" Filterable="true" Width="10%" />
         <Column TableItem="Client" Title="NIP" Field="@(x => x.NIP)" Sortable="true" Filterable="true" Width="10%" />
@@ -46,8 +50,8 @@
         <Column TableItem="Client" Title="Abonament" Field="@(x => x.Subscription)" Sortable="true" Filterable="true" Width="10%" />
         <Column TableItem="Client" Title="Koszt abonamentu" Field="@(x => x.SubscriptionPrice)" Format="C2" Sortable="true" Filterable="true" Width="10%" />
         <Column TableItem="Client" Title="Kwota autoryzacyjna" Field="@(x => x.AuthorizationPrice)" Format="C2" Sortable="true" Filterable="true" Width="10%" />
-        <Column TableItem="Client" Title="Podatek" Field="@(x => x.TaxType)" Sortable="true" Filterable="true" Width="10%" >
-            <Template>@(context.TaxType.GetDescriptor())</Template>    
+        <Column TableItem="Client" Title="Podatek" Field="@(x => x.TaxType)" Sortable="true" Filterable="true" Width="10%">
+            <Template>@(context.TaxType.GetDescriptor())</Template>
         </Column>
         <Column TableItem="Client" Title="Ulga" Field="@(x => x.ReductionType)" Sortable="true" Filterable="true" Width="10%">
             <Template>@(context.ReductionType.GetDescriptor())</Template>
@@ -58,16 +62,95 @@
         <Column TableItem="Client" Title="Opłacanie VAT" Field="@(x => x.VATPaymentType)" Sortable="true" Filterable="true" Width="10%">
             <Template>@(context.VATPaymentType.GetDescriptor())</Template>
         </Column>
+        <Column TableItem="Client" Title="" Width="5%">
+            <Template><button class="btn btn-danger p-0" style="height:22px;width:22px;" @onclick="@(async () => await ShowDeleteModalAsync(context))"><div class="bi-trash3" style="margin-top:-1px;" /></button></Template>
+        </Column>
         <Pager ShowPageNumber="true" ShowTotalCount="true" />
     </Table>
+</div>
+<!-- Modal -->
+<div class="modal" id="deletingClientModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Potwierdź usunięcie</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Czy na pewno chcesz usunąć <i class="text-danger">@(_deletedModalClient?.FullName ?? "(brak imienia)")</i>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                <button type="button" class="btn btn-danger" @onclick="@DeleteModalClientAsync">Usuń</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @code
 {
     private List<Client> _allClients = [];
+    private Client? _deletedModalClient;
+
+    private IJSObjectReference _JSModule = default!;
+    private IDisposable? _navigationLockRegistration;
 
     protected override async Task OnInitializedAsync()
     {
         _allClients = [.. await ClientsService.GetAllWithDetailsAsync()];
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _navigationLockRegistration = Navigation.RegisterLocationChangingHandler(OnLocationChanging);
+
+            _JSModule = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/ClientListPage.razor.js");
+            await _JSModule.InvokeVoidAsync("addEventListeners", DotNetObjectReference.Create(this));
+        }
+    }
+
+    private async Task ShowDeleteModalAsync(Client client)
+    {
+        _deletedModalClient = client;
+        await JS.InvokeVoidAsync("showModal", "deletingClientModal");
+    }
+
+    private async Task DeleteModalClientAsync()
+    {
+        if (_deletedModalClient is not null)
+        {
+            await ClientsService.DeleteAsync(_deletedModalClient.Id);
+            _allClients.Remove(_deletedModalClient);
+        }
+
+        await JS.InvokeVoidAsync("hideModal", "deletingClientModal");
+    }
+
+    [JSInvokable]
+    public void OnModalHidden() => _deletedModalClient = null;
+
+    private ValueTask OnLocationChanging(LocationChangingContext context)
+    {
+        if (_deletedModalClient is not null)
+            context.PreventNavigation();
+
+        return ValueTask.CompletedTask;
+    }
+
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (_JSModule is not null)
+        {
+            try
+            {
+                _navigationLockRegistration?.Dispose();
+                await _JSModule.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            { }
+        }
     }
 }
