@@ -13,6 +13,7 @@ public class Client : Entity
     [MaxLength(64, ErrorMessage = "Nazwisko jest zbyt długie (max 64)")]
     public string Surname { get; set; } = string.Empty;
     public required DateTime JoinDateTime { get; set; }
+    [MaxLength(10, ErrorMessage = "NIP jest zbyt długi (max 10)")]
     public string NIP { get; set; } = string.Empty;
     [PhoneOrEmpty(ErrorMessage = "Nieprawidłowy numer telefonu")]
     public string PhoneNumber { get; set; } = string.Empty;
@@ -51,4 +52,25 @@ public class Client : Entity
 
     [NotMapped]
     public string FullName => $"{Name} {Surname}";
+}
+
+public record NewClientData
+{
+    [MaxLength(64, ErrorMessage = "Imię jest zbyt długie (max 64)")]
+    [Required(ErrorMessage = "Imię jest wymagane")]
+    public string Name { get; set; } = string.Empty;
+    [MaxLength(64, ErrorMessage = "Nazwisko jest zbyt długie (max 64)")]
+    [Required(ErrorMessage = "Nazwisko jest wymagane")]
+    public string Surname { get; set; } = string.Empty;
+    [Required(ErrorMessage = "Data założenia jest wymagana")]
+    public DateTime JoinDateTime { get; set; }
+    [MaxLength(10, ErrorMessage = "NIP jest zbyt długi (max 10)")]
+    [Required(ErrorMessage = "NIP jest wymagany")]
+    public string NIP { get; set; } = string.Empty;
+    [PhoneOrEmpty(ErrorMessage = "Nieprawidłowy numer telefonu")]
+    public string PhoneNumber { get; set; } = string.Empty;
+    [EmailOrEmpty(ErrorMessage = "Nieprawidłowy adres email")]
+    public string Email { get; set; } = string.Empty;
+    [Required(ErrorMessage = "Przydzielenie do banku jest wymagane")]
+    public Bank Bank { get; set; } = default!;
 }

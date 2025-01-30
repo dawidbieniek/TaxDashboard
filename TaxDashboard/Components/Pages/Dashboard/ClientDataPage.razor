@@ -193,7 +193,6 @@
     private EditContext _clientEditContext = default!;
 
     private IDisposable? _navigationLockRegistration;
-
     private string? _lastNavigationTarget;
     private bool _ignoreChanges = false;
 
@@ -241,7 +240,7 @@
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if(firstRender)
+        if (firstRender)
             _navigationLockRegistration = Navigation.RegisterLocationChangingHandler(OnLocationChanging);
     }
 
