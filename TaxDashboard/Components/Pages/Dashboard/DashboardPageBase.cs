@@ -29,7 +29,7 @@ public class DashboardPageBase : ComponentBase
         base.BuildRenderTree(builder);
     }
 
-    protected async Task ChangeSelectedClient(Client client)
+    protected virtual async Task ChangeSelectedClient(Client client)
     {
         Client = await ClientsService.GetDetailsAsync(client.Id);
         await LocalStorage.SetItemAsync(StorageClientIdKey, client.Id);

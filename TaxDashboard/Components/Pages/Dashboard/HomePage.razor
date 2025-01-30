@@ -74,12 +74,12 @@
                             <h5 class="card-title">Miesięczne przychody</h5>
                             <ApexChart @ref="_incomeChartRef" TItem="Income" Title="" Height="@("200px")" XAxisType="XAxisType.Category">
                                 <ApexPointSeries TItem="Income"
-                                                 Color="var(--bs-primary)"
-                                                 Items="_currentYearIncomes"
-                                                 SeriesType="@SeriesType.Area"
-                                                 ShowDataLabels
-                                                 XValue="@(e => e.Date.Month)"
-                                                 YAggregate="@(e => e.Sum(e => e.Amount))" />
+                                Color="var(--bs-primary)"
+                                Items="_currentYearIncomes"
+                                SeriesType="@SeriesType.Area"
+                                ShowDataLabels
+                                XValue="@(e => e.Date.Month)"
+                                YAggregate="@(e => e.Sum(e => e.Amount))" />
                             </ApexChart>
                             <label class="form-label" for="income">Przychody w tym miesiącu</label>
                             <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncome" onclick="this.select();" />
@@ -144,6 +144,18 @@
         _currentYearIncomes = GetCurrentYearIncomes(date);
 
         UpdateIncomeCharts();
+    }
+
+    protected override async Task ChangeSelectedClient(Client client)
+    {
+        await base.ChangeSelectedClient(client);
+
+        if (ContextDate.HasValue)
+        {
+            _currentMonthIncome = GetCurrentMonthIncomeOrCreateNew(ContextDate.Value);
+            _currentYearIncomes = GetCurrentYearIncomes(ContextDate.Value);
+            UpdateIncomeCharts();
+        }
     }
 
     private Income GetCurrentMonthIncomeOrCreateNew(DateOnly date)
