@@ -1,0 +1,3 @@
+[submodule "BlazorTable"]
+	path = BlazorTable
+	url = git@github.com:dawidbieniek/BlazorTable.git
