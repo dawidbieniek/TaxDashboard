@@ -72,7 +72,7 @@
                     <div class="card bg-light mb-4">
                         <div class="card-body">
                             <h5 class="card-title">Miesięczne przychody</h5>
-                            <ApexChart @ref="_incomeChartRef" TItem="Income" Height="@("200px")" XAxisType="XAxisType.Category">
+                            <ApexChart @ref="_incomeChartRef" TItem="Income" Height="@("236px")" XAxisType="XAxisType.Category">
                                 <ApexPointSeries TItem="Income"
                                                  Name="Przychody"
                                                  Items="_currentYearIncomes"
@@ -91,6 +91,10 @@
                             <TaxDashboard.Components.Pages.Dashboard.Components.InvoicesCard Client="@Client" ContextDate="@ContextDate" />
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-8 col">
                     @* Button panel *@
                     <div class="card bg-light mb-4">
                         <TaxDashboard.Components.Pages.Dashboard.Components.ButtonPanel Client="@Client" ContextDate="@ContextDate" ClientsService="@ClientsService" />

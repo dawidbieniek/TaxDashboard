@@ -3,7 +3,7 @@
 @inject ClientsService ClientsService
 
 <h5 class="card-title mb-2">Faktury</h5>
-<ApexChart @ref="_invoiceChartRef" TItem="InvoiceCount" Height="@("200px")" XAxisType="XAxisType.Category">
+<ApexChart @ref="_invoiceChartRef" TItem="InvoiceCount" Height="@("236px")" XAxisType="XAxisType.Category">
     <ApexPointSeries TItem="InvoiceCount"
                      Name="Sprzedażowe"
                      Items="_currentYearSellInvoices"
@@ -19,8 +19,8 @@
                      XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
                      YAggregate="@(e => e.Sum(e => e.Amount))" />
 </ApexChart>
-<div class="d-flex gap-2 mb-3">
-    <div class="col mb-2">
+<div class="d-flex gap-2">
+    <div class="col">
         <label class="form-label" for="sell">Sprzedażowe</label>
         <InputNumber id="sell" class="form-control" @bind-Value="@CurrentSellInvoiceAmount" onclick="this.select();" />
     </div>
