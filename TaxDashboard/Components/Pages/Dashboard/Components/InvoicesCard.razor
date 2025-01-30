@@ -3,35 +3,38 @@
 @inject ClientsService ClientsService
 
 <h5 class="card-title mb-2">Faktury</h5>
-<ApexChart @ref="_invoiceChartRef" TItem="InvoiceCount" Height="@("236px")" XAxisType="XAxisType.Category">
-    <ApexPointSeries TItem="InvoiceCount"
-                     Name="Sprzedażowe"
-                     Items="_currentYearSellInvoices"
-                     SeriesType="@SeriesType.Bar"
-                     ShowDataLabels
-                     XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
-                     YAggregate="@(e => e.Sum(e => e.Amount))" />
-    <ApexPointSeries TItem="InvoiceCount"
-                     Name="Kosztowe"
-                     Items="_currentYearCostInvoices"
-                     SeriesType="@SeriesType.Bar"
-                     ShowDataLabels
-                     XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
-                     YAggregate="@(e => e.Sum(e => e.Amount))" />
-</ApexChart>
-<div class="d-flex gap-2">
-    <div class="col">
-        <label class="form-label" for="sell">Sprzedażowe</label>
-        <InputNumber id="sell" class="form-control" @bind-Value="@CurrentSellInvoiceAmount" onclick="this.select();" />
+<ElementRequiringLoad @ref="@_invoiceLoadingRef">
+    <ApexChart @ref="_invoiceChartRef" TItem="InvoiceCount" Height="@("236px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _invoiceLoadingRef.HideLoadingIcon())">
+        <ApexPointSeries TItem="InvoiceCount"
+                         Name="Sprzedażowe"
+                         Items="_currentYearSellInvoices"
+                         SeriesType="@SeriesType.Bar"
+                         ShowDataLabels
+                         XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
+                         YAggregate="@(e => e.Sum(e => e.Amount))" />
+        <ApexPointSeries TItem="InvoiceCount"
+                         Name="Kosztowe"
+                         Items="_currentYearCostInvoices"
+                         SeriesType="@SeriesType.Bar"
+                         ShowDataLabels
+                         XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
+                         YAggregate="@(e => e.Sum(e => e.Amount))" />
+    </ApexChart>
+    <div class="d-flex gap-2">
+        <div class="col">
+            <label class="form-label" for="sell">Sprzedażowe</label>
+            <InputNumber id="sell" class="form-control" @bind-Value="@CurrentSellInvoiceAmount" onclick="this.select();" />
+        </div>
+        <div class="col">
+            <label class="form-label" for="cost">Kosztowe</label>
+            <InputNumber id="cost" class="form-control" @bind-Value="@CurrentCostInvoiceAmount" onclick="this.select();" />
+        </div>
     </div>
-    <div class="col">
-        <label class="form-label" for="cost">Kosztowe</label>
-        <InputNumber id="cost" class="form-control" @bind-Value="@CurrentCostInvoiceAmount" onclick="this.select();" />
-    </div>
-</div>
+</ElementRequiringLoad>
 
 @code {
     private ApexChart<InvoiceCount> _invoiceChartRef = default!;
+    private ElementRequiringLoad _invoiceLoadingRef = default!;
 
     private InvoiceCount? _currentSellInvoice;
     private InvoiceCount? _currentCostInvoice;
@@ -45,7 +48,6 @@
     public Client Client { get; set; } = default!;
     [Parameter, EditorRequired]
     public DateOnly? ContextDate { get; set; }
-
 
     private int CurrentSellInvoiceAmount
     {
@@ -161,7 +163,7 @@
         }
 
         if (updateCharts && (updateSellInvoice || updateCostInvoice))
-            UpdateInvoiceCharts();
+            UpdateChart();
     }
 
     private List<InvoiceCount> GetCurrentYearInvoices(DateOnly? date, InvoiceType type)
@@ -184,5 +186,5 @@
             .ToList();
     }
 
-    private void UpdateInvoiceCharts() => _ = Task.WhenAll([_invoiceChartRef.UpdateSeriesAsync()]);
+    private void UpdateChart() => _ = _invoiceChartRef.UpdateSeriesAsync();
 }

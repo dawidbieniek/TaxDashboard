@@ -3,6 +3,7 @@
 @using TaxDashboard.Components.Charts
 @using TaxDashboard.Components.Navbar
 @using ApexCharts
+@using TaxDashboard.Components.Pages.Dashboard.Components
 
 @inherits DashboardPageBase
 
@@ -70,25 +71,27 @@
                 <div class="col-12 col-xl-9">
                     @* Income chart *@
                     <div class="card bg-light mb-4">
-                        <div class="card-body">
+                        <div class="card-body chart-card">
                             <h5 class="card-title">Miesięczne przychody</h5>
-                            <ApexChart @ref="_incomeChartRef" TItem="Income" Height="@("236px")" XAxisType="XAxisType.Category">
-                                <ApexPointSeries TItem="Income"
-                                                 Name="Przychody"
-                                                 Items="_currentYearIncomes"
-                                                 SeriesType="@SeriesType.Area"
-                                                 ShowDataLabels
-                                                 XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
-                                                 YAggregate="@(e => e.Sum(e => e.Amount))" />
-                            </ApexChart>
-                            <label class="form-label" for="income">Przychody w tym miesiącu</label>
-                            <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncomeAmount" onclick="this.select();" />
+                            <ElementRequiringLoad @ref="@_incomeLoadingRef">
+                                <ApexChart @ref="_incomeChartRef" TItem="Income" Height="@("236px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _incomeLoadingRef.HideLoadingIcon())">
+                                    <ApexPointSeries TItem="Income"
+                                                     Name="Przychody"
+                                                     Items="_currentYearIncomes"
+                                                     SeriesType="@SeriesType.Area"
+                                                     ShowDataLabels
+                                                     XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
+                                                     YAggregate="@(e => e.Sum(e => e.Amount))" />
+                                </ApexChart>
+                                <label class="form-label" for="income">Przychody w tym miesiącu</label>
+                                <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncomeAmount" onclick="this.select();" />
+                            </ElementRequiringLoad>
                         </div>
                     </div>
                     @* Invoices *@
                     <div class="card bg-light mb-4">
-                        <div class="card-body">
-                            <TaxDashboard.Components.Pages.Dashboard.Components.InvoicesCard Client="@Client" ContextDate="@ContextDate" />
+                        <div class="card-body chart-card">
+                                <InvoicesCard Client="@Client" ContextDate="@ContextDate" />
                         </div>
                     </div>
                 </div>
@@ -97,7 +100,7 @@
                 <div class="col-xl-8 col">
                     @* Button panel *@
                     <div class="card bg-light mb-4">
-                        <TaxDashboard.Components.Pages.Dashboard.Components.ButtonPanel Client="@Client" ContextDate="@ContextDate" ClientsService="@ClientsService" />
+                        <ButtonPanel Client="@Client" ContextDate="@ContextDate"  />
                     </div>
                 </div>
             </div>
@@ -110,13 +113,15 @@
     private const decimal FiscalGaugeLimit = 20_000;
     private const decimal ZusGaugeLimit = 50_000;
 
-    private Income? _currentMonthIncome;
-    private List<Income> _currentYearIncomes = [];
+    private ElementRequiringLoad _incomeLoadingRef = default!;
 
     private ApexChart<Income> _incomeChartRef = default!;
     private Gauge _vatGaugeRef = default!;
     private Gauge? _fiscalGaugeRef;
     private Gauge? _zusGaugeRef;
+
+    private Income? _currentMonthIncome;
+    private List<Income> _currentYearIncomes = [];
 
     private string CurrentMonthIncomeAmount
     {

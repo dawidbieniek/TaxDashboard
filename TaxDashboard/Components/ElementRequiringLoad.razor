@@ -1,0 +1,24 @@
+﻿<div class="h-100 position-relative">
+    <div style="@(_showLoadingIcon ? "visibility:hidden;" : "")">
+        @ChildContent
+    </div>
+    @if (_showLoadingIcon)
+    {
+        <div class="position-absolute top-50 start-50 translate-middle">
+            <LoadingIcon />
+        </div>
+    }
+</div>
+
+@code {
+    private bool _showLoadingIcon = true;
+
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; } = default!;
+
+    public void HideLoadingIcon()
+    {
+        _showLoadingIcon = false;
+        StateHasChanged();
+    }
+}

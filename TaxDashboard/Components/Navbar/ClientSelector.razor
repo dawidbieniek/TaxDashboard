@@ -1,6 +1,6 @@
 ﻿@inject ClientsService ClientsService
 
-<nav class="navbar navbar-expand align-items-start bg-light border-black border-bottom border-2 px-2">
+<nav class="navbar navbar-expand sticky-top align-items-start bg-light border-black border-bottom border-2 px-2">
     <div class="dropdown flex-grow-0 flex-shrink-0@(_incorrectClientName ? " border-1 border-danger" : "")">
         <input class="form-select" style="min-height:38px; width:14rem;" list="clientList" type="text" placeholder="Klient" autocomplete="on" @onchange="ChangeSelectedClient" value="@(StartingClient?.FullName ?? "")" />
         <datalist id="clientList">

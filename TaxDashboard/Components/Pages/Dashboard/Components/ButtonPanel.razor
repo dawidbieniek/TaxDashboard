@@ -1,4 +1,6 @@
-﻿<div class="card-body row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 gy-3">
+﻿@inject ClientsService ClientsService
+
+<div class="card-body row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 gy-3">
     <div class="col">
         <input type="checkbox" class="btn-check visually-hidden" id="vatR" @bind="@Client.VATRHandled" @bind:after="@UpdateClient">
         <label class="btn btn-outline-secondary toggle-button" for="vatR"><b>VAT-R</b></label>
@@ -44,20 +46,12 @@
     public Client Client { get; set; } = default!;
     [Parameter, EditorRequired]
     public DateOnly? ContextDate { get; set; }
-    [Parameter]
-    public ClientsService? ClientsService { get; set; }
 
     private JPKV7? CurrentJpkV7 => ContextDate is null ? null : Client.JPKV7HandledDates.FirstOrDefault(jpk => jpk.ContextDate == ContextDate.Value);
 
     private VATUE? CurrentVatUe => ContextDate is null ? null : Client.VATUEHandledDates.FirstOrDefault(vat => vat.ContextDate == ContextDate.Value);
 
-    private async Task UpdateClient()
-    {
-        if (ClientsService is null)
-            return;
-
-        await ClientsService.UpdateAsync(Client);
-    }
+    private Task UpdateClient() => ClientsService.UpdateAsync(Client);
 
     private async Task ChangeZusDra(ChangeEventArgs e)
     {
