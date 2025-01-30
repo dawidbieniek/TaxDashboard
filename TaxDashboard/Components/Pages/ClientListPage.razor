@@ -3,7 +3,7 @@
 @using BlazorTable
 @using TaxDashboard.Util
 
-@implements IAsyncDisposable
+@implements IDisposable
 
 @inject ClientsService ClientsService
 @inject IJSRuntime JS
@@ -92,7 +92,6 @@
     private List<Client> _allClients = [];
     private Client? _deletedModalClient;
 
-    private IJSObjectReference _JSModule = default!;
     private IDisposable? _navigationLockRegistration;
 
     protected override async Task OnInitializedAsync()
@@ -106,8 +105,7 @@
         {
             _navigationLockRegistration = Navigation.RegisterLocationChangingHandler(OnLocationChanging);
 
-            _JSModule = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/ClientListPage.razor.js");
-            await _JSModule.InvokeVoidAsync("addEventListeners", DotNetObjectReference.Create(this));
+            await JS.InvokeVoidAsync("addModalHiddenListener", DotNetObjectReference.Create(this), "OnModalHidden", "deletingClientModal");
         }
     }
 
@@ -139,18 +137,5 @@
         return ValueTask.CompletedTask;
     }
 
-
-    async ValueTask IAsyncDisposable.DisposeAsync()
-    {
-        if (_JSModule is not null)
-        {
-            try
-            {
-                _navigationLockRegistration?.Dispose();
-                await _JSModule.DisposeAsync();
-            }
-            catch (JSDisconnectedException)
-            { }
-        }
-    }
+    public void Dispose() => _navigationLockRegistration?.Dispose();
 }

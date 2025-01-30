@@ -195,6 +195,7 @@
     private IDisposable? _navigationLockRegistration;
     private string? _lastNavigationTarget;
     private bool _ignoreChanges = false;
+    private bool _modalShowing = false;
 
     protected override Client? Client
     {
@@ -238,10 +239,13 @@
         await base.OnInitializedAsync();
     }
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
+        {
             _navigationLockRegistration = Navigation.RegisterLocationChangingHandler(OnLocationChanging);
+            await JS.InvokeVoidAsync("addModalHiddenListener", DotNetObjectReference.Create(this), "OnModalHidden", "unsavedChangesModal");
+        }
     }
 
     private async Task UpdateClientAsync()
@@ -253,6 +257,9 @@
         }
     }
 
+    [JSInvokable]
+    public void OnModalHidden() => _modalShowing = false;
+
     private ValueTask OnLocationChanging(LocationChangingContext context)
     {
         if (context.TargetLocation == Navigation.ToAbsoluteUri("data").AbsoluteUri)
@@ -261,7 +268,13 @@
         if (!_ignoreChanges && _clientEditContext.IsModified())
         {
             _lastNavigationTarget = context.TargetLocation;
-            JS.InvokeVoidAsync("showModal", "unsavedChangesModal");
+
+            if(!_modalShowing)
+            {
+                JS.InvokeVoidAsync("showModal", "unsavedChangesModal");
+                _modalShowing = true;
+            }
+
             context.PreventNavigation();
         }
         else

@@ -15,3 +15,10 @@ function hideToast(id) {
     const dismissBtn = document.querySelector('[data-bs-dismiss=toast]');
     dismissBtn?.click();
 }
+
+function addModalHiddenListener(dotnetRef, callbackName, modalId) {
+    const modal = document.getElementById(modalId);
+    modal.addEventListener('hidden.bs.modal', e => {
+        dotnetRef.invokeMethodAsync(callbackName);
+    });
+}
