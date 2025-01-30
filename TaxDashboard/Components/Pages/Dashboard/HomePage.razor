@@ -60,31 +60,32 @@
                             }
                         </div>
                     </div>
-                    @* Invoices *@
-                    <div class="card bg-light mb-4">
-                        <div class="card-body gauge-card">
-                            <TaxDashboard.Components.Pages.Dashboard.Components.InvoicesCard Client="@Client" ContextDate="@ContextDate" ClientsService="ClientsService" OnSettlementStateChanged="@(() => StateHasChanged())"/>
-                        </div>
-                    </div>
                 </div>
                 <div class="col-12 col-lg-6">
                     @* Income chart *@
                     <div class="card bg-light mb-4">
                         <div class="card-body">
                             <h5 class="card-title">Miesięczne przychody</h5>
-                            <ApexChart @ref="_incomeChartRef" TItem="Income" Title="" Height="@("200px")" XAxisType="XAxisType.Category">
+                            <ApexChart @ref="_incomeChartRef" TItem="Income" Height="@("200px")" XAxisType="XAxisType.Category">
                                 <ApexPointSeries TItem="Income"
-                                Color="var(--bs-primary)"
-                                Items="_currentYearIncomes"
-                                SeriesType="@SeriesType.Area"
-                                ShowDataLabels
-                                XValue="@(e => e.Date.Month)"
-                                YAggregate="@(e => e.Sum(e => e.Amount))" />
+                                                 Name="Przychody"
+                                                 Items="_currentYearIncomes"
+                                                 SeriesType="@SeriesType.Area"
+                                                 ShowDataLabels
+                                                 XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
+                                                 YAggregate="@(e => e.Sum(e => e.Amount))" />
                             </ApexChart>
                             <label class="form-label" for="income">Przychody w tym miesiącu</label>
-                            <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncome" onclick="this.select();" />
+                            <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncomeAmount" onclick="this.select();" />
                         </div>
-                    </div>@* Button panel *@
+                    </div>
+                    @* Invoices *@
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <TaxDashboard.Components.Pages.Dashboard.Components.InvoicesCard Client="@Client" ContextDate="@ContextDate"/>
+                        </div>
+                    </div>
+                    @* Button panel *@
                     <div class="card bg-light mb-4">
                         <TaxDashboard.Components.Pages.Dashboard.Components.ButtonPanel Client="@Client" ContextDate="@ContextDate" ClientsService="@ClientsService" />
                     </div>
@@ -104,82 +105,90 @@
 
     private ApexChart<Income> _incomeChartRef = default!;
     private Gauge _vatGaugeRef = default!;
-    private Gauge? _fiscalGaugeRef = default!;
-    private Gauge? _zusGaugeRef = default!;
+    private Gauge? _fiscalGaugeRef;
+    private Gauge? _zusGaugeRef;
 
-    private string CurrentMonthIncome
+    private string CurrentMonthIncomeAmount
     {
         get => (_currentMonthIncome?.Amount ?? 0).ToString("C2");
         set
         {
+            if (Client is null || !ContextDate.HasValue)
+                return;
+
             if (Decimal.TryParse(value, GlobalSettings.CurrencyNumberStyles, GlobalSettings.CurrencyCulture, out decimal currency))
             {
-                _currentMonthIncome!.Amount = Math.Round(currency, 2);
-                IncomesService.UpdateAsync(_currentMonthIncome).Wait();
+                if (currency == 0)
+                {
+                    if (_currentMonthIncome is not null)
+                    {
+                        Client.Incomes.Remove(_currentMonthIncome);
+                        _currentMonthIncome = null;
+                    }
+                }
+                else
+                {
+                    if (_currentMonthIncome is not null)
+                        _currentMonthIncome.Amount = Math.Round(currency, 2);
+                    else
+                    {
+                        _currentMonthIncome = new() { Date = ContextDate.Value };
+                        Client.Incomes.Add(_currentMonthIncome);
+                    }
 
-                UpdateIncomeCharts();
+                    _currentMonthIncome.Amount = Math.Round(currency, 2);
+                }
+
+                _ = Task.Run(async () =>
+                {
+                    await ClientsService.UpdateAsync(Client);
+                    UpdateIncomesWithoutMonthlyIncome(ContextDate);
+                });
             }
         }
     }
 
-    protected override Task OnAfterRequiredInitializedAsync()
-    {
-        if (ContextDate.HasValue)
-        {
-            _currentMonthIncome = GetCurrentMonthIncomeOrCreateNew(ContextDate.Value);
-            _currentYearIncomes = GetCurrentYearIncomes(ContextDate.Value);
-        }
-
-        return Task.CompletedTask;
-    }
+    protected override void OnAfterRequiredInitialized() => UpdateIncomes(ContextDate, false);
 
     protected override async Task ChangeDateContext(DateOnly date)
     {
         await base.ChangeDateContext(date);
-
-        if (Client is null)
-            return;
-
-        _currentMonthIncome = GetCurrentMonthIncomeOrCreateNew(date);
-        _currentYearIncomes = GetCurrentYearIncomes(date);
-
-        UpdateIncomeCharts();
+        UpdateIncomes(date);
     }
 
     protected override async Task ChangeSelectedClient(Client client)
     {
         await base.ChangeSelectedClient(client);
+        UpdateIncomes(ContextDate);
+    }
 
-        if (ContextDate.HasValue)
-        {
-            _currentMonthIncome = GetCurrentMonthIncomeOrCreateNew(ContextDate.Value);
-            _currentYearIncomes = GetCurrentYearIncomes(ContextDate.Value);
+    // Instead of querying data on every render, data is cached and needs to be updated manually
+    private void UpdateIncomes(DateOnly? date, bool updateCharts = true)
+    {
+        _currentMonthIncome = date.HasValue ? Client?.Incomes.Where(i => i.Date == date).FirstOrDefault() : null;
+        UpdateIncomesWithoutMonthlyIncome(date, updateCharts);
+    }
+
+    private void UpdateIncomesWithoutMonthlyIncome(DateOnly? date, bool updateCharts = true)
+    {
+        _currentYearIncomes = GetCurrentYearIncomes(date);
+
+        if (updateCharts)
             UpdateIncomeCharts();
-        }
     }
 
-    private Income GetCurrentMonthIncomeOrCreateNew(DateOnly date)
+    private List<Income> GetCurrentYearIncomes(DateOnly? date)
     {
-        Income? income = Client!.Incomes
-            .Where(i => i.Date == date)
-            .FirstOrDefault();
-
-        if (income is null)
-        {
-            income = new Income() { Client = Client, Amount = 0, Date = date };
-            Client!.Incomes.Add(income);
-        };
-
-        return income;
-    }
-
-    private List<Income> GetCurrentYearIncomes(DateOnly date)
-    {
-        IEnumerable<Income> existingIncomes = Client!.Incomes
-            .Where(i => i.Date.Year == date.Year);
+        int year = date.HasValue ? date.Value.Year : 1;
 
         IEnumerable<Income> monthlyIncomes = Enumerable.Range(1, 12)
-            .Select(month => new Income { Amount = 0, Date = new DateOnly(date.Year, month, 1) });
+            .Select(month => new Income { Amount = 0, Date = new DateOnly(year, month, 1) });
+
+        if (Client is null || !date.HasValue)
+            return [.. monthlyIncomes];
+
+        IEnumerable<Income> existingIncomes = Client!.Incomes
+            .Where(i => i.Date.Year == year);
 
         return monthlyIncomes
             .Select(monthlyIncome => existingIncomes
@@ -198,5 +207,4 @@
 
         _ = Task.WhenAll(tasks);
     }
-
 }

@@ -1,0 +1,20 @@
+﻿.month-dropdown {
+    display: none !important;
+}
+
+@media (max-width: 1371px) {
+    .month-button {
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+    }
+}
+
+@media (max-width: 1180px) {
+    .month-button-group {
+        display: none !important;
+    }
+
+    .month-dropdown {
+        display: block !important;
+    }
+}

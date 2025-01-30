@@ -1,4 +1,4 @@
-﻿<select class="form-select ms-4" @onchange="ChangeSelectedYear" value="@_selectedYear">
+﻿<select class="form-select ms-2 flex-grow-0 flex-shrink-0" style="width:6rem; height: 38px" @onchange="ChangeSelectedYear" value="@_selectedYear">
     @foreach (int year in SelectableYears)
     {
         @if (_selectedYear == year)
@@ -12,8 +12,8 @@
     }
 </select>
 
-<div class="d-flex gap-1 ms-4">
-    @for (int i = 1; i <= MonthLabels.Length; i++)
+<div class="d-flex gap-0 ms-2 flex-shrink-1 flex-wrap month-button-group">
+    @for (int i = 1; i <= 12; i++)
     {
         string id = $"month{i}";
         int monthValue = i;
@@ -25,13 +25,26 @@
         {
             <input type="radio" class="btn-check" name="months" id="@id" autocomplete="off" @onclick="@(() => ChangeSelectedMonth(monthValue))">
         }
-        <label class="btn @(GetLabelClass(monthValue))" for="@id">@(MonthLabels[i - 1])</label>
+        <label class="btn month-button @(GetMonthButtonClass(monthValue))" for="@id">@(Util.DataDisplayHelper.GetMonthLabel(i))</label>
     }
 </div>
+<select class="form-select month-dropdown ms-2 flex-grow-0 flex-shrink-0" style="width:9rem; height: 38px" @onchange="@((e) => ChangeSelectedMonth(int.Parse((string)e.Value!)))" value="@_selectedMonth">
+    @for (int i = 1; i <= 12; i++)
+    {
+        int monthValue = i;
+        @if (_selectedMonth == i)
+        {
+            <option class="@(GetMonthButtonClass(monthValue))" value="@i" selected>@Util.DataDisplayHelper.GetMonthFullLabel(i)</option>
+        }
+        else
+        {
+            <option class="@(GetMonthButtonClass(monthValue))" value="@i">@Util.DataDisplayHelper.GetMonthFullLabel(i)</option>
+        }
+    }
+</select>
 
 @code {
 
-    private static readonly string[] MonthLabels = ["Sty", "Lut", "Mar", "Kwi", "Maj", "Cze", "Lip", "Sie", "Wrz", "Paź", "Lis", "Gru"];
     private static readonly int[] SelectableYears = [2024, 2025];
 
     private int _selectedMonth;
@@ -56,8 +69,8 @@
         {
             _selectedYear = SelectableYears[0];
             _selectedMonth = 1;
-            UpdateSelectedContextDate();
         }
+        UpdateSelectedContextDate();
     }
 
     private void ChangeSelectedMonth(int month)
@@ -80,7 +93,7 @@
         OnSelectedDateContextChanged.InvokeAsync(dateContext);
     }
 
-    private string GetLabelClass(int monthValue) => ClientSettlements.Any(s => s.ContextDate.Year == _selectedYear && s.ContextDate.Month == monthValue)
+    private string GetMonthButtonClass(int monthValue) => ClientSettlements.Any(s => s.ContextDate.Year == _selectedYear && s.ContextDate.Month == monthValue)
             ? "text-success"
             : "text-warning";
 }

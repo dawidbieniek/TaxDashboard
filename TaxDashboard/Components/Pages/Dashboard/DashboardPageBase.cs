@@ -53,11 +53,12 @@ public class DashboardPageBase : ComponentBase
         if (storedDateContext.HasValue)
             ContextDate = storedDateContext.Value;
 
-        await OnAfterRequiredInitializedAsync();
+        OnAfterRequiredInitialized();
 
         Initialized = true;
         StateHasChanged();
     }
 
-    protected virtual Task OnAfterRequiredInitializedAsync() => Task.CompletedTask;
+    protected virtual void OnAfterRequiredInitialized()
+    { }
 }

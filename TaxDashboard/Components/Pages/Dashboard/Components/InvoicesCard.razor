@@ -1,4 +1,24 @@
-﻿<h5 class="card-title mb-2">Faktury</h5>
+﻿@using ApexCharts
+@using TaxDashboard.Models.Enums
+@inject ClientsService ClientsService
+
+<h5 class="card-title mb-2">Faktury</h5>
+<ApexChart @ref="_invoiceChartRef" TItem="InvoiceCount" Height="@("200px")" XAxisType="XAxisType.Category">
+    <ApexPointSeries TItem="InvoiceCount"
+                     Name="Sprzedażowe"
+                     Items="_currentYearSellInvoices"
+                     SeriesType="@SeriesType.Bar"
+                     ShowDataLabels
+                     XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
+                     YAggregate="@(e => e.Sum(e => e.Amount))" />
+    <ApexPointSeries TItem="InvoiceCount"
+                     Name="Kosztowe"
+                     Items="_currentYearCostInvoices"
+                     SeriesType="@SeriesType.Bar"
+                     ShowDataLabels
+                     XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
+                     YAggregate="@(e => e.Sum(e => e.Amount))" />
+</ApexChart>
 <div class="d-flex gap-2 mb-3">
     <div class="col mb-2">
         <label class="form-label" for="sell">Sprzedażowe</label>
@@ -9,120 +29,160 @@
         <InputNumber id="cost" class="form-control" @bind-Value="@CurrentCostInvoiceAmount" onclick="this.select();" />
     </div>
 </div>
-<div class="col">
-    @{
-        Settlement? currentSettlement = CurrentSettlement;
-        <input type="checkbox" class="btn-check visually-hidden" id="settlement" checked="@(currentSettlement is not null)" @onchange="@ChangeSettlement">
-        <label class="btn btn-outline-secondary toggle-button" for="settlement"><b>@(currentSettlement is not null ? "Rozliczony" : "Nierozliczony")</b></label>
-    }
-</div>
 
 @code {
+    private ApexChart<InvoiceCount> _invoiceChartRef = default!;
+
+    private InvoiceCount? _currentSellInvoice;
+    private InvoiceCount? _currentCostInvoice;
+    private List<InvoiceCount> _currentYearSellInvoices = [];
+    private List<InvoiceCount> _currentYearCostInvoices = [];
+
+    private Client? _lastClientValue = null;
+    private DateOnly? _lastContextDateValue = null;
+
     [Parameter, EditorRequired]
     public Client Client { get; set; } = default!;
     [Parameter, EditorRequired]
     public DateOnly? ContextDate { get; set; }
-    [Parameter]
-    public ClientsService? ClientsService { get; set; }
-    [Parameter]
-    public EventCallback OnSettlementStateChanged { get; set; }
 
-
-    private Settlement? CurrentSettlement => ContextDate is null ? null : Client.Settlements.FirstOrDefault(s => s.ContextDate == ContextDate.Value);
-    private InvoiceCount? CurrentSellInvoice => ContextDate is null ? null : Client.Invoices.FirstOrDefault(i => i.Type == Models.Enums.InvoiceType.Sell && i.Date == ContextDate.Value);
-    private InvoiceCount? CurrentCostInvoice => ContextDate is null ? null : Client.Invoices.FirstOrDefault(i => i.Type == Models.Enums.InvoiceType.Cost && i.Date == ContextDate.Value);
 
     private int CurrentSellInvoiceAmount
     {
-        get => CurrentSellInvoice?.Amount ?? 0;
-        set => _ = ChangeSellInvoice(value);
+        get => _currentSellInvoice?.Amount ?? 0;
+        set
+        {
+            if (value == 0)
+            {
+                if (_currentSellInvoice is not null)
+                {
+                    Client.Invoices.Remove(_currentSellInvoice);
+                    _currentSellInvoice = null;
+                }
+            }
+            else
+            {
+                if (_currentSellInvoice is not null)
+                    _currentSellInvoice.Amount = value;
+                else
+                {
+                    _currentSellInvoice = new()
+                        {
+                            Type = Models.Enums.InvoiceType.Sell,
+                            Amount = value,
+                            Date = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1),
+                        };
+                    Client.Invoices.Add(_currentSellInvoice);
+                }
+            }
+
+
+            _ = Task.Run(async () =>
+            {
+                await ClientsService.UpdateAsync(Client);
+                UpdateInvoices(updateCostInvoice: false);
+            });
+        }
     }
+
     private int CurrentCostInvoiceAmount
     {
-        get => CurrentCostInvoice?.Amount ?? 0;
-        set => _ = ChangeCostInvoice(value);
-    }
-
-    private async Task UpdateClient()
-    {
-        if (ClientsService is null)
-            return;
-
-        await ClientsService.UpdateAsync(Client);
-    }
-
-    private async Task ChangeSettlement(ChangeEventArgs e)
-    {
-        Settlement? currentSettlement = CurrentSettlement;
-
-        if ((bool)e.Value!)
+        get => _currentCostInvoice?.Amount ?? 0;
+        set
         {
-            Client.Settlements.Add(new()
+            if (value == 0)
+            {
+                if (_currentCostInvoice is not null)
                 {
-                    ContextDate = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1),
-                    Client = Client
-                });
-        }
-        else if (currentSettlement is not null)
-            Client.Settlements.Remove(currentSettlement);
-
-        await UpdateClient();
-        await OnSettlementStateChanged.InvokeAsync();
-    }
-
-    private async Task ChangeSellInvoice(int invoiceAmount)
-    {
-        InvoiceCount? currentInvoice = CurrentSellInvoice;
-
-        if(invoiceAmount == 0)
-        {
-            if(currentInvoice is not null)
-                Client.Invoices.Remove(currentInvoice);
-        }
-        else
-        {
-            if (currentInvoice is not null)
-                currentInvoice.Amount = invoiceAmount;
+                    Client.Invoices.Remove(_currentCostInvoice);
+                    _currentCostInvoice = null;
+                }
+            }
             else
             {
-                Client.Invoices.Add(new()
+                if (_currentCostInvoice is not null)
+                    _currentCostInvoice.Amount = value;
+                else
                 {
-                    Type = Models.Enums.InvoiceType.Sell,
-                    Amount = invoiceAmount, 
-                    Date = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1),
-                    Client = Client,
-                });
+                    _currentCostInvoice = new()
+                        {
+                            Type = Models.Enums.InvoiceType.Cost,
+                            Amount = value,
+                            Date = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1),
+                        };
+                    Client.Invoices.Add(_currentCostInvoice);
+                }
             }
-        }
 
-        await UpdateClient();
-    }
 
-    private async Task ChangeCostInvoice(int invoiceAmount)
-    {
-        InvoiceCount? currentInvoice = CurrentCostInvoice;
-
-        if (invoiceAmount == 0)
-        {
-            if (currentInvoice is not null)
-                Client.Invoices.Remove(currentInvoice);
-        }
-        else
-        {
-            if (currentInvoice is not null)
-                currentInvoice.Amount = invoiceAmount;
-            else
+            _ = Task.Run(async () =>
             {
-                Client.Invoices.Add(new()
-                    {
-                        Type = Models.Enums.InvoiceType.Cost,
-                        Amount = invoiceAmount,
-                        Date = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1),
-                        Client = Client,
-                    });
-            }
+                await ClientsService.UpdateAsync(Client);
+                UpdateInvoices(updateSellInvoice: false);
+            });
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            UpdateInvoices();
+    }
+
+    protected override void OnParametersSet()
+    {
+        bool changed = false;
+        if (_lastClientValue != Client)
+        {
+            _lastClientValue = Client;
+            changed = true;
+        }
+        if (_lastContextDateValue != ContextDate)
+        {
+            _lastContextDateValue = ContextDate;
+            changed = true;
         }
 
-        await UpdateClient();
+        if (changed && _invoiceChartRef is not null)
+            UpdateInvoices();
     }
+
+    private void UpdateInvoices(bool updateCharts = true, bool updateSellInvoice = true, bool updateCostInvoice = true)
+    {
+        if (updateSellInvoice)
+        {
+            _currentSellInvoice = ContextDate.HasValue ? Client.Invoices.FirstOrDefault(i => i.Type == InvoiceType.Sell && i.Date == ContextDate) : null;
+            _currentYearSellInvoices = GetCurrentYearInvoices(ContextDate, InvoiceType.Sell);
+        }
+        if (updateCostInvoice)
+        {
+            _currentCostInvoice = ContextDate.HasValue ? Client.Invoices.FirstOrDefault(i => i.Type == InvoiceType.Cost && i.Date == ContextDate) : null;
+            _currentYearCostInvoices = GetCurrentYearInvoices(ContextDate, InvoiceType.Cost);
+        }
+
+        if (updateCharts && (updateSellInvoice || updateCostInvoice))
+            UpdateInvoiceCharts();
+    }
+
+    private List<InvoiceCount> GetCurrentYearInvoices(DateOnly? date, InvoiceType type)
+    {
+        int year = date.HasValue ? date.Value.Year : 1;
+
+        IEnumerable<InvoiceCount> monthlyInvoices = Enumerable.Range(1, 12)
+            .Select(month => new InvoiceCount { Amount = 0, Type = type, Date = new DateOnly(year, month, 1) });
+
+        if (!date.HasValue)
+            return [.. monthlyInvoices];
+
+        IEnumerable<InvoiceCount> existingInvoices = Client!.Invoices
+            .Where(i => i.Type == type && i.Date.Year == year);
+
+        return monthlyInvoices
+            .Select(monthlyInvoice => existingInvoices
+                .FirstOrDefault(existingInvoice => existingInvoice.Date == monthlyInvoice.Date)
+                ?? monthlyInvoice)
+            .ToList();
+    }
+
+    private void UpdateInvoiceCharts() => _ = Task.WhenAll([_invoiceChartRef.UpdateSeriesAsync()]);
 }

@@ -1,28 +1,30 @@
 ﻿@inject ClientsService ClientsService
 
-<nav class="navbar bg-light border-black border-bottom border-2">
-    <div class="container-fluid">
-        <div class="d-flex">
-            <div class="dropdown@(_incorrectClientName ? " border-1 border-danger" : "")">
-                <input class="form-select" style="min-height:38px; min-width:14rem;" list="clientList" type="text" placeholder="Klient" autocomplete="on" @onchange="ChangeSelectedClient" value="@(StartingClient?.FullName ?? "")" />
-                <datalist id="clientList">
-                    @foreach (Client client in _allClients)
-                    {
-                        <option>@client.FullName</option>
-                    }
-                </datalist>
-            </div>
-            @if (ShowDateSelector)
+<nav class="navbar navbar-expand align-items-start bg-light border-black border-bottom border-2 px-2">
+    <div class="dropdown flex-grow-0 flex-shrink-0@(_incorrectClientName ? " border-1 border-danger" : "")">
+        <input class="form-select" style="min-height:38px; width:14rem;" list="clientList" type="text" placeholder="Klient" autocomplete="on" @onchange="ChangeSelectedClient" value="@(StartingClient?.FullName ?? "")" />
+        <datalist id="clientList">
+            @foreach (Client client in _allClients)
             {
-                <ContextDateSelector ClientSettlements="@(_selectedClient?.Settlements ?? [])" StartingDateContext="@StartingDateContext" OnSelectedDateContextChanged="@OnSelectedDateContextChanged" />
+                <option>@client.FullName</option>
             }
-        </div>
+        </datalist>
     </div>
+    @if (ShowDateSelector && _selectedClient is not null)
+    {
+        <ContextDateSelector ClientSettlements="@(_selectedClient?.Settlements ?? [])" StartingDateContext="@StartingDateContext" OnSelectedDateContextChanged="ChangeSelectedDateContext" />
+        <div class="flex-grow-1"/>
+        <SettlementButton Client="@_selectedClient" ContextDate="@_contextDate" OnSettlementStateChanged="@(() => StateHasChanged())" />
+    }
 </nav>
+
 
 @code {
     private Client? _selectedClient;
     private bool _incorrectClientName = false;
+    private IEnumerable<Client> _allClients = [];
+
+    private DateOnly? _contextDate;
 
     [Parameter]
     public Client? StartingClient { get; set; }
@@ -34,8 +36,9 @@
     public DateOnly? StartingDateContext { get; set; }
     [Parameter]
     public EventCallback<DateOnly> OnSelectedDateContextChanged { get; set; }
+    [Parameter]
+    public EventCallback OnSettlementStateChanged { get; set; }
 
-    private IEnumerable<Client> _allClients = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -69,4 +72,13 @@
 
         return false;
     }
+
+    private async Task ChangeSelectedDateContext(DateOnly dateContext)
+    {
+        _contextDate = dateContext;
+        StateHasChanged();
+        await OnSelectedDateContextChanged.InvokeAsync(dateContext);
+    }
+
+
 }
