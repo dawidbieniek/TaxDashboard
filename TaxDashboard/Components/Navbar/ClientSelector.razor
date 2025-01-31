@@ -2,7 +2,7 @@
 
 <nav class="navbar navbar-expand sticky-top align-items-start bg-light border-black border-bottom border-2 px-2">
     <div class="dropdown flex-grow-0 flex-shrink-0@(_incorrectClientName ? " border-1 border-danger" : "")">
-        <input class="form-select" style="min-height:38px; width:14rem;" list="clientList" type="text" placeholder="Klient" autocomplete="on" @onchange="ChangeSelectedClient" value="@(StartingClient?.FullName ?? "")" />
+        <input class="form-select" style="min-height:38px; width:14rem;" list="clientList" type="text" placeholder="@(_allClients.Any() ? "Klient" : "Brak klientów")" autocomplete="on" @onchange="ChangeSelectedClient" value="@(StartingClient?.FullName ?? "")" />
         <datalist id="clientList">
             @foreach (Client client in _allClients)
             {
@@ -42,7 +42,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _allClients = await ClientsService.GetAllAsync();
+        _allClients = (await ClientsService.GetAllAsync())
+            .Where(c => !c.Suspended);
 
         if (StartingClient is not null)
         {

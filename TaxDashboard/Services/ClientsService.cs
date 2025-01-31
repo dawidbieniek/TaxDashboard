@@ -10,11 +10,8 @@ public class ClientsService(IDbContextFactory<AppDbContext> contextFactory) : Cr
     public async Task<ICollection<Client>> GetAllWithDetailsAsync()
     {
         using AppDbContext context = await ContextFactory.CreateDbContextAsync();
-#pragma warning disable IDE0305 // Simplify collection initialization
-        return context.Clients
-            .Include(c => c.Bank)
-            .ToList();
-#pragma warning restore IDE0305 // Simplify collection initialization
+        return [..context.Clients
+            .Include(c => c.Bank)];
     }
 
     public override async Task<Client?> GetDetailsAsync(int id)
@@ -30,7 +27,7 @@ public class ClientsService(IDbContextFactory<AppDbContext> contextFactory) : Cr
             .FirstOrDefault(c => c.Id == id);
     }
 
-    public async Task<Client?> GetFirstWithDetailsAsync()
+    public async Task<Client?> GetFirstSelectableClientWithDetailsAsync()
     {
         using AppDbContext context = await ContextFactory.CreateDbContextAsync();
         return context.Clients
@@ -40,7 +37,7 @@ public class ClientsService(IDbContextFactory<AppDbContext> contextFactory) : Cr
             .Include(c => c.VATUEHandledDates)
             .Include(c => c.Settlements)
             .Include(c => c.Invoices)
-            .FirstOrDefault();
+            .FirstOrDefault(c => !c.Suspended);
     }
 
     public override async Task UpdateAsync(Client entity)

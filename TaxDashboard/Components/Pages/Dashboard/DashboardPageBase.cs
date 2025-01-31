@@ -45,9 +45,13 @@ public class DashboardPageBase : ComponentBase
     {
         int? storedClientId = await LocalStorage.GetItemAsync<int>(StorageClientIdKey);
         if (storedClientId.HasValue)
-            Client = await ClientsService.GetDetailsAsync(storedClientId.Value);
+        {
+            Client? storedClient = await ClientsService.GetDetailsAsync(storedClientId.Value);
+            if (storedClient is not null && !storedClient.Suspended)
+                Client = storedClient;
+        }
 
-        Client ??= await ClientsService.GetFirstWithDetailsAsync();
+        Client ??= await ClientsService.GetFirstSelectableClientWithDetailsAsync();
 
         DateOnly? storedDateContext = await LocalStorage.GetItemAsync<DateOnly>(StorageDateContextKey);
         if (storedDateContext.HasValue)
