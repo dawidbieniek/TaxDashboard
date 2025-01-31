@@ -6,7 +6,7 @@
 @inject BanksService BanksService
 @inject IJSRuntime JS
 
-<EditForm EditContext="@_newClientDataEditContext" class="container pt-3" style="max-width:800px;" OnValidSubmit="CreateNewClient">
+<EditForm EditContext="@_newClientDataEditContext" class="container pt-3" style="max-width:800px;" OnValidSubmit="CreateNewClient" onkeypress="if(event.keyCode==13){document.activeElement.blur();return false;}">
     <DataAnnotationsValidator />
     <div class="row">
         <div class="col">

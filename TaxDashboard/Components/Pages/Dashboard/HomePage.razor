@@ -21,100 +21,100 @@
     }
     else
     {
-                    <div class="container-fluid flex-row mt-3">
-                        <div class="row">
-                            <div class="col-12 col-xl-3">
-                                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-1">
+        <div class="container-fluid flex-row mt-3">
+            <div class="row">
+                <div class="col-12 col-xl-3">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-1">
                         @* VAT gauge *@
-                                    <div class="col">
-                                        <div class="card bg-light mb-4">
-                                            <div class="card-body gauge-card">
-                                                <div style="height:25px" />
-                                                <Gauge @ref="@_vatGaugeRef" Label="Limit do VAT" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@VatGaugeLimit" />
-                                            </div>
-                                        </div>
-                                    </div>
-                        @* Fiscal gauge *@
-                                    <div class="col">
-                                        <div class="card bg-light mb-4">
-                                            <div class="card-body gauge-card">
-                                                <div class="col form-check form-switch" style="margin-top:-.5rem;">
-                                                    <label class="form-check-label overflow-hidden" style="height:1.5rem;" for="cashMethod">Używaj kasy fiskalnej</label>
-                                                    <InputCheckbox id="cashMethod" class="form-check-input" type="checkbox" @bind-Value="Client.UseCashRegister" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" />
-                                                </div>
-                                    @if (Client.UseCashRegister)
-                                    {
-                                                                <Gauge @ref="@_fiscalGaugeRef" Label="Kasy fiskalne" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@FiscalGaugeLimit" />
-                                    }
-                                    else
-                                    {
-                                                                <div class="text-secondary text-center w-100 mt-5">Klient nie używa kasy fiskalnej</div>
-                                    }
-                                            </div>
-                                        </div>
-                                    </div>
-                        @* ZUS gauge *@
-                                    <div class="col">
-                                        <div class="card bg-light mb-4">
-                                            <div class="card-body gauge-card">
-                                                <div style="height:25px" />
-                                    @if (Client.ReductionType == Models.Enums.ReductionType.ZUSPlus)
-                                    {
-                                                                <Gauge @ref="@_zusGaugeRef" Label="Mały ZUS Plus" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@ZusGaugeLimit" />
-                                    }
-                                    else
-                                    {
-                                                                <div class="text-secondary text-center w-100 mt-5">Klient nie jest na Małym ZUSie Plus</div>
-                                    }
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-xl-9">
-                    @* Income chart *@
-                                <div class="card bg-light mb-4">
-                                    <div class="card-body chart-card">
-                                        <h5 class="card-title">Miesięczne przychody</h5>
-                                        <ElementRequiringLoad @ref="@_incomeLoadingRef">
-                                            <ApexChart @ref="_incomeChartRef" TItem="IncomeData" Height="@("236px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _incomeLoadingRef.HideLoadingIcon())">
-                                                <ApexPointSeries TItem="IncomeData"
-                                                Name="Przychody"
-                                                Items="@_incomesDataSeries"
-                                                SeriesType="@SeriesType.Area"
-                                                ShowDataLabels
-                                                XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Month))"
-                                                YAggregate="@(e => e.Sum(e => e.Amount))" />
-                                            </ApexChart>
-                                            <label class="form-label" for="income">Przychody w tym miesiącu</label>
-                                            <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncomeAmount" onclick="this.select();" />
-                                        </ElementRequiringLoad>
-                                    </div>
-                                </div>
-                    @* Invoices *@
-                                <div class="card bg-light mb-4">
-                                    <div class="card-body chart-card">
-                                        <InvoicesCard Client="@Client" ContextDate="@ContextDate" />
-                                    </div>
+                        <div class="col">
+                            <div class="card bg-light mb-4">
+                                <div class="card-body gauge-card">
+                                    <div style="height:25px" />
+                                    <Gauge @ref="@_vatGaugeRef" Label="Limit do VAT" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@VatGaugeLimit" />
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-lg">
-                    @* Button panel *@
-                                <div class="card bg-light mb-4 mb-lg-2">
-                                    <ButtonPanel Client="@Client" ContextDate="@ContextDate" />
+                        @* Fiscal gauge *@
+                        <div class="col">
+                            <div class="card bg-light mb-4">
+                                <div class="card-body gauge-card">
+                                    <div class="col form-check form-switch" style="margin-top:-.5rem;">
+                                        <label class="form-check-label overflow-hidden" style="height:1.5rem;" for="cashMethod">Używaj kasy fiskalnej</label>
+                                        <InputCheckbox id="cashMethod" class="form-check-input" type="checkbox" @bind-Value="Client.UseCashRegister" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" />
+                                    </div>
+                                    @if (Client.UseCashRegister)
+                                    {
+                                        <Gauge @ref="@_fiscalGaugeRef" Label="Kasy fiskalne" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@FiscalGaugeLimit" />
+                                    }
+                                    else
+                                    {
+                                        <div class="text-secondary text-center w-100 mt-5">Klient nie używa kasy fiskalnej</div>
+                                    }
                                 </div>
                             </div>
-                            <div class="col-lg mb-2">
-                    @* Notes *@
-                                <div class="card bg-light h-100 p-3" style="min-height:224px">
-                                    <h5 class="card-title">Notatki</h5>
-                                    <InputTextArea class="form-control h-100" style="resize:none;" @bind-Value="@Client.Notes" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" />
+                        </div>
+                        @* ZUS gauge *@
+                        <div class="col">
+                            <div class="card bg-light mb-4">
+                                <div class="card-body gauge-card">
+                                    <div style="height:25px" />
+                                    @if (Client.ReductionType == Models.Enums.ReductionType.ZUSPlus)
+                                    {
+                                        <Gauge @ref="@_zusGaugeRef" Label="Mały ZUS Plus" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@ZusGaugeLimit" />
+                                    }
+                                    else
+                                    {
+                                        <div class="text-secondary text-center w-100 mt-5">Klient nie jest na Małym ZUSie Plus</div>
+                                    }
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="col-12 col-xl-9">
+                    @* Income chart *@
+                    <div class="card bg-light mb-4">
+                        <div class="card-body chart-card">
+                            <h5 class="card-title">Miesięczne przychody</h5>
+                            <ElementRequiringLoad @ref="@_incomeLoadingRef">
+                                <ApexChart @ref="_incomeChartRef" TItem="IncomeData" Height="@("236px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _incomeLoadingRef.HideLoadingIcon())">
+                                    <ApexPointSeries TItem="IncomeData"
+                                                     Name="Przychody"
+                                                     Items="@_incomesDataSeries"
+                                                     SeriesType="@SeriesType.Area"
+                                                     ShowDataLabels
+                                                     XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Month))"
+                                                     YAggregate="@(e => e.Sum(e => e.Amount))" />
+                                </ApexChart>
+                                <label class="form-label" for="income">Przychody w tym miesiącu</label>
+                                <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncomeAmount" onclick="this.select();" />
+                            </ElementRequiringLoad>
+                        </div>
+                    </div>
+                    @* Invoices *@
+                    <div class="card bg-light mb-4">
+                        <div class="card-body chart-card">
+                            <InvoicesCard Client="@Client" ContextDate="@ContextDate" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg">
+                    @* Button panel *@
+                    <div class="card bg-light mb-4 mb-lg-2">
+                        <ButtonPanel Client="@Client" ContextDate="@ContextDate" />
+                    </div>
+                </div>
+                <div class="col-lg mb-2">
+                    @* Notes *@
+                    <div class="card bg-light h-100 p-3" style="min-height:224px">
+                        <h5 class="card-title">Notatki</h5>
+                        <InputTextArea class="form-control h-100" style="resize:none;" @bind-Value="@Client.Notes" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" />
+                    </div>
+                </div>
+            </div>
+        </div>
     }
 </DashboardPageComponent>
 
