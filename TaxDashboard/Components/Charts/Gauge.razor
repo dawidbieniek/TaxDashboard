@@ -34,14 +34,12 @@
         if (Value >= ValueLimit * WarningColorPercentage)
         {
             if (Value >= ValueLimit)
-            {
                 _valueClass = " text-danger";
-                return;
-            }
-            _valueClass = " text-warning";
+            else
+                _valueClass = " text-warning";
         }
-
-        //TODO: UPdate chart options
+        else
+            _valueClass = string.Empty;
     }
 
     public Task UpdateChartAsync() => _chartRef.UpdateSeriesAsync();
