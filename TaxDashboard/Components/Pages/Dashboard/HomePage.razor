@@ -97,10 +97,17 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-xl-8 col">
+                <div class="col-lg">
                     @* Button panel *@
-                    <div class="card bg-light mb-4">
+                    <div class="card bg-light mb-4 mb-lg-2">
                         <ButtonPanel Client="@Client" ContextDate="@ContextDate" />
+                    </div>
+                </div>
+                <div class="col-lg mb-2">
+                    @* Notes *@
+                    <div class="card bg-light h-100 p-3" style="min-height:224px">
+                        <h5 class="card-title">Notatki</h5>
+                        <InputTextArea class="form-control h-100" style="resize:none;" @bind-Value="@Client.Notes" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))"/>
                     </div>
                 </div>
             </div>

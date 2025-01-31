@@ -36,6 +36,8 @@ public class Client : Entity
     public PaymentType PITPaymentType { get; set; } = PaymentType.Monthly;
     public PaymentType VATPaymentType { get; set; } = PaymentType.Monthly;
 
+    public string Notes { get; set; } = string.Empty;
+
     public bool VATRHandled { get; set; } = false;
     public bool CEIDG1Handled { get; set; } = false;
     public bool ZUSHandled { get; set; } = false;
@@ -47,7 +49,6 @@ public class Client : Entity
 
     public List<InvoiceCount> Invoices { get; set; } = [];
     public List<Income> Incomes { get; set; } = [];
-    public List<ClientNote> Notes { get; set; } = [];
     public List<Settlement> Settlements { get; set; } = [];
 
     [NotMapped]

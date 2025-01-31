@@ -21,13 +21,13 @@
                          YAggregate="@(e => e.Sum(e => e.Amount))" />
     </ApexChart>
     <div class="d-flex gap-2">
-        <div class="col">
+        <div >
             <label class="form-label" for="sell">Sprzedażowe</label>
-            <InputNumber id="sell" class="form-control" @bind-Value="@CurrentSellInvoiceAmount" onclick="this.select();" />
+            <InputNumber id="sell" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentSellInvoiceAmount" onclick="this.select();" />
         </div>
-        <div class="col">
+        <div>
             <label class="form-label" for="cost">Kosztowe</label>
-            <InputNumber id="cost" class="form-control" @bind-Value="@CurrentCostInvoiceAmount" onclick="this.select();" />
+            <InputNumber id="cost" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentCostInvoiceAmount" onclick="this.select();" />
         </div>
     </div>
 </ElementRequiringLoad>
