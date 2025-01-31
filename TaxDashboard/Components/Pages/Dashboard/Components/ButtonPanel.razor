@@ -19,37 +19,121 @@
     </div>
     <div class="col">
         <input type="checkbox" class="btn-check visually-hidden" id="zusDra" checked="@(Client.ZUSDraHandledDate is not null)" @onchange="@ChangeZusDra">
-        <label class="btn btn-outline-secondary toggle-button" for="zusDra"><b>ZUS DRA</b>@(Client.ZUSDraHandledDate is not null ? Client.ZUSDraHandledDate.Value.ToString("\nyyyy-MM-dd\nHH:mm") : "")</label>
+        <label class="btn btn-outline-secondary toggle-button" for="zusDra"><b>ZUS DRA</b>@(Client.ZUSDraHandledDate is not null ? Client.ZUSDraHandledDate.Value.ToString(DateFormat) : "")</label>
     </div>
     <div class="col">
         <input type="checkbox" class="btn-check visually-hidden" id="tax" checked="@(Client.TaxHandledDate is not null)" @onchange="@ChangeTax">
-        <label class="btn btn-outline-secondary toggle-button" for="tax"><b>Podatek</b>@(Client.TaxHandledDate is not null ? Client.TaxHandledDate.Value.ToString("\nyyyy-MM-dd\nHH:mm") : "")</label>
+        <label class="btn btn-outline-secondary toggle-button" for="tax"><b>Podatek</b>@(Client.TaxHandledDate is not null ? Client.TaxHandledDate.Value.ToString(DateFormat) : "")</label>
     </div>
     <div class="col">
-        @{
-            JPKV7? currentJpk = CurrentJpkV7;
-            <input type="checkbox" class="btn-check visually-hidden" id="jpkv7" checked="@(currentJpk is not null)" @onchange="@ChangeJpkV7">
-            <label class="btn btn-outline-secondary toggle-button" for="jpkv7"><b>JPK V7</b>@(currentJpk is not null ? currentJpk.ChangedDateTime.ToString("\nyyyy-MM-dd\nHH:mm") : "")</label>
-        }
+        <input type="checkbox" class="btn-check visually-hidden" id="jpkv7" @bind="@CurrentJpkV7Exists">
+        <label class="btn btn-outline-secondary toggle-button" for="jpkv7"><b>JPK V7</b>@(_currentJpkV7 is not null ? _currentJpkV7.ChangedDateTime.ToString(DateFormat) : "")</label>
     </div>
     <div class="col">
-        @{
-            VATUE? currentVat = CurrentVatUe;
-            <input type="checkbox" class="btn-check visually-hidden" id="vatue"checked="@(currentVat is not null)" @onchange="@ChangeVatUe">
-            <label class="btn btn-outline-secondary toggle-button" for="vatue"><b>VAT UE</b>@(currentVat is not null ? currentVat.ChangedDateTime.ToString("\nyyyy-MM-dd\nHH:mm") : "")</label>
-        }
+        <input type="checkbox" class="btn-check visually-hidden" id="vatue" @bind="@CurrentVatUeExists">
+        <label class="btn btn-outline-secondary toggle-button" for="vatue"><b>VAT UE</b>@(_currentVatUe is not null ? _currentVatUe.ChangedDateTime.ToString(DateFormat) : "")</label>
     </div>
 </div>
 
 @code {
+    private const string DateFormat = "\nyyyy-MM-dd\nHH:mm";
+
+    private JPKV7? _currentJpkV7;
+    private VATUE? _currentVatUe;
+
+    private Client? _lastClientValue = null;
+    private DateOnly? _lastContextDateValue = null;
+
     [Parameter, EditorRequired]
     public Client Client { get; set; } = default!;
     [Parameter, EditorRequired]
     public DateOnly? ContextDate { get; set; }
 
-    private JPKV7? CurrentJpkV7 => ContextDate is null ? null : Client.JPKV7HandledDates.FirstOrDefault(jpk => jpk.ContextDate == ContextDate.Value);
+    private bool CurrentJpkV7Exists
+    {
+        get => _currentJpkV7 is not null;
+        set
+        {
+            if (value)
+            {
+                if (_currentJpkV7 is not null)
+                    _currentJpkV7.ChangedDateTime = DateTime.Now;
+                else
+                {
+                    _currentJpkV7 = new()
+                        {
+                            ContextDate = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1),
+                            ChangedDateTime = DateTime.Now,
+                            Client = Client
+                        };
+                    Client.JPKV7HandledDates.Add(_currentJpkV7);
+                }
+            }
+            else if (_currentJpkV7 is not null)
+            {
+                Client.JPKV7HandledDates.Remove(_currentJpkV7);
+                _currentJpkV7 = null;
 
-    private VATUE? CurrentVatUe => ContextDate is null ? null : Client.VATUEHandledDates.FirstOrDefault(vat => vat.ContextDate == ContextDate.Value);
+            }
+
+            _ = UpdateClient();
+        }
+    }
+
+    private bool CurrentVatUeExists
+    {
+        get => _currentVatUe is not null;
+        set
+        {
+            if (value)
+            {
+                if (_currentVatUe is not null)
+                    _currentVatUe.ChangedDateTime = DateTime.Now;
+                else
+                {
+                    _currentVatUe = new()
+                        {
+                            ContextDate = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1),
+                            ChangedDateTime = DateTime.Now,
+                            Client = Client
+                        };
+                    Client.VATUEHandledDates.Add(_currentVatUe);
+                }
+            }
+            else if (_currentVatUe is not null)
+            {
+                Client.VATUEHandledDates.Remove(_currentVatUe);
+                _currentVatUe = null;
+
+            }
+            
+            _ = UpdateClient();
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            UpdateContextBoundDates();
+    }
+
+    protected override void OnParametersSet()
+    {
+        bool changed = false;
+        if (_lastClientValue != Client)
+        {
+            _lastClientValue = Client;
+            changed = true;
+        }
+        if (_lastContextDateValue != ContextDate)
+        {
+            _lastContextDateValue = ContextDate;
+            changed = true;
+        }
+
+        if (changed)
+            UpdateContextBoundDates();
+    }
 
     private Task UpdateClient() => ClientsService.UpdateAsync(Client);
 
@@ -65,51 +149,9 @@
         await UpdateClient();
     }
 
-    private async Task ChangeJpkV7(ChangeEventArgs e)
+    private void UpdateContextBoundDates()
     {
-        JPKV7 currentJpkV7 = CurrentJpkV7;
-
-        if ((bool)e.Value!)
-        {
-            if (currentJpkV7 is not null)
-                currentJpkV7.ChangedDateTime = DateTime.Now;
-            else
-            {
-                Client.JPKV7HandledDates.Add(new()
-                    {
-                        ContextDate = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1),
-                        ChangedDateTime = DateTime.Now,
-                        Client = Client
-                    });
-            }
-        }
-        else if (currentJpkV7 is not null)
-            Client.JPKV7HandledDates.Remove(currentJpkV7);
-
-        await UpdateClient();
-    }
-
-    private async Task ChangeVatUe(ChangeEventArgs e)
-    {
-        VATUE currentVatUe = CurrentVatUe;
-
-        if ((bool)e.Value!)
-        {
-            if (currentVatUe is not null)
-                currentVatUe.ChangedDateTime = DateTime.Now;
-            else
-            {
-                Client.VATUEHandledDates.Add(new()
-                    {
-                        ContextDate = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1),
-                        ChangedDateTime = DateTime.Now,
-                        Client = Client
-                    });
-            }
-        }
-        else if (currentVatUe is not null)
-            Client.VATUEHandledDates.Remove(currentVatUe);
-
-        await UpdateClient();
+        _currentJpkV7 = ContextDate.HasValue ? Client.JPKV7HandledDates.FirstOrDefault(i => i.ContextDate == ContextDate) : null;
+        _currentVatUe = ContextDate.HasValue ? Client.VATUEHandledDates.FirstOrDefault(i => i.ContextDate == ContextDate) : null;
     }
 }
