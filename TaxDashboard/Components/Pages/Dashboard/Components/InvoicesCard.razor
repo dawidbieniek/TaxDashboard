@@ -6,22 +6,22 @@
 <ElementRequiringLoad @ref="@_invoiceLoadingRef">
     <ApexChart @ref="_invoiceChartRef" TItem="InvoiceCount" Height="@("236px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _invoiceLoadingRef.HideLoadingIcon())">
         <ApexPointSeries TItem="InvoiceCount"
-                         Name="Sprzedażowe"
-                         Items="_currentYearSellInvoices"
-                         SeriesType="@SeriesType.Bar"
-                         ShowDataLabels
-                         XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
-                         YAggregate="@(e => e.Sum(e => e.Amount))" />
+        Name="Sprzedażowe"
+        Items="_currentYearSellInvoices"
+        SeriesType="@SeriesType.Bar"
+        ShowDataLabels
+        XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
+        YAggregate="@(e => e.Sum(e => e.Amount))" />
         <ApexPointSeries TItem="InvoiceCount"
-                         Name="Kosztowe"
-                         Items="_currentYearCostInvoices"
-                         SeriesType="@SeriesType.Bar"
-                         ShowDataLabels
-                         XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
-                         YAggregate="@(e => e.Sum(e => e.Amount))" />
+        Name="Kosztowe"
+        Items="_currentYearCostInvoices"
+        SeriesType="@SeriesType.Bar"
+        ShowDataLabels
+        XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
+        YAggregate="@(e => e.Sum(e => e.Amount))" />
     </ApexChart>
     <div class="d-flex gap-2">
-        <div >
+        <div>
             <label class="form-label" for="sell">Sprzedażowe</label>
             <InputNumber id="sell" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentSellInvoiceAmount" onclick="this.select();" />
         </div>
@@ -145,7 +145,7 @@
         }
 
         if (changed && _invoiceChartRef is not null)
-            UpdateInvoices();
+            UpdateInvoices(updateCharts: _lastContextDateValue != ContextDate && (_lastContextDateValue is null || ContextDate is null || _lastContextDateValue.Value.Year != ContextDate.Value.Year));
     }
 
     private void UpdateInvoices(bool updateCharts = true, bool updateSellInvoice = true, bool updateCostInvoice = true)
