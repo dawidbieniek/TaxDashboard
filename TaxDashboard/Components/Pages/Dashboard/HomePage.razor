@@ -74,14 +74,14 @@
                         <div class="card-body chart-card">
                             <h5 class="card-title">Miesięczne przychody</h5>
                             <ElementRequiringLoad @ref="@_incomeLoadingRef">
-                                <ApexChart @ref="_incomeChartRef" TItem="Income" Height="@("236px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _incomeLoadingRef.HideLoadingIcon())">
-                                    <ApexPointSeries TItem="Income"
-                                                     Name="Przychody"
-                                                     Items="_currentYearIncomes"
-                                                     SeriesType="@SeriesType.Area"
-                                                     ShowDataLabels
-                                                     XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Date.Month))"
-                                                     YAggregate="@(e => e.Sum(e => e.Amount))" />
+                                <ApexChart @ref="_incomeChartRef" TItem="IncomeData" Height="@("236px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _incomeLoadingRef.HideLoadingIcon())">
+                                    <ApexPointSeries TItem="IncomeData"
+                                    Name="Przychody"
+                                    Items="@_incomesDataSeries"
+                                    SeriesType="@SeriesType.Area"
+                                    ShowDataLabels
+                                    XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Month))"
+                                    YAggregate="@(e => e.Sum(e => e.Amount))" />
                                 </ApexChart>
                                 <label class="form-label" for="income">Przychody w tym miesiącu</label>
                                 <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncomeAmount" onclick="this.select();" />
@@ -107,7 +107,7 @@
                     @* Notes *@
                     <div class="card bg-light h-100 p-3" style="min-height:224px">
                         <h5 class="card-title">Notatki</h5>
-                        <InputTextArea class="form-control h-100" style="resize:none;" @bind-Value="@Client.Notes" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))"/>
+                        <InputTextArea class="form-control h-100" style="resize:none;" @bind-Value="@Client.Notes" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" />
                     </div>
                 </div>
             </div>
@@ -122,13 +122,14 @@
 
     private ElementRequiringLoad _incomeLoadingRef = default!;
 
-    private ApexChart<Income> _incomeChartRef = default!;
+    private ApexChart<IncomeData> _incomeChartRef = default!;
     private Gauge _vatGaugeRef = default!;
     private Gauge? _fiscalGaugeRef;
     private Gauge? _zusGaugeRef;
 
     private Income? _currentMonthIncome;
     private List<Income> _currentYearIncomes = [];
+    private List<IncomeData> _incomesDataSeries = [.. Enumerable.Range(1, 12).Select(month => new IncomeData(month))];
 
     private string CurrentMonthIncomeAmount
     {
@@ -196,7 +197,21 @@
         _currentYearIncomes = GetCurrentYearIncomes(date);
 
         if (updateCharts)
+        {
+            UpdateIncomesDataSeries();
             UpdateIncomeCharts();
+        }
+    }
+
+    private void UpdateIncomesDataSeries()
+    {
+        IEnumerable<Income> clientIncomes = ContextDate.HasValue && Client is not null ? Client.Incomes.Where(i => i.Date.Year == ContextDate.Value.Year) : [];
+
+        foreach (IncomeData data in _incomesDataSeries)
+        {
+            Income? currentIncome = clientIncomes.FirstOrDefault(i => i.Date.Month == data.Month);
+            data.Amount = currentIncome is not null ? currentIncome.Amount : 0;
+        }
     }
 
     private List<Income> GetCurrentYearIncomes(DateOnly? date)
@@ -228,5 +243,11 @@
             tasks.Add(_zusGaugeRef.UpdateChartAsync());
 
         _ = Task.WhenAll(tasks);
+    }
+
+    private class IncomeData(int month)
+    {
+        public int Month { get; set; } = month;
+        public decimal Amount { get; set; } = 0;
     }
 }
