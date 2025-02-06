@@ -1,0 +1,82 @@
+﻿@implements IDisposable
+
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<div class="modal" id="unsavedChangesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Niezapisane zmiany</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @Message
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                <button type="button" class="btn btn-danger" @onclick="@ForceNavigation">Odrzuć zmiany</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private IDisposable? _navigationLockRegistration;
+    private string? _lastNavigationTarget;
+    private bool _ignoreChanges = false;
+    private bool _modalShowing = false;
+
+    [Parameter, EditorRequired]
+    public Func<bool> NavigationBlockCondition { get; set; } = () => true;
+    [Parameter]
+    public string Message { get; set; } = "Zmiany nie zostały zapisane. Opuszczenie strony spowoduje ich utratę!";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _navigationLockRegistration = Navigation.RegisterLocationChangingHandler(OnLocationChanging);
+            await JS.InvokeVoidAsync("addModalHiddenListener", DotNetObjectReference.Create(this), "OnModalHidden", "unsavedChangesModal");
+        }
+    }
+
+    [JSInvokable]
+    public void OnModalHidden() => _modalShowing = false;
+
+    private ValueTask OnLocationChanging(LocationChangingContext context)
+    {
+        if (context.TargetLocation == Navigation.Uri)
+            return ValueTask.CompletedTask;
+
+        if (!_ignoreChanges && NavigationBlockCondition())
+        {
+            _lastNavigationTarget = context.TargetLocation;
+
+            if (!_modalShowing) // Prevents showing multiple modals at once
+            {
+                JS.InvokeVoidAsync("showModal", "unsavedChangesModal");
+                _modalShowing = true;
+            }
+
+            context.PreventNavigation();
+        }
+        else if (_modalShowing)
+            JS.InvokeVoidAsync("hideModal", "unsavedChangesModal");
+
+        return ValueTask.CompletedTask;
+    }
+
+
+    private void ForceNavigation()
+    {
+        if (_lastNavigationTarget is null)
+            return;
+
+        _ignoreChanges = true;
+        Navigation.NavigateTo(_lastNavigationTarget);
+    }
+
+    public void Dispose() => _navigationLockRegistration?.Dispose();
+}

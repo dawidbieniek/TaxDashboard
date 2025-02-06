@@ -1,0 +1,91 @@
+﻿@using TaxDashboard.Components.Popups
+@using TaxDashboard.Util
+
+@inject EmailService EmailService
+
+<h5 class="card-title">Przypomnienia</h5>
+<LoadingContentsComponent Initialized="@(_emailLoginInfo is not null)">
+    <div class="list-group shadow">
+        <div class="list-group-item row">
+            <div class="col">
+                <div class="fw-bold">
+                    Konto
+                    @if (_emailLoginInfo!.LoggedIn)
+                    {
+                        <span class="badge rounded-pill text-bg-success ms-2">Zalogowano - @(_emailLoginInfo.LoginOption.GetDescriptor())</span>
+                    }
+                    else
+                    {
+                        <a href="/email/login" class="badge rounded-pill text-bg-warning text-decoration-none ms-2">Wylogowano</a>
+                    }
+                </div>
+                <div class="text-muted">Konto gmail używane przy wysyłaniu wiadomości</div>
+            </div>
+            <div class="col-auto my-auto d-flex">
+                @if (_emailLoginInfo.LoggedIn)
+                {
+                    <div class="form-control disabled me-2">
+                        @_emailLoginInfo.EmailAddress
+                    </div>
+                    <button class="btn btn-danger" @onclick="LogoutEmailAsync">Wyloguj</button>
+                }
+                else
+                {
+                    <a href="/email/login" class="btn btn-primary">Logowanie</a>
+                }
+            </div>
+        </div>
+        <div class="list-group-item row flex-column">
+            <div class="row m-0 p-0 mb-2">
+                <div class="col">
+                    <div class="fw-bold">Szablon</div>
+                    <div class="text-muted">Treść szablonu używana przy wysyłaniu wiadomości</div>
+                </div>
+                <div class="col-auto my-auto">
+                    <button class="btn btn-primary" @onclick="@ChangeEditState">@(_editingEmailTemplate ? "Zapisz" : "Edytuj")</button>
+                </div>
+            </div>
+            <div class="row m-0 p-0">
+                <div class="col">
+                    <InputTextArea rows="8" readonly="@(!_editingEmailTemplate)" class="@(_editingEmailTemplate ? "form-control bg-light" : "form-control")" style="resize:none;overflow-y:auto;" @bind-Value="@_emailTemplate" />
+                </div>
+            </div>
+        </div>
+    </div>
+</LoadingContentsComponent>
+<!-- Modal -->
+<PreventNavigationModal NavigationBlockCondition="@(() => _editingEmailTemplate)"/>
+
+@code {
+    private bool _editingEmailTemplate = false;
+    private string _emailTemplate { get; set; } = string.Empty;
+    private EmailLoginInfo? _emailLoginInfo;
+
+    [Parameter]
+    public EventCallback<bool> OnTempateEditChanged { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _emailTemplate = Preferences.Get(GlobalSettings.PreferencesStorage.EmailTemplateKey, string.Empty);
+        await UpdateLoginDataAsync();
+    }
+
+    private void ChangeEditState()
+    {
+        if (_editingEmailTemplate)
+            Preferences.Set(GlobalSettings.PreferencesStorage.EmailTemplateKey, _emailTemplate);
+
+        _editingEmailTemplate = !_editingEmailTemplate;
+        OnTempateEditChanged.InvokeAsync(_editingEmailTemplate);
+    }
+
+    private async Task LogoutEmailAsync()
+    {
+        await EmailService.ClearAllLoginDataAsync();
+        await UpdateLoginDataAsync();
+    }
+
+    private async Task UpdateLoginDataAsync() => _emailLoginInfo = await EmailService.GetCurrentLoginInfoAsync();
+
+
+}

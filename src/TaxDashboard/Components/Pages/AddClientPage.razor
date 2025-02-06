@@ -1,0 +1,141 @@
+﻿@page "/add"
+
+@using TaxDashboard.Components.FormInputs
+@using TaxDashboard.Components.Popups
+
+@inject ClientsService ClientsService
+@inject BanksService BanksService
+
+<EditForm EditContext="@_newClientDataEditContext" class="container pt-3" style="max-width:800px;" OnValidSubmit="CreateNewClient" onkeypress="if(event.keyCode==13){document.activeElement.blur();return false;}">
+    <DataAnnotationsValidator />
+    <div class="row">
+        <div class="col">
+            <div class="card bg-light">
+                <div class="card-body p-4">
+                    <h5 class="card-title w-100 text-center mb-2">Dodaj nowego klienta</h5>
+                    <hr class="mb-4"/>
+                    <div class="row mb-2">
+                        <div class="col-4">
+                            <label class="form-label" for="name">Imię</label>
+                        </div>
+                        <div class="col-8">
+                            <InputText id="name" class="form-control" @bind-Value="_newClientData.Name" onclick="this.select();" />
+                            <ValidationMessage For="@(()=> _newClientData.Name)" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-4">
+                            <label class="form-label" for="surname">Nazwisko</label>
+                        </div>
+                        <div class="col-8">
+                            <InputText id="surname" class="form-control" @bind-Value="_newClientData.Surname" onclick="this.select();" />
+                            <ValidationMessage For="@(()=> _newClientData.Surname)" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-4">
+                            <label class="form-label" for="phone">Telefon</label>
+                        </div>
+                        <div class="col-8">
+                            <InputText id="phone" class="form-control" type="tel" @bind-Value="_newClientData.PhoneNumber" onclick="this.select();" />
+                            <ValidationMessage For="@(()=> _newClientData.PhoneNumber)" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-4">
+                            <label class="form-label" for="email">Email</label>
+                        </div>
+                        <div class="col-8">
+                            <InputText id="email" class="form-control" type="email" @bind-Value="_newClientData.Email" onclick="this.select();" />
+                            <ValidationMessage For="@(()=> _newClientData.Email)" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-4">
+                            <label class="form-label" for="date">Data założenia</label>
+                        </div>
+                        <div class="col-8">
+                            <InputDate id="date" class="form-control" @bind-Value="_newClientData.JoinDateTime" />
+                            <ValidationMessage For="@(()=> _newClientData.JoinDateTime)" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-4">
+                            <label class="form-label" for="nip">NIP</label>
+                        </div>
+                        <div class="col-8">
+                            <InputText id="nip" class="form-control" @bind-Value="_newClientData.NIP" onclick="this.select();" />
+                            <ValidationMessage For="@(()=> _newClientData.NIP)" />
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-4">
+                            <label class="form-label" for="bank">Bank</label>
+                        </div>
+                        <div class="col-8">
+                            <InputClassSelect id="bank" class="form-select" @bind-Value="@_newClientData.Bank" Options="@_allBanks" Selector="v => v.Name" />
+                            <ValidationMessage For="@(()=> _newClientData.Bank)" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col d-flex">
+                            <div class="flex-grow-1" />
+                            <button class="btn btn-primary" style="width:8rem;" type="submit">Dodaj</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+<Toast @ref="@_toastRef" Title="Dodano klienta">
+    Pomyślnie dodano klienta o imieniu "<b>@_toastClientName</b>"
+</Toast>
+
+@code {
+    private NewClientData _newClientData = default!;
+    private IEnumerable<Bank> _allBanks = [];
+
+    private EditContext _newClientDataEditContext = default!;
+
+    private Toast _toastRef = default!;
+    private string _toastClientName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _allBanks = await BanksService.GetAllAsync();
+
+        CreateNewClientData();
+    }
+
+    private void CreateNewClientData()
+    {
+        _newClientData = new()
+            {
+                Bank = _allBanks.First(),
+                JoinDateTime = DateTime.Today,
+            };
+        _newClientDataEditContext = new(_newClientData);
+    }
+
+    private async Task CreateNewClient()
+    {
+        Client newClient = new()
+            {
+                Name = _newClientData.Name,
+                Surname = _newClientData.Surname,
+                PhoneNumber = _newClientData.PhoneNumber,
+                Email = _newClientData.Email,
+                JoinDateTime = _newClientData.JoinDateTime,
+                NIP = _newClientData.NIP,
+                Bank = _newClientData.Bank,
+            };
+
+        await ClientsService.UpdateWithRelatedEntitiesAsync(newClient);
+
+        _toastClientName = newClient.FullName;
+        await _toastRef.ShowAsync();
+
+        CreateNewClientData();
+    }
+}

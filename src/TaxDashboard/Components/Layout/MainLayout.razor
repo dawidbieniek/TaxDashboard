@@ -1,0 +1,100 @@
+﻿@inherits LayoutComponentBase
+@implements IAsyncDisposable
+
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<aside class="aside border-end border-2 border-black">
+    <nav class="navbar navbar-vertical align-items-stretch">
+        <div class="container">
+            <span class="navbar-brand m-0 mb-2 fw-bold fs-4 p-0">TaxDashboard</span>
+            <nav class="navbar-nav nav-pills">
+                <div class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" data-bs-target="#dashboards">
+                        <i class="bi-speedometer2"></i>
+                        Dashboard
+                    </a>
+                    <div id="dashboards" class="collapse show">
+                        <nav class="nav-pills">
+                            <a id="@(NavItemsIds[""])" class="nav-link" href="/">Rozliczenia</a>
+                            <a id="@(NavItemsIds["data"])" class="nav-link" href="/data">Dane</a>
+                        </nav>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a id="@(NavItemsIds["list"])" class="nav-link" href="/list">
+                        <i class="bi-list"></i>
+                        Lista klientów
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a id="@(NavItemsIds["add"])" class="nav-link" href="/add">
+                        <i class="bi-plus-circle"></i>
+                        Dodaj klienta
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a id="@(NavItemsIds["settings"])" class="nav-link" href="/settings">
+                        <i class="bi-gear-fill"></i>
+                        Ustawienia
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </nav>
+</aside>
+
+<content>
+    @Body
+</content>
+
+@code {
+    private static readonly Dictionary<string, string> NavItemsIds = new()
+        {
+            [""] = "homeLink",
+            ["data"] = "dataLink",
+            ["list"] = "listLink",
+            ["add"] = "addLink",
+            ["settings"] = "settingsLink",
+        };
+
+    private IJSObjectReference _JSModule = default!;
+    private IDisposable? _navigationLockRegistration;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _JSModule = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Layout/MainLayout.razor.js");
+            Navigation.LocationChanged += OnLocationChanged;
+
+            SetActiveNavLinkToCurrentUrl(Navigation.Uri);
+        }
+
+        base.OnAfterRender(firstRender);
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e) => SetActiveNavLinkToCurrentUrl(e.Location);
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if(_JSModule is not null)
+        {
+            try
+            {
+                Navigation.LocationChanged -= OnLocationChanged;
+                _navigationLockRegistration?.Dispose();
+                await _JSModule.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {}
+        }
+    }
+
+    private void SetActiveNavLinkToCurrentUrl(string currentLocation)
+    {
+
+        string? navLinkId = NavItemsIds.GetValueOrDefault(Navigation.ToBaseRelativePath(currentLocation));
+        _JSModule.InvokeVoidAsync("setActiveNavLink", navLinkId);
+    }
+}

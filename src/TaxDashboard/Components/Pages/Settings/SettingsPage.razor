@@ -1,0 +1,30 @@
+﻿@page "/settings"
+
+@using TaxDashboard.Components.Pages.Settings.Components
+@using TaxDashboard.Components.Popups
+
+<div class="container-md pt-3" style="max-width:1000px;">
+    <div class="row">
+        <div class="col-12 col-lg-12">
+            @* Backups *@
+            <div class="card bg-light mb-4 shadow">
+                <div class="card-body">
+                    <BackupSettings @ref="_backupSettings"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-12">
+            @* Mail *@
+            <div class="card bg-light mb-4">
+                <div class="card-body">
+                    <EmailSettings/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private BackupSettings _backupSettings = default!;
+    private EmailSettings _emailSettings = default!;
+}

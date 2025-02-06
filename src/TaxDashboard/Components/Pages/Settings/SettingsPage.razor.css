@@ -1,0 +1,19 @@
+﻿::deep .list-group-item {
+    display: flex;
+    flex-wrap: nowrap;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+    ::deep .list-group-item div {
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    ::deep .list-group-item .col {
+        padding: 0;
+    }
+
+    ::deep .list-group-item .col-auto {
+        padding: 0;
+    }

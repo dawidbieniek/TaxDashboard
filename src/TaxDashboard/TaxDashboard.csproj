@@ -1,0 +1,76 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFrameworks>net9.0-windows10.0.19041.0</TargetFrameworks>
+        
+        <OutputType>Exe</OutputType>
+        <RootNamespace>TaxDashboard</RootNamespace>
+        <UseMaui>true</UseMaui>
+        <SingleProject>true</SingleProject>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <EnableDefaultCssItems>false</EnableDefaultCssItems>
+        <Nullable>enable</Nullable>
+        <NuGetAudit>False</NuGetAudit>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <!-- Display name -->
+        <ApplicationTitle>TaxDashboard</ApplicationTitle>
+
+        <!-- App Identifier -->
+        <ApplicationId>db.myapps.taxdashboard</ApplicationId>
+
+        <!-- Versions -->
+        <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+        <ApplicationVersion>1</ApplicationVersion>
+
+        <!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
+        <WindowsPackageType>None</WindowsPackageType>
+
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+        <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+        <UserSecretsId>82fea89f-fbe5-4e78-8a32-00c63fe2ff7d</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- App Icon -->
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+
+        <!-- Splash Screen -->
+        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+        <!-- Images -->
+        <MauiImage Include="Resources\Images\*" />
+
+        <!-- Custom Fonts -->
+        <MauiFont Include="Resources\Fonts\*" />
+
+        <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="appsettings.json">
+            <LogicalName>appsettings.json</LogicalName>
+            <BuildAction>EmbeddedResource</BuildAction>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Blazor-ApexCharts" Version="5.0.1" />
+        <PackageReference Include="CommunityToolkit.Maui" Version="9.1.1" />
+        <PackageReference Include="Google.Apis.Auth" Version="1.69.0" />
+        <PackageReference Include="MailKit" Version="4.10.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.1" />
+        <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\TaxDashboard.Data\TaxDashboard.Data.csproj" />
+      <ProjectReference Include="..\BlazorTable\src\BlazorTable\BlazorTable.csproj" />
+      <ProjectReference Include="..\LifeManagers.Data\src\LifeManagers.Data.csproj" />
+    </ItemGroup>
+</Project>

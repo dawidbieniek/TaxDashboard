@@ -1,0 +1,156 @@
+﻿@inject ClientsService ClientsService
+
+<div class="card-body row row-cols-2 row-cols-md-3 row-cols-lg-2 row-cols-xl-3 row-cols-xxl-4 gy-3">
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="vatR" @bind="@Client.VATRHandled" @bind:after="@UpdateClient">
+        <label class="btn btn-outline-secondary toggle-button" for="vatR"><b>VAT-R</b></label>
+    </div>
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="ceidg1" @bind="@Client.CEIDG1Handled" @bind:after="@UpdateClient">
+        <label class="btn btn-outline-secondary toggle-button" for="ceidg1"><b>CEIDG-1</b></label>
+    </div>
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="zus" @bind="@Client.ZUSHandled" @bind:after="@UpdateClient">
+        <label class="btn btn-outline-secondary toggle-button" for="zus"><b>ZUS</b></label>
+    </div>
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="invoiced" @bind="@Client.Invoiced" @bind:after="@UpdateClient">
+        <label class="btn btn-outline-secondary toggle-button" for="invoiced"><b>Zafakturowany</b></label>
+    </div>
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="zusDra" checked="@(Client.ZUSDraHandledDate is not null)" @onchange="@ChangeZusDra">
+        <label class="btn btn-outline-secondary toggle-button" for="zusDra"><b>ZUS DRA</b>@(Client.ZUSDraHandledDate is not null ? Client.ZUSDraHandledDate.Value.ToString(DateFormat) : "")</label>
+    </div>
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="tax" checked="@(Client.TaxHandledDate is not null)" @onchange="@ChangeTax">
+        <label class="btn btn-outline-secondary toggle-button" for="tax"><b>Podatek</b>@(Client.TaxHandledDate is not null ? Client.TaxHandledDate.Value.ToString(DateFormat) : "")</label>
+    </div>
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="jpkv7" @bind="@CurrentJpkV7Exists">
+        <label class="btn btn-outline-secondary toggle-button" for="jpkv7"><b>JPK V7</b>@(_currentJpkV7 is not null ? _currentJpkV7.ChangedDateTime.ToString(DateFormat) : "")</label>
+    </div>
+    <div class="col">
+        <input type="checkbox" class="btn-check visually-hidden" id="vatue" @bind="@CurrentVatUeExists">
+        <label class="btn btn-outline-secondary toggle-button" for="vatue"><b>VAT UE</b>@(_currentVatUe is not null ? _currentVatUe.ChangedDateTime.ToString(DateFormat) : "")</label>
+    </div>
+</div>
+
+@code {
+    private const string DateFormat = "\nyyyy-MM-dd\nHH:mm";
+
+    private JPKV7? _currentJpkV7;
+    private VATUE? _currentVatUe;
+
+    private Client? _lastClientValue = null;
+    private DateOnly? _lastContextDateValue = null;
+
+    [Parameter, EditorRequired]
+    public Client Client { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public DateOnly? ContextDate { get; set; }
+
+    private bool CurrentJpkV7Exists
+    {
+        get => _currentJpkV7 is not null;
+        set
+        {
+            if (value)
+            {
+                if (_currentJpkV7 is not null)
+                    _currentJpkV7.ChangedDateTime = DateTime.Now;
+                else
+                {
+                    _currentJpkV7 = new()
+                        {
+                            ContextDate = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1),
+                            ChangedDateTime = DateTime.Now,
+                            Client = Client
+                        };
+                    Client.JPKV7HandledDates.Add(_currentJpkV7);
+                }
+            }
+            else if (_currentJpkV7 is not null)
+            {
+                Client.JPKV7HandledDates.Remove(_currentJpkV7);
+                _currentJpkV7 = null;
+
+            }
+
+            _ = UpdateClient();
+        }
+    }
+
+    private bool CurrentVatUeExists
+    {
+        get => _currentVatUe is not null;
+        set
+        {
+            if (value)
+            {
+                if (_currentVatUe is not null)
+                    _currentVatUe.ChangedDateTime = DateTime.Now;
+                else
+                {
+                    _currentVatUe = new()
+                        {
+                            ContextDate = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1),
+                            ChangedDateTime = DateTime.Now,
+                            Client = Client
+                        };
+                    Client.VATUEHandledDates.Add(_currentVatUe);
+                }
+            }
+            else if (_currentVatUe is not null)
+            {
+                Client.VATUEHandledDates.Remove(_currentVatUe);
+                _currentVatUe = null;
+            }
+
+            _ = UpdateClient();
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            UpdateContextBoundDates();
+    }
+
+    protected override void OnParametersSet()
+    {
+        bool changed = false;
+        if (_lastClientValue != Client)
+        {
+            _lastClientValue = Client;
+            changed = true;
+        }
+        if (_lastContextDateValue != ContextDate)
+        {
+            _lastContextDateValue = ContextDate;
+            changed = true;
+        }
+
+        if (changed)
+            UpdateContextBoundDates();
+    }
+
+    private Task UpdateClient() => ClientsService.UpdateWithRelatedEntitiesAsync(Client);
+
+    private async Task ChangeZusDra(ChangeEventArgs e)
+    {
+        Client.ZUSDraHandledDate = (bool)e.Value! ? DateTime.Now : null;
+        await UpdateClient();
+    }
+
+    private async Task ChangeTax(ChangeEventArgs e)
+    {
+        Client.TaxHandledDate = (bool)e.Value! ? DateTime.Now : null;
+        await UpdateClient();
+    }
+
+    private void UpdateContextBoundDates()
+    {
+        _currentJpkV7 = ContextDate.HasValue ? Client.JPKV7HandledDates.FirstOrDefault(i => i.ContextDate == ContextDate) : null;
+        _currentVatUe = ContextDate.HasValue ? Client.VATUEHandledDates.FirstOrDefault(i => i.ContextDate == ContextDate) : null;
+    }
+}

@@ -1,0 +1,107 @@
+﻿@page "/email/login"
+
+@using System.ComponentModel.DataAnnotations
+@using TaxDashboard.Components.Popups
+@using TaxDashboard.Services.Emails
+
+@inject EmailService EmailService
+@inject NavigationManager Navigation
+
+<div class="container pt-3" style="max-width:400px;">
+    <div class="row">
+        <div class="col">
+            <div class="card bg-light">
+                <div class="card-body p-4">
+                    <h5 class="card-title w-100 text-center mb-2">Logowanie na konto Gmail</h5>
+                    <hr class="mb-4" />
+                    <button class="btn btn-primary w-100" @onclick="@LoginUsingOAuthAsync"><span class="bi-google me-3" />Zaloguj z Google</button>
+                    <div class="h6 text-uppercase w-100 text-center my-3">Albo</div>
+                    <EditForm EditContext="@_loginDetailsEditContext" OnValidSubmit="LoginUsingPasswordAsync" onkeypress="if(event.keyCode==13){document.activeElement.blur();return false;}">
+                        <DataAnnotationsValidator />
+                        <div class="row mb-2">
+                            <div class="col">
+                                <div class="input-group">
+                                    <span class="bi-person input-group-text" />
+                                    <InputText class="form-control" @bind-Value="@_loginDetails.Email" placeholder="Adres email" onclick="this.select();" />
+                                </div>
+                                <ValidationMessage For="@(() => _loginDetails.Email)" />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col">
+                                <div class="input-group">
+                                    <span class="bi-key input-group-text" />
+                                    <InputText type="password" class="form-control" @bind-Value="@_loginDetails.Password" placeholder="Hasło" onclick="this.select();" />
+                                    <span class="bi-question-lg input-group-text" />
+                                </div>
+                                <ValidationMessage For="@(() => _loginDetails.Password)" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <button class="btn btn-primary w-100" type="submit">Zaloguj</button>
+                            </div>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<Toast @ref="@_toastRef" Title="Logowanie">
+    @_toastMessage
+</Toast>
+
+
+@code {
+    private Toast _toastRef = default!;
+    private string _toastMessage = string.Empty;
+
+    private LoginDetails _loginDetails = new LoginDetails();
+    private EditContext _loginDetailsEditContext;
+
+    public EmailLoginPage()
+    {
+        _loginDetailsEditContext = new(_loginDetails);
+    }
+
+    private async Task LoginUsingPasswordAsync()
+    {
+        LoginResult result = await EmailService.LoginUsingPasswordAsync(_loginDetails.Email, _loginDetails.Password);
+        if (result.IsSuccessful)
+        {
+            Navigation.NavigateTo("/settings");
+            return;
+        }
+
+        _toastMessage = result.Message;
+        _loginDetails.Password = string.Empty;
+        _loginDetailsEditContext = new(_loginDetails);
+
+        await _toastRef.ShowAsync();
+    }
+
+    private async Task LoginUsingOAuthAsync()
+    {
+        LoginResult result = await EmailService.LoginUsingOAuthAsync();
+
+        if (result.IsSuccessful)
+        {
+            Navigation.NavigateTo("/settings");
+            return;
+        }
+
+        _toastMessage = result.Message;
+        await _toastRef.ShowAsync();
+
+    }
+
+    private class LoginDetails
+    {
+        [Required(ErrorMessage = "Podaj adres email")]
+        [EmailAddress(ErrorMessage = "Wprowadzona wartość nie jest adresem email")]
+        public string Email { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Podaj hasło")]
+        public string Password { get; set; } = string.Empty;
+    }
+}

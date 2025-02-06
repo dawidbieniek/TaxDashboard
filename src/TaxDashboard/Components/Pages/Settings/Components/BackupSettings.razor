@@ -1,0 +1,80 @@
+﻿@using TaxDashboard.Components.Popups
+@using TaxDashboard.Util
+
+@inject BackupService BackupService
+
+<h5 class="card-title">Kopia zapasowa</h5>
+<div class="list-group shadow">
+    <div class="list-group-item row">
+        <div class="col">
+            <div class="fw-bold">Ostatni zapis<span class="badge rounded-pill text-bg-secondary ms-2">Co @_backupPeriodString</span></div>
+            <div class="text-muted">Data i godzina ostatniej automatycznej kopii zapasowej</div>
+        </div>
+        <div class="col-auto my-auto">
+            <div class="form-control disabled">@_lastBackupDateTimeString</div>
+        </div>
+    </div>
+    <div class="list-group-item row">
+        <div class="col">
+            <div class="fw-bold">Lokalizacja</div>
+            <div class="text-muted">Miejsce zapisu danych</div>
+        </div>
+        <div class="col-auto my-auto">
+            <div class="form-control disabled">
+                @FileSystem.Current.AppDataDirectory
+            </div>
+        </div>
+    </div>
+    <div class="list-group-item row">
+        <div class="col">
+            <div class="fw-bold">Zarządzaj</div>
+            <div class="text-muted">Twórz i przywracaj kopie zapasowe</div>
+        </div>
+        <div class="col-auto my-auto">
+            <button class="btn btn-primary me-2" @onclick="@CreateBackup">Stwórz kopię</button>
+            <button class="btn btn-primary" @onclick="ApplyBackup">Przywróć dane</button>
+        </div>
+    </div>
+</div>
+<!-- Toast -->
+<Toast @ref="@_toastRef" Id="backupToast" Title="Kopia zapasowa">
+    @_toastMessage
+</Toast>
+
+@code {
+    private string _lastBackupDateTimeString = string.Empty;
+    private string _backupPeriodString = string.Empty;
+
+    private Toast _toastRef = default!;
+    private string _toastMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _lastBackupDateTimeString = (await BackupService.GetLastBackupTimeAsync())?.ToString("g") ?? "Wyłączono";
+
+        TimeSpan? backupPeriod = BackupService.GetBackupPeriod();
+        _backupPeriodString = backupPeriod.HasValue ? backupPeriod.Value.ToHumanReadableString() : "N/A";
+    }
+
+    private async Task CreateBackup()
+    {
+        BackupResult result = await BackupService.MakeBackupAsync();
+        if (result.IsSuccessful)
+            _toastMessage = "Pomyślnie utworzono kopię zapasową";
+        else
+            _toastMessage = result.Message;
+
+        await _toastRef.ShowAsync();
+    }
+
+    private async Task ApplyBackup()
+    {
+        BackupResult result = await BackupService.LoadBackupFromFileAsyc();
+        if (result.IsSuccessful)
+            _toastMessage = "Pomyślnie przywrócono kopię zapasową";
+        else
+            _toastMessage = result.Message;
+
+        await _toastRef.ShowAsync();
+    }
+}
