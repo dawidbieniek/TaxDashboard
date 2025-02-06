@@ -5,7 +5,7 @@
         <ApexChart @ref="@_chartRef" TItem="GaugeValue" OnBeforeMount="@(() => _loadingRef.HideLoadingIcon())">
             <ApexPointSeries TItem="GaugeValue"
                              SeriesType=SeriesType.RadialBar
-                             Items=@([new GaugeValue {Percentage = Math.Min(Value / ValueLimit * 100, 100), Label = Label}])
+                             Items=@([new GaugeValue {Percentage = Math.Round(Math.Min(Value / ValueLimit * 100, 100)), Label = Label}])
                              Name="@Label"
                              XValue="@(e => e.Label)"
                              YValue="@(e => e.Percentage)" />

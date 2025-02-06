@@ -28,7 +28,7 @@
                             <div class="card bg-light mb-4">
                                 <div class="card-body gauge-card">
                                     <div style="height:25px" />
-                                    <Gauge @ref="@_vatGaugeRef" Label="Limit do VAT" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@VatGaugeLimit" />
+                                    <Gauge @ref="@_vatGaugeRef" Label="Limit do VAT" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@_vatGaugeLimit" />
                                 </div>
                             </div>
                         </div>
@@ -42,7 +42,11 @@
                                     </div>
                                     @if (Client.UseCashRegister)
                                     {
-                                        <Gauge @ref="@_fiscalGaugeRef" Label="Kasy fiskalne" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@FiscalGaugeLimit" />
+                                        decimal value = Client.FirstCashRegisterUseDate.Year == DateTime.Today.Year
+                                        ? _currentYearIncomes.Where(i => i.Date.Month >= Client.FirstCashRegisterUseDate.Month).Sum(i => i.Amount)
+                                        : _currentYearIncomes.Sum(i => i.Amount);
+
+                                        <Gauge @ref="@_fiscalGaugeRef" Label="Kasy fiskalne" Value="@value" ValueLimit="@FiscalGaugeLimit" />
                                     }
                                     else
                                     {
@@ -117,9 +121,11 @@
 </LoadingContentsComponent>
 
 @code {
-    private const decimal VatGaugeLimit = 100_000;
+    private const decimal BaseVatGaugeLimit = 200_000;
     private const decimal FiscalGaugeLimit = 20_000;
-    private const decimal ZusGaugeLimit = 50_000;
+    private const decimal ZusGaugeLimit = 120_000;
+
+    private decimal _vatGaugeLimit = BaseVatGaugeLimit;
 
     private ElementRequiringLoad _incomeLoadingRef = default!;
 
@@ -172,7 +178,22 @@
         }
     }
 
-    protected override void OnAfterRequiredInitialized() => UpdateIncomes(ContextDate, false);
+    protected override void OnAfterRequiredInitialized()
+    {
+        if (Client is not null)
+        {
+            if (Client.JoinDateTime.Year == DateTime.Today.Year)
+            {
+                TimeSpan timeUntilEndOfYear = new DateTime(Client.JoinDateTime.Year, 12, 31) - Client.JoinDateTime;
+                int numberOfDaysUntilEndOfYear = Math.Max((int)timeUntilEndOfYear.TotalDays, 1);
+                int numberOfDaysInYear = new System.Globalization.GregorianCalendar().GetDaysInYear(Client.JoinDateTime.Year);
+                _vatGaugeLimit = Math.Round(BaseVatGaugeLimit * numberOfDaysUntilEndOfYear / numberOfDaysInYear, 2);
+            }
+        }
+        UpdateIncomes(ContextDate, false);
+    }
+
+
 
     protected override async Task ChangeDateContext(DateOnly date)
     {
