@@ -29,3 +29,10 @@ function enableTooltips() {
         new bootstrap.Tooltip(t);
     });
 }
+
+function enablePopovers() {
+    const tooltips = document.querySelectorAll('[data-bs-toggle="popover"]');
+    tooltips.forEach(t => {
+        new bootstrap.Popover(t);
+    });
+}

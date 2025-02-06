@@ -6,6 +6,7 @@
 
 @inject EmailService EmailService
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <div class="container pt-3" style="max-width:400px;">
     <div class="row">
@@ -32,7 +33,7 @@
                                 <div class="input-group">
                                     <span class="bi-key input-group-text" />
                                     <InputText type="password" class="form-control" @bind-Value="@_loginDetails.Password" placeholder="Hasło" onclick="this.select();" />
-                                    <span class="bi-question-lg input-group-text" />
+                                    <span class="bi-question-lg input-group-text" data-bs-toggle="popover" data-bs-title="Hasło aplikacji" data-bs-html="true" data-bs-content="Chodzi o hasło aplikacji, a nie hasło do konta Gmail. <a href='https://support.google.com/accounts/answer/185833?hl=en#app-passwords'>Więcej informacji</a>" />
                                 </div>
                                 <ValidationMessage For="@(() => _loginDetails.Password)" />
                             </div>
@@ -63,6 +64,12 @@
     public EmailLoginPage()
     {
         _loginDetailsEditContext = new(_loginDetails);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JS.InvokeVoidAsync("enablePopovers");
     }
 
     private async Task LoginUsingPasswordAsync()
