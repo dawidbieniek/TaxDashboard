@@ -121,14 +121,7 @@
                             </div>
                             <div class="col mb-2">
                                 <label class="form-label" for="vatType">Sposób opłacania VAT</label>
-                                @if (Client.VAT)
-                                {
-                                    <InputClassSelect id="vatType" class="form-select" @bind-Value="@Client.VATPaymentType" Options="@(Enum.GetValues<PaymentType>())" Selector="v => v.GetDescriptor()" />
-                                }
-                                else
-                                {
-                                    <InputClassSelect disabled id="vatType" class="form-select" @bind-Value="@Client.VATPaymentType" Options="@(Enum.GetValues<PaymentType>())" Selector="v => v.GetDescriptor()" />
-                                }
+                                <InputClassSelect disabled="@(!Client.VAT)" id="vatType" class="form-select" @bind-Value="@Client.VATPaymentType" Options="@(Enum.GetValues<PaymentType>())" Selector="v => v.GetDescriptor()" />
                                 <ValidationMessage For="@(()=> Client.VATPaymentType)" />
                             </div>
                         </div>
@@ -146,14 +139,35 @@
                                 <ValidationMessage For="@(()=> Client.TaxType)" />
                             </div>
                             <div class="col mb-2">
+                                <label class="form-label" for="pit">Sposób rozliczania PIT</label>
+                                <InputClassSelect id="pit" class="form-select" @bind-Value="@Client.PITPaymentType" Options="@(Enum.GetValues<PaymentType>())" Selector="v => v.GetDescriptor()" />
+                                <ValidationMessage For="@(()=> Client.PITPaymentType)" />
+                            </div>
+                        </div>
+                    </div>
+                    @* Reduction settings *@
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Ulgi</h5>
+                            <p class="text-body-secondary mb-2">Dane ulg klienta</p>
+                            <div class="col mb-2">
                                 <label class="form-label" for="reductionType">Ulga</label>
                                 <InputClassSelect id="reductionType" class="form-select" @bind-Value="@Client.ReductionType" Options="@(Enum.GetValues<ReductionType>())" Selector="v => v.GetDescriptor()" />
                                 <ValidationMessage For="@(()=> Client.ReductionType)" />
                             </div>
                             <div class="col mb-2">
-                                <label class="form-label" for="pit">Sposób rozliczania PIT</label>
-                                <InputClassSelect id="pit" class="form-select" @bind-Value="@Client.PITPaymentType" Options="@(Enum.GetValues<PaymentType>())" Selector="v => v.GetDescriptor()" />
-                                <ValidationMessage For="@(()=> Client.PITPaymentType)" />
+                                <label class="form-label" for="reductionDate">Data przejścia</label>
+                                <InputDate id="reductionDate" class="form-control" @bind-Value="Client.JoinDateTime" />
+                                <ValidationMessage For="@(()=> Client.JoinDateTime)" />
+                            </div>
+                            <div class="col mb-2 form-check form-switch">
+                                <label class="form-check-label" for="fiscal">Kasy fiskalne</label>
+                                <InputCheckbox id="fiscal" class="form-check-input" type="checkbox" @bind-Value="Client.VAT" />
+                            </div>
+                            <div class="col mb-2">
+                                <label class="form-label" for="vatType">Pierwsza transakcja</label>
+                                <InputClassSelect disabled="@(!Client.VAT)" id="vatType" class="form-select" @bind-Value="@Client.VATPaymentType" Options="@(Enum.GetValues<PaymentType>())" Selector="v => v.GetDescriptor()" />
+                                <ValidationMessage For="@(()=> Client.VATPaymentType)" />
                             </div>
                         </div>
                     </div>

@@ -22,3 +22,10 @@ function addModalHiddenListener(dotnetRef, callbackName, modalId) {
         dotnetRef.invokeMethodAsync(callbackName);
     });
 }
+
+function enableTooltips() {
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(t => {
+        new bootstrap.Tooltip(t);
+    });
+}

@@ -86,7 +86,9 @@
         </div>
     </div>
 </div>
+<div class="tt" style="width:200px; height:200px; background-color:red" data-bs-placement="bottom" data-bs-title="Tooltip" data-bs-toggle="tooltip">
 
+</div>
 @code
 {
     private List<Client> _allClients = [];
@@ -105,6 +107,7 @@
         {
             _navigationLockRegistration = Navigation.RegisterLocationChangingHandler(OnLocationChanging);
 
+            await JS.InvokeVoidAsync("enableTooltips");
             await JS.InvokeVoidAsync("addModalHiddenListener", DotNetObjectReference.Create(this), "OnModalHidden", "deletingClientModal");
         }
     }
