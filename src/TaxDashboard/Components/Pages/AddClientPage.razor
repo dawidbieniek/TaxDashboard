@@ -19,7 +19,7 @@
                             <label class="form-label" for="name">Imię</label>
                         </div>
                         <div class="col-8">
-                            <InputText id="name" class="form-control" @bind-Value="_newClientData.Name" onclick="this.select();" />
+                            <InputText id="name" class="form-control" @bind-Value="_newClientData.Name" onclick="this.select();" required/>
                             <ValidationMessage For="@(()=> _newClientData.Name)" />
                         </div>
                     </div>
@@ -28,7 +28,7 @@
                             <label class="form-label" for="surname">Nazwisko</label>
                         </div>
                         <div class="col-8">
-                            <InputText id="surname" class="form-control" @bind-Value="_newClientData.Surname" onclick="this.select();" />
+                            <InputText id="surname" class="form-control" @bind-Value="_newClientData.Surname" onclick="this.select();" required/>
                             <ValidationMessage For="@(()=> _newClientData.Surname)" />
                         </div>
                     </div>
@@ -55,7 +55,7 @@
                             <label class="form-label" for="date">Data założenia</label>
                         </div>
                         <div class="col-8">
-                            <InputDate id="date" class="form-control" @bind-Value="_newClientData.JoinDateTime" />
+                            <InputDate id="date" class="form-control" @bind-Value="_newClientData.JoinDateTime" required/>
                             <ValidationMessage For="@(()=> _newClientData.JoinDateTime)" />
                         </div>
                     </div>
@@ -73,7 +73,7 @@
                             <label class="form-label" for="bank">Bank</label>
                         </div>
                         <div class="col-8">
-                            <InputClassSelect id="bank" class="form-select" @bind-Value="@_newClientData.Bank" Options="@_allBanks" Selector="v => v.Name" />
+                            <InputClassSelect id="bank" class="form-select" @bind-Value="@_newClientData.Bank" Options="@_allBanks" Selector="v => v.Name" required/>
                             <ValidationMessage For="@(()=> _newClientData.Bank)" />
                         </div>
                     </div>
