@@ -12,7 +12,7 @@
 @inject IJSRuntime JS
 
 <LoadingContentsComponent Initialized="@Initialized">
-    <ClientSelector ShowDateSelector="false" StartingClient="@Client" OnSelectedClientChanged="ChangeSelectedClient" />
+    <ClientSelector @ref="_clientSelectorRef" ShowDateSelector="false" StartingClient="@Client" OnSelectedClientChanged="ChangeSelectedClient" />
 
     @if (Client is null)
     {
@@ -185,6 +185,7 @@
     private IEnumerable<Bank> _allBanks = [];
     private EditContext _clientEditContext = default!;
 
+    private ClientSelector _clientSelectorRef = default!;
 
     protected override Client? Client
     {
@@ -241,6 +242,8 @@
         {
             _clientEditContext = new(Client);
             await ClientsService.UpdateWithRelatedEntitiesAsync(Client);
+
+            await _clientSelectorRef.RefreshAsync();
         }
     }
 }

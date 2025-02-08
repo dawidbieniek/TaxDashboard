@@ -48,7 +48,7 @@ namespace TaxDashboard
                 opt.GlobalOptions = new ApexChartBaseOptions()
                 {
 #if DEBUG
-                    Debug = true,
+                    Debug = false,
 #endif
                     Theme = new() { Palette = PaletteType.Palette1, Mode = Mode.Dark },
                     Chart = new() { Background = "transparent", },

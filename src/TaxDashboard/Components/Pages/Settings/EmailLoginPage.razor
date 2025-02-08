@@ -4,6 +4,8 @@
 @using TaxDashboard.Components.Popups
 @using TaxDashboard.Services.Emails
 
+@implements IAsyncDisposable
+
 @inject EmailService EmailService
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
@@ -33,7 +35,7 @@
                                 <div class="input-group">
                                     <span class="bi-key input-group-text" />
                                     <InputText type="password" class="form-control" @bind-Value="@_loginDetails.Password" placeholder="Hasło" onclick="this.select();" required />
-                                    <span class="bi-question-lg input-group-text" data-bs-toggle="popover" data-bs-title="Hasło aplikacji" data-bs-html="true" data-bs-content="Chodzi o hasło aplikacji, a nie hasło do konta Gmail. <a href='https://support.google.com/accounts/answer/185833?hl=en#app-passwords'>Więcej informacji</a>" />
+                                    <span id="passwordPopover" class="bi-question-lg input-group-text" data-bs-toggle="popover" data-bs-title="Hasło aplikacji" data-bs-html="true" data-bs-content="Chodzi o hasło aplikacji, a nie hasło do konta Gmail. <a href='https://support.google.com/accounts/answer/185833?hl=en#app-passwords'>Więcej informacji</a>" />
                                 </div>
                                 <ValidationMessage For="@(() => _loginDetails.Password)" />
                             </div>
@@ -101,6 +103,11 @@
         _toastMessage = result.Message;
         await _toastRef.ShowAsync();
 
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await JS.InvokeVoidAsync("hidePopover", "passwordPopover");
     }
 
     private class LoginDetails

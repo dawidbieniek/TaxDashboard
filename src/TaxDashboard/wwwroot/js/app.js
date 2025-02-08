@@ -31,8 +31,31 @@ function enableTooltips() {
 }
 
 function enablePopovers() {
-    const tooltips = document.querySelectorAll('[data-bs-toggle="popover"]');
-    tooltips.forEach(t => {
+    const popovers = document.querySelectorAll('[data-bs-toggle="popover"]');
+    popovers.forEach(t => {
         new bootstrap.Popover(t);
     });
+}
+
+function enablePopover(id) {
+    const popover = document.getElementById(id);
+    if (popover) {
+        new bootstrap.Popover(popover);
+    }
+    else {
+        console.log(`Couldn\'t find element with id: ${id}`)
+    }
+}
+
+function hidePopover(id) {
+    const popover = document.getElementById(id);
+    if (popover) {
+        const pi = bootstrap.Popover.getInstance(`#${id}`);
+        if (pi)
+            pi.hide();
+    }
+    else {
+        console.log(`Couldn\'t find popover with id: ${id}`)
+    }
+    
 }
