@@ -4,10 +4,11 @@
 <nav class="navbar navbar-expand sticky-top align-items-start bg-light border-black border-bottom border-2 px-2">
     <div class="dropdown flex-grow-0 flex-shrink-0">
         <input class="form-select@(_incorrectClientName ? " border border-1 border-danger" : "")" style="min-height:38px; width:14rem;" list="clientList" type="text"
-               placeholder="@(_allClients.Any() ? "Klient" : "Brak klientów")" 
-               autocomplete="on" @onchange="ChangeSelectedClient" 
-               value="@(StartingClient?.FullName ?? "")"
-               onclick="this.select();" />
+        placeholder="@(_allClients.Any() ? "Klient" : "Brak klientów")"
+        autocomplete="on" 
+        @onchange="ChangeSelectedClient"
+        value="@(StartingClient?.FullName ?? "")"
+        onclick="this.select();" />
         <datalist id="clientList">
             @foreach (Client client in _allClients)
             {
@@ -15,6 +16,10 @@
             }
         </datalist>
     </div>
+
+    <button class="btn navigation-button" @onclick="@(() => ChangeSelectedClient(_selectedClientIndex - 1))" disabled="@(LockClientNavigationButtons || _selectedClientIndex <= 0)"><i class="bi-chevron-left" /></button>
+    <button class="btn navigation-button" @onclick="@(() => ChangeSelectedClient(_selectedClientIndex + 1))" disabled="@(LockClientNavigationButtons || _selectedClientIndex >= (_allClients.Count - 1) || _selectedClientIndex < 0)"><i class="bi-chevron-right" /></button>
+
     <NotificationIcon PopoverText="@_notificationText" Severity="@_notificationSeverity" ShowWhenEmptyMessage="false" OccupySpaceWhenEmptyMessage="true" />
     @if (ShowDateSelector && _selectedClient is not null)
     {
@@ -28,7 +33,8 @@
 @code {
     private Client? _selectedClient;
     private bool _incorrectClientName = false;
-    private IEnumerable<Client> _allClients = [];
+    private List<Client> _allClients = [];
+    private int _selectedClientIndex = -1;
 
     private DateOnly? _contextDate;
 
@@ -47,6 +53,8 @@
     public EventCallback<DateOnly> OnSelectedDateContextChanged { get; set; }
     [Parameter]
     public EventCallback OnSettlementStateChanged { get; set; }
+    [Parameter]
+    public bool LockClientNavigationButtons { get; set; } = false;
 
     /// <summary>
     /// Refreshes the view and requeries selected client. Won't notify about client change
@@ -63,17 +71,35 @@
     protected override async Task OnInitializedAsync()
     {
         _allClients = (await ClientsService.GetAllAsync())
-            .Where(c => !c.Suspended);
+            .Where(c => !c.Suspended)
+            .OrderBy(c => c.FullName)
+            .ToList();
 
         if (StartingClient is not null)
         {
             _selectedClient = StartingClient;
+            _selectedClientIndex = Math.Max(_allClients.Select(c => c.Id).ToList().IndexOf(_selectedClient.Id), 0);
+
             _incorrectClientName = false;
 
             ShowClientNotificationIconIfNesessary();
         }
         else
             _incorrectClientName = true;
+    }
+
+    private void ChangeSelectedClient(int allClientIndex)
+    {
+        if (allClientIndex < 0 || allClientIndex >= _allClients.Count || LockClientNavigationButtons)
+            return;
+
+        _selectedClient = _allClients[allClientIndex];
+        OnSelectedClientChanged.InvokeAsync(_selectedClient);
+        _selectedClientIndex = allClientIndex;
+
+        ShowClientNotificationIconIfNesessary();
+
+        _incorrectClientName = false;
     }
 
     private void ChangeSelectedClient(ChangeEventArgs e)

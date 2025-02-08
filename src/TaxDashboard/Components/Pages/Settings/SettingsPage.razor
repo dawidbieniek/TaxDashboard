@@ -9,7 +9,7 @@
             @* Backups *@
             <div class="card bg-light mb-4 shadow">
                 <div class="card-body">
-                    <BackupSettings @ref="_backupSettings"/>
+                    <BackupSettings/>
                 </div>
             </div>
         </div>
@@ -23,8 +23,3 @@
         </div>
     </div>
 </div>
-
-@code {
-    private BackupSettings _backupSettings = default!;
-    private EmailSettings _emailSettings = default!;
-}

@@ -195,5 +195,9 @@ label {
 }
 
 .form-switch input.form-switch {
-    overflow:unset;
+    overflow: unset;
+}
+
+.form-control {
+    margin: 1px;
 }

@@ -1,0 +1,13 @@
+﻿.navigation-button {
+    flex-shrink: 0;
+    padding: 0.25rem;
+    font-size: 1.25rem;
+    border: none;
+}
+
+    .navigation-button:hover {
+        color: #b2b2b2;
+    }
+    .navigation-button:disabled {
+        color: #212529;
+    }

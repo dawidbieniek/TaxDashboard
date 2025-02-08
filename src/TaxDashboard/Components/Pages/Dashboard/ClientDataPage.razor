@@ -12,7 +12,7 @@
 @inject IJSRuntime JS
 
 <LoadingContentsComponent Initialized="@Initialized">
-    <ClientSelector @ref="_clientSelectorRef" ShowDateSelector="false" StartingClient="@Client" OnSelectedClientChanged="ChangeSelectedClient" />
+    <ClientSelector @ref="_clientSelectorRef" ShowDateSelector="false" StartingClient="@Client" OnSelectedClientChanged="ChangeSelectedClient" LockClientNavigationButtons="@(_clientEditContext.IsModified())" />
 
     @if (Client is null)
     {
@@ -179,13 +179,13 @@
     }
 </LoadingContentsComponent>
 <!-- Modal -->
-<TaxDashboard.Components.Popups.PreventNavigationModal NavigationBlockCondition="@(() => _clientEditContext.IsModified())" />
+<TaxDashboard.Components.Popups.PreventNavigationModal NavigationBlockCondition="@(() => _clientEditContext is not null && _clientEditContext.IsModified())" />
 
 @code {
     private IEnumerable<Bank> _allBanks = [];
     private EditContext _clientEditContext = default!;
 
-    private ClientSelector _clientSelectorRef = default!;
+    private ClientSelector? _clientSelectorRef;
 
     protected override Client? Client
     {
@@ -243,7 +243,7 @@
             _clientEditContext = new(Client);
             await ClientsService.UpdateWithRelatedEntitiesAsync(Client);
 
-            await _clientSelectorRef.RefreshAsync();
+            await _clientSelectorRef!.RefreshAsync();
         }
     }
 }
