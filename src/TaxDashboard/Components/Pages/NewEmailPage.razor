@@ -1,0 +1,117 @@
+﻿@page "/email/new"
+
+@using System.ComponentModel.DataAnnotations
+@using TaxDashboard.Components.Popups
+
+@inject NavigationManager Navigation
+@inject EmailService EmailService
+@inject ClientsService ClientsService
+
+<EditForm EditContext="@_emailEditContext" class="container pt-3" style="max-width:1000px;" OnValidSubmit="SendEmailAsync" onkeypress="if(event.keyCode==13){document.activeElement.blur();return false;}">
+    <DataAnnotationsValidator />
+    <div class="row">
+        <div class="col">
+            <div class="card bg-light">
+                <div class="card-body p-4">
+                    <div class="row mb-2">
+                        <label class="label-col form-label" for="from">Od</label>
+                        <div class="col">
+                            <InputText id="from" class="form-control" @bind-Value="_email.From" onclick="this.select();" disabled required />
+                            <ValidationMessage For="@(()=> _email.From)" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <label class="label-col form-label" for="to">Do</label>
+                        <div class="col">
+                            <InputText id="to" class="form-control" @bind-Value="_email.To" required />
+                            <ValidationMessage For="@(()=> _email.To)" />
+                        </div>
+                        <div class="col">
+                            <InputText id="toName" class="form-control" @bind-Value="_email.ToName" required disabled />
+                            <ValidationMessage For="@(()=> _email.ToName)" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <label class="label-col form-label" for="subject">Temat</label>
+                        <div class="col">
+                            <InputText id="subject" class="form-control" type="tel" @bind-Value="_email.Subject" required />
+                            <ValidationMessage For="@(()=> _email.Subject)" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <InputTextArea id="content" class="form-control" @bind-Value="_email.Content" rows="10"/>
+                            <ValidationMessage For="@(()=> _email.Content)" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col d-flex">
+                            <div class="flex-grow-1" />
+                            <button class="btn btn-primary" style="width:8rem;" type="submit">Wyślij</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+<Toast @ref="@_toastRef" Title="Dodano klienta">
+    @_toastMessage
+</Toast>
+
+@code {
+    private EmailContent _email = new();
+    private EditContext _emailEditContext = default!;
+
+    private Toast _toastRef = default!;
+    private string _toastMessage = string.Empty;
+
+    [SupplyParameterFromQuery]
+    public int? ClientId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _emailEditContext = new(_email);
+
+        EmailLoginInfo login = await EmailService.GetCurrentLoginInfoAsync();
+        if (!login.LoggedIn)
+        {
+            Navigation.NavigateTo("/email/login");
+            return;
+        }
+
+        if (ClientId is null)
+            return;
+
+        Client? client = await ClientsService.GetDetailsAsync(ClientId.Value);
+
+        if (client is null)
+            return;
+
+        _email.From = login.EmailAddress!;
+        _email.To = client.Email;
+        _email.ToName = client.FullName;
+        // _emailEditContext = new(_email);
+    }
+
+    private async Task SendEmailAsync()
+    {
+
+    }
+
+    private class EmailContent
+    {
+        [Required(ErrorMessage = "Podaj adres nadawcy")]
+        public string From { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Podaj adresata")]
+        public string To { get; set; } = string.Empty;
+        public string ToName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Temat nie może być pusty")]
+        public string Subject { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Zawartość nie może być pusta")]
+        [MaxLength(2024, ErrorMessage = "Zbyt długa wiadomość (max 2048)")]
+        public string Content { get; set; } = string.Empty;
+    }
+}
+
+

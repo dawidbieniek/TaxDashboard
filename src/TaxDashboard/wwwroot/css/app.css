@@ -230,15 +230,11 @@ content {
     min-width: 30px;
 }
 
-.form-control, h5 {
+.form-control, h5, label {
     white-space: nowrap;
     overflow: hidden;
 }
 
-.d-flex {
-    overflow: hidden;
-}
-
-.text-nowrap {
+.d-flex, .text-nowrap {
     overflow: hidden;
 }

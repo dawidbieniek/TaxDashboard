@@ -96,7 +96,7 @@
 
         if (result.IsSuccessful)
         {
-            Navigation.NavigateTo("/settings");
+            await JS.InvokeVoidAsync("history.back");
             return;
         }
 
