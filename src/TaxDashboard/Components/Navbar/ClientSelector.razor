@@ -3,7 +3,11 @@
 
 <nav class="navbar navbar-expand sticky-top align-items-start bg-light border-black border-bottom border-2 px-2">
     <div class="dropdown flex-grow-0 flex-shrink-0">
-        <input class="form-select@(_incorrectClientName ? " border border-1 border-danger" : "")" style="min-height:38px; width:14rem;" list="clientList" type="text" placeholder="@(_allClients.Any() ? "Klient" : "Brak klientów")" autocomplete="on" @onchange="ChangeSelectedClient" value="@(StartingClient?.FullName ?? "")" />
+        <input class="form-select@(_incorrectClientName ? " border border-1 border-danger" : "")" style="min-height:38px; width:14rem;" list="clientList" type="text"
+               placeholder="@(_allClients.Any() ? "Klient" : "Brak klientów")" 
+               autocomplete="on" @onchange="ChangeSelectedClient" 
+               value="@(StartingClient?.FullName ?? "")"
+               onclick="this.select();" />
         <datalist id="clientList">
             @foreach (Client client in _allClients)
             {

@@ -4,7 +4,7 @@
 }
 
 body {
-    overflow-x:hidden;
+    overflow-x: hidden;
 }
 
 textarea {
@@ -150,84 +150,20 @@ content {
     height: 385px !important;
 }
 
-.client-table table th:nth-child(1) {
-    min-width: 50px;
+.card-body {
+    box-shadow: var(--bs-box-shadow) !important;
 }
 
-.client-table table th:nth-child(2) {
-    min-width: 150px;
+.floating-card .col:has(>.card) {
+    padding-bottom: 1rem;
 }
 
-.client-table table th:nth-child(3) {
-    min-width: 120px;
+.floating-card div:has(>label) {
+    display: flex;
 }
 
-.client-table table th:nth-child(4) {
-    min-width: 120px;
-}
-
-.client-table table th:nth-child(5) {
-    min-width: 120px;
-}
-
-.client-table table th:nth-child(6) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(7) {
-    min-width: 150px;
-}
-
-.client-table table th:nth-child(8) {
-    min-width: 90px;
-}
-
-.client-table table th:nth-child(9) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(10) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(11) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(12) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(13) {
-    min-width: 150px;
-}
-
-.client-table table th:nth-child(14) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(15) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(16) {
-    min-width: 130px;
-}
-
-.client-table table th:nth-child(17) {
-    min-width: 130px;
-}
-
-.client-table table th:nth-child(18) {
-    min-width: 100px;
-}
-
-.client-table table th:nth-child(19) {
-    min-width: 100px;
-}
-
-.client-table table th:nth-child(20) {
-    min-width: 30px;
+.floating-card label {
+    align-self: center;
 }
 
 .form-control, h5, label {
@@ -235,6 +171,29 @@ content {
     overflow: hidden;
 }
 
-.d-flex, .text-nowrap {
+.d-flex, .text-nowrap, .col, .col-auto {
     overflow: hidden;
+}
+
+.text-secondary.text-center {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+label {
+    display: inline;
+}
+
+.table-responsive table {
+    margin-bottom: 0;
+}
+
+.tooltip-inner {
+    white-space: break-spaces;
+}
+
+.form-switch input.form-switch {
+    overflow:unset;
 }

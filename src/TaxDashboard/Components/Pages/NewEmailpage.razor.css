@@ -2,4 +2,5 @@
     width: 60px;
     flex-grow: 0;
     padding-right:0;
+    align-content:center;
 }

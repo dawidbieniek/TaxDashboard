@@ -10,9 +10,17 @@
 @inject NavigationManager Navigation
 
 <div class="client-table container-fluid flex-row pt-3">
-    <Table TableItem="Client" Items="@_allClients" PageSize="15" TableClass="table table-striped table-hover table-bordered table-sm small w-100 rounded" TableRowClass="@((c) => c.Suspended ? "text-decoration-line-through text-danger" : "")">
+    <Table TableItem="Client" Items="@_allClients" PageSize="15" TableClass="table table-striped table-hover table-bordered table-sm small w-100 rounded" TableRowClass="@((c) => c.Suspended ? "suspended" : "")">
         <Column TableItem="Client" Title="Id" Field="@(x => x.Id)" Sortable="true" Filterable="true" DefaultSortColumn="true" Width="10%" />
-        <Column TableItem="Client" Title="Imię" Field="@(x => x.FullName)" Sortable="true" Filterable="true" Width="10%" />
+        <Column TableItem="Client" Title="Imię" Field="@(x => x.FullName)" Sortable="true" Filterable="true" Width="10%" >
+            <Template>
+                <span>@context.FullName</span>
+                @if(!string.IsNullOrEmpty(context.Notes))
+                {
+                    <i class="bi-card-text ms-1" data-bs-toggle="tooltip" data-bs-title="@context.Notes"/>
+                }
+            </Template>
+        </Column>
         <Column TableItem="Client" Title="NIP" Field="@(x => x.NIP)" Sortable="true" Filterable="true" Width="10%" />
         <Column TableItem="Client" Title="Email" Field="@(x => x.Email)" Sortable="true" Filterable="true" Width="10%">
             <Template>
@@ -105,6 +113,7 @@
         {
             _navigationLockRegistration = Navigation.RegisterLocationChangingHandler(OnLocationChanging);
 
+            await JS.InvokeVoidAsync("enableTooltips");
             await JS.InvokeVoidAsync("addModalHiddenListener", DotNetObjectReference.Create(this), "OnModalHidden", "deletingClientModal");
         }
     }

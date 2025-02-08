@@ -77,11 +77,11 @@
                                 <InputClassSelect id="bank" class="form-select" @bind-Value="@Client.Bank" Options="@_allBanks" Selector="v => v.Name" />
                                 <ValidationMessage For="@(()=> Client.Bank)" />
                             </div>
-                            <div class="col mb-3 form-check form-switch">
+                            <div class="col mb-3 form-check form-switch" style="margin-top:26px;">
                                 <label class="form-check-label" for="employmentContract">Umowa o pracę</label>
                                 <InputCheckbox id="employmentContract" class="form-check-input" type="checkbox" @bind-Value="Client.EmploymentContract" />
                             </div>
-                            <div class="col form-check form-switch" style="margin-bottom:4px">
+                            <div class="col form-check form-switch" >
                                 <label class="form-check-label" for="cashMethod">Metoda kasowa</label>
                                 <InputCheckbox id="cashMethod" class="form-check-input" type="checkbox" @bind-Value="Client.CashMethod" />
                             </div>
@@ -149,7 +149,7 @@
                     @* Reduction settings *@
                     <div class="card bg-light mb-4">
                         <div class="card-body">
-                            <h5 class="card-title" style="margin-bottom:26px;">Ulgi</h5>
+                            <h5 class="card-title" style="margin-bottom:27px;">Ulgi</h5>
                             <div class="col mb-2">
                                 <InputClassSelect id="reductionType" class="form-select" @bind-Value="@Client.ReductionType" Options="@(Enum.GetValues<ReductionType>())" Selector="v => v.GetDescriptor()" />
                                 <ValidationMessage For="@(()=> Client.ReductionType)" />
