@@ -60,7 +60,7 @@
 
                                         <Gauge @ref="@_fiscalGaugeRef" Label="Kasy fiskalne" Value="@fiscalValue" ValueLimit="@FiscalGaugeLimit" TooltipAdditionalText="@fiscalTooltip"
                                                PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
-                                               PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" / />
+                                               PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" />
                                     }
                                     else
                                     {
@@ -76,9 +76,10 @@
                                     <div style="height:25px" />
                                     @if (Client.ReductionType == Data.Enums.ReductionType.ZUSPlus)
                                     {
-                                        <Gauge @ref="@_zusGaugeRef" Label="Mały ZUS Plus" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@ZusGaugeLimit"
+                                        <Gauge @ref="@_zusGaugeRef" Label="Mały ZUS Plus" Value="@_zusIncomeSum" ValueLimit="@ZusGaugeLimit"
+                                               TooltipAdditionalText="@(_zusIncomesStartDate is null ? "" : $"Liczone od {_zusIncomesStartDate.Value.ToShortDateString()} do {_zusIncomesStartDate.Value.AddYears(1).ToShortDateString()}")"
                                                PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
-                                               PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" / />
+                                               PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" />
                                     }
                                     else
                                     {
@@ -152,6 +153,8 @@
 
     private Income? _currentMonthIncome;
     private List<Income> _currentYearIncomes = [];
+    private decimal _zusIncomeSum = 0;
+    private DateTime? _zusIncomesStartDate;
     private List<IncomeData> _incomesDataSeries = [.. Enumerable.Range(1, 12).Select(month => new IncomeData(month))];
 
     private string CurrentMonthIncomeAmount
@@ -188,16 +191,16 @@
                 _ = Task.Run(async () =>
                 {
                     await ClientsService.UpdateWithRelatedEntitiesAsync(Client);
-                    UpdateIncomesWithoutMonthlyIncome(ContextDate);
+                    await UpdateIncomesWithoutMonthlyIncomeAsync(ContextDate);
                 });
             }
         }
     }
 
-    protected override void OnAfterRequiredInitialized()
+    protected override async Task OnAfterRequiredInitializedAsync()
     {
         UpdateGaugeChartLimits();
-        UpdateIncomes(ContextDate, false);
+        await UpdateIncomesAsync(ContextDate, false);
     }
 
     protected override async Task ChangeDateContext(DateOnly date)
@@ -205,7 +208,7 @@
         await base.ChangeDateContext(date);
 
         UpdateGaugeChartLimits();
-        UpdateIncomes(date);
+        await UpdateIncomesAsync(date);
     }
 
     protected override async Task ChangeSelectedClient(Client client)
@@ -213,19 +216,27 @@
         await base.ChangeSelectedClient(client);
 
         UpdateGaugeChartLimits();
-        UpdateIncomes(ContextDate);
+        await UpdateIncomesAsync(ContextDate);
     }
 
     // Instead of querying data on every render, data is cached and needs to be updated manually
-    private void UpdateIncomes(DateOnly? date, bool updateCharts = true)
+    private async Task UpdateIncomesAsync(DateOnly? date, bool updateCharts = true)
     {
         _currentMonthIncome = date.HasValue ? Client?.Incomes.Where(i => i.Date == date).FirstOrDefault() : null;
-        UpdateIncomesWithoutMonthlyIncome(date, updateCharts);
+        await UpdateIncomesWithoutMonthlyIncomeAsync(date, updateCharts);
     }
 
-    private void UpdateIncomesWithoutMonthlyIncome(DateOnly? date, bool updateCharts = true)
+    private async Task UpdateIncomesWithoutMonthlyIncomeAsync(DateOnly? date, bool updateCharts = true)
     {
         _currentYearIncomes = GetCurrentYearIncomes(date);
+
+        if (Client is not null && Client.ReductionType == Data.Enums.ReductionType.ZUSPlus && ContextDate.HasValue)
+        {
+            int yearsToAdd = Math.Max(ContextDate.Value.Year - Client.ReductionChangeDate.Year, 0);
+            _zusIncomesStartDate = Client.JoinDateTime.AddYears(yearsToAdd);
+            DateTime endDate = _zusIncomesStartDate.Value.AddYears(1);
+            _zusIncomeSum = await ClientsService.GetIncomeSumAsync(Client.Id, new(_zusIncomesStartDate.Value.Year, _zusIncomesStartDate.Value.Month, 1), new(endDate.Year, endDate.Month, 1));
+        }
 
         if (updateCharts)
         {

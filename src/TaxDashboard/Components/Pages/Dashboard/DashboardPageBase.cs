@@ -48,12 +48,11 @@ public class DashboardPageBase : ComponentBase
         if (DateOnly.TryParseExact(Preferences.Get(GlobalSettings.PreferencesStorage.LastDateContextKey, null), GlobalSettings.PreferencesStorage.DateStorageFormat, out DateOnly storedDateContext))
             ContextDate = storedDateContext;
 
-        OnAfterRequiredInitialized();
+        await OnAfterRequiredInitializedAsync();
 
         Initialized = true;
         StateHasChanged();
     }
 
-    protected virtual void OnAfterRequiredInitialized()
-    { }
+    protected virtual Task OnAfterRequiredInitializedAsync() => Task.CompletedTask;
 }
