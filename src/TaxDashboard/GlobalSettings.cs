@@ -17,9 +17,15 @@ public static class GlobalSettings
     }
     public static class SecureStorage
     {
-        public const string OAuthTokenKey = "GmailOAuthToken";
         public const string EmailAddressKey = "EmailAddress";
         public const string EmailPasswordKey = "EmailPassword";
+    }
+
+    public static class Emails
+    {
+        public const string GmailSmtpAddress = "smtp.gmail.com";
+        public const int GmailSmtpPort = 465;
+        public const int GmailSmtpTSLPort = 587;
     }
 
 }

@@ -6,6 +6,7 @@
 @inject NavigationManager Navigation
 @inject EmailService EmailService
 @inject ClientsService ClientsService
+@inject IJSRuntime JS
 
 <EditForm EditContext="@_emailEditContext" class="container pt-3 floating-card" style="max-width:1000px;" OnValidSubmit="SendEmailAsync">
     <DataAnnotationsValidator />
@@ -69,6 +70,13 @@
     [SupplyParameterFromQuery]
     public int? ClientId { get; set; }
 
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JS.InvokeVoidAsync("enablePopovers");
+    }
+
     protected override async Task OnInitializedAsync()
     {
         _emailEditContext = new(_email);
@@ -96,7 +104,11 @@
 
     private async Task SendEmailAsync()
     {
-
+        if (await EmailService.SendEmailAsync(_email.To, _email.ToName, "Ktoś", _email.Subject, _email.Content))
+            _toastMessage = $"Pomyślnie wysłano wiadomość do {_email.To}";
+        else
+            _toastMessage = $"Nie udało się wysłać wiadomości";
+            await _toastRef.ShowAsync();
     }
 
     private class EmailContent
@@ -107,8 +119,10 @@
         public string To { get; set; } = string.Empty;
         public string ToName { get; set; } = string.Empty;
         [Required(ErrorMessage = "Temat nie może być pusty")]
+        [MinLength(1, ErrorMessage = "Temat nie może być pusty")]
         public string Subject { get; set; } = string.Empty;
         [Required(ErrorMessage = "Zawartość nie może być pusta")]
+        [MinLength(1, ErrorMessage = "Zawartość nie może być pusta")]
         [MaxLength(2024, ErrorMessage = "Zbyt długa wiadomość (max 2048)")]
         public string Content { get; set; } = string.Empty;
     }

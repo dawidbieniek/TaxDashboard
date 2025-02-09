@@ -2,7 +2,7 @@
 
 namespace TaxDashboard.Services.Emails;
 
-internal class PasswordAuthenticator : Authenticator
+internal class PasswordAuthenticator
 {
     public static async Task<string?> GetAuthenticatedUserEmailAddressAsync()
     {
@@ -30,13 +30,21 @@ internal class PasswordAuthenticator : Authenticator
         return new();
     }
 
+    public static async Task<(string email, string password)?> GetStoredAuthenticationData()
+    {
+        string? email = await SecureStorage.GetAsync(GlobalSettings.SecureStorage.EmailAddressKey);
+        string? password = await SecureStorage.GetAsync(GlobalSettings.SecureStorage.EmailPasswordKey);
+
+        return string.IsNullOrEmpty(password) || string.IsNullOrEmpty(email) ? null : (email, password);
+    }
+
     private static async Task<bool> AuthenticateUsingPasswordAsync(string emailAddress, string password)
     {
         using SmtpClient client = new();
 
         try
         {
-            await client.ConnectAsync(GmailSmtpAddress, GmailSmtpPort, true);
+            await client.ConnectAsync(GlobalSettings.Emails.GmailSmtpAddress, GlobalSettings.Emails.GmailSmtpPort, true);
             await client.AuthenticateAsync(emailAddress, password);
             return true;
         }
