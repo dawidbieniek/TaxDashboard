@@ -30,6 +30,18 @@ function enableTooltips() {
     });
 }
 
+
+function enableTooltip(id) {
+    const tooltip = document.getElementById(id);
+    if (tooltip) {
+        new bootstrap.Tooltip(tooltip);
+    }
+    else {
+        console.log(`Couldn\'t find element with id: ${id}`)
+    }
+}
+
+
 function enablePopovers() {
     const popovers = document.querySelectorAll('[data-bs-toggle="popover"]');
     popovers.forEach(t => {

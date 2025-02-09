@@ -28,7 +28,10 @@
                             <div class="card bg-light mb-4">
                                 <div class="card-body gauge-card">
                                     <div style="height:25px" />
-                                    <Gauge @ref="@_vatGaugeRef" Label="Limit do VAT" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@_vatGaugeLimit" />
+                                    @{
+                                        string vatTooltip = ContextDate.HasValue && Client.JoinDateTime.Year == ContextDate.Value.Year ? $"Limit liczony od: {Client.JoinDateTime.ToShortDateString()}" : "";
+                                        <Gauge @ref="@_vatGaugeRef" Label="Limit do VAT" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@_vatGaugeLimit" TooltipAdditionalText="@vatTooltip" />
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -42,11 +45,18 @@
                                     </div>
                                     @if (Client.UseCashRegister)
                                     {
-                                        decimal value = Client.FirstCashRegisterUseDate.Year == DateTime.Today.Year
-                                        ? _currentYearIncomes.Where(i => i.Date.Month >= Client.FirstCashRegisterUseDate.Month).Sum(i => i.Amount)
-                                        : _currentYearIncomes.Sum(i => i.Amount);
+                                        decimal fiscalValue;
+                                        string fiscalTooltip = string.Empty;
 
-                                        <Gauge @ref="@_fiscalGaugeRef" Label="Kasy fiskalne" Value="@value" ValueLimit="@FiscalGaugeLimit" />
+                                        if (Client.FirstCashRegisterUseDate.Year == DateTime.Today.Year)
+                                        {
+                                            fiscalValue = _currentYearIncomes.Where(i => i.Date.Month >= Client.FirstCashRegisterUseDate.Month).Sum(i => i.Amount);
+                                            fiscalTooltip = $"Liczone od: {Client.FirstCashRegisterUseDate.ToShortDateString()}";
+                                        }
+                                        else
+                                            fiscalValue = _currentYearIncomes.Sum(i => i.Amount);
+
+                                        <Gauge @ref="@_fiscalGaugeRef" Label="Kasy fiskalne" Value="@fiscalValue" ValueLimit="@FiscalGaugeLimit" TooltipAdditionalText="@fiscalTooltip" />
                                     }
                                     else
                                     {
@@ -180,30 +190,23 @@
 
     protected override void OnAfterRequiredInitialized()
     {
-        if (Client is not null)
-        {
-            if (Client.JoinDateTime.Year == DateTime.Today.Year)
-            {
-                TimeSpan timeUntilEndOfYear = new DateTime(Client.JoinDateTime.Year, 12, 31) - Client.JoinDateTime;
-                int numberOfDaysUntilEndOfYear = Math.Max((int)timeUntilEndOfYear.TotalDays, 1);
-                int numberOfDaysInYear = new System.Globalization.GregorianCalendar().GetDaysInYear(Client.JoinDateTime.Year);
-                _vatGaugeLimit = Math.Round(BaseVatGaugeLimit * numberOfDaysUntilEndOfYear / numberOfDaysInYear, 2);
-            }
-        }
+        UpdateGaugeChartLimits();
         UpdateIncomes(ContextDate, false);
     }
-
-
 
     protected override async Task ChangeDateContext(DateOnly date)
     {
         await base.ChangeDateContext(date);
+
+        UpdateGaugeChartLimits();
         UpdateIncomes(date);
     }
 
     protected override async Task ChangeSelectedClient(Client client)
     {
         await base.ChangeSelectedClient(client);
+
+        UpdateGaugeChartLimits();
         UpdateIncomes(ContextDate);
     }
 
@@ -265,6 +268,25 @@
             tasks.Add(_zusGaugeRef.UpdateChartAsync());
 
         _ = Task.WhenAll(tasks);
+    }
+
+    private void UpdateGaugeChartLimits()
+    {
+        if (Client is null || !ContextDate.HasValue)
+        {
+            _vatGaugeLimit = 0;
+            return;
+        }
+
+        if (Client.JoinDateTime.Year == ContextDate.Value.Year)
+        {
+            TimeSpan timeUntilEndOfYear = new DateTime(Client.JoinDateTime.Year, 12, 31) - Client.JoinDateTime;
+            int numberOfDaysUntilEndOfYear = Math.Max((int)timeUntilEndOfYear.TotalDays, 1);
+            int numberOfDaysInYear = new System.Globalization.GregorianCalendar().GetDaysInYear(Client.JoinDateTime.Year);
+            _vatGaugeLimit = Math.Round(BaseVatGaugeLimit * numberOfDaysUntilEndOfYear / numberOfDaysInYear, 2);
+        }
+        else
+            _vatGaugeLimit = BaseVatGaugeLimit;
     }
 
     private class IncomeData(int month)
