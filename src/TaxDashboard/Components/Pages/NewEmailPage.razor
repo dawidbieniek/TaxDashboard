@@ -104,7 +104,7 @@
 
     private async Task SendEmailAsync()
     {
-        if (await EmailService.SendEmailAsync(_email.To, _email.ToName, "Ktoś", _email.Subject, _email.Content))
+        if (await EmailService.SendEmailAsync(_email.To, _email.ToName, Preferences.Get(GlobalSettings.PreferencesStorage.EmailNameKey, string.Empty), _email.Subject, _email.Content))
             _toastMessage = $"Pomyślnie wysłano wiadomość do {_email.To}";
         else
             _toastMessage = $"Nie udało się wysłać wiadomości";

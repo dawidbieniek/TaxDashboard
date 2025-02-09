@@ -11,9 +11,13 @@
     }
 
     ::deep .list-group-item .col {
-        padding: 0;
+        padding: 0 1px;
     }
 
     ::deep .list-group-item .col-auto {
-        padding: 0;
+        padding: 0 1px;
+    }
+
+    ::deep .list-group-item .col-flex {
+        padding: 0 1px;
     }

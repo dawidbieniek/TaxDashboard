@@ -34,6 +34,14 @@
                     <a href="/email/login" class="btn btn-primary">Logowanie</a>
                 }
             </div>
+        </div><div class="list-group-item row">
+            <div class="col">
+                <div class="fw-bold">Imię</div>
+                <div class="text-muted">Imię i nazwisko używane przy wysyłaniu wiadomości</div>
+            </div>
+            <div class="col-auto my-auto d-flex">
+                <InputText class="form-control" @bind-Value="EmailName" @bind-Value:after="@(() => Preferences.Set(GlobalSettings.PreferencesStorage.EmailNameKey, EmailName))" disabled="@(!_emailLoginInfo.LoggedIn)" />
+            </div>
         </div>
         <div class="list-group-item row flex-column">
             <div class="row m-0 p-0 mb-2">
@@ -59,6 +67,9 @@
 @code {
     private bool _editingEmailTemplate = false;
     private string _emailTemplate { get; set; } = string.Empty;
+
+    private string EmailName { get; set; } = string.Empty;
+
     private EmailLoginInfo? _emailLoginInfo;
 
     [Parameter]
@@ -67,6 +78,8 @@
     protected override async Task OnInitializedAsync()
     {
         _emailTemplate = Preferences.Get(GlobalSettings.PreferencesStorage.EmailTemplateKey, string.Empty);
+        EmailName = Preferences.Get(GlobalSettings.PreferencesStorage.EmailNameKey, string.Empty);
+
         await UpdateLoginDataAsync();
     }
 

@@ -14,6 +14,7 @@ public static class GlobalSettings
         public const string EmailTemplateKey = "EmailTemplate";
         public const string LastBackupDateKey = "LastBackup";
         public const string DateStorageFormat = "yyyy-MM-dd";
+        public const string EmailNameKey = "EmailName";
     }
     public static class SecureStorage
     {
