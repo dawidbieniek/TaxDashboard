@@ -46,10 +46,10 @@ public class ClientNotificationService
     }
 
     private static string GetReductionWarningMessage(Client client, int daysToEnd) => 
-        $"Za {daysToEnd} {(daysToEnd == 1? "dzień" : "dni")} klient {client.FullName} przekroczy okres ulgi <b>{client.ReductionType.GetDescriptor()}</b>." +
+        $"Za {daysToEnd} {(daysToEnd == 1? "dzień" : "dni")} klient <i>{client.FullName}</i> przekroczy okres ulgi <b>{client.ReductionType.GetDescriptor()}</b>." +
         $"<br/>Kliknij <a href='/email/new?clientId={client.Id}'>tutaj</a>, aby go poinformować";
 
     private static string GetReductionDangerMessage(Client client) =>
-        $"Klient {client.FullName} przekroczył okres ulgi <b>{client.ReductionType.GetDescriptor()}</b>." +
+        $"Klient <i>{client.FullName}</i> przekroczył okres ulgi <b>{client.ReductionType.GetDescriptor()}</b>." +
         $"<br/>Kliknij <a href='/email/new?clientId={client.Id}'>tutaj</a>, aby go poinformować";
 }

@@ -30,7 +30,9 @@
                                     <div style="height:25px" />
                                     @{
                                         string vatTooltip = ContextDate.HasValue && Client.JoinDateTime.Year == ContextDate.Value.Year ? $"Limit liczony od: {Client.JoinDateTime.ToShortDateString()}" : "";
-                                        <Gauge @ref="@_vatGaugeRef" Label="Limit do VAT" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@_vatGaugeLimit" TooltipAdditionalText="@vatTooltip" />
+                                        <Gauge @ref="@_vatGaugeRef" Label="Limit do VAT" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@_vatGaugeLimit" TooltipAdditionalText="@vatTooltip"
+                                               PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
+                                               PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" />
                                     }
                                 </div>
                             </div>
@@ -56,7 +58,9 @@
                                         else
                                             fiscalValue = _currentYearIncomes.Sum(i => i.Amount);
 
-                                        <Gauge @ref="@_fiscalGaugeRef" Label="Kasy fiskalne" Value="@fiscalValue" ValueLimit="@FiscalGaugeLimit" TooltipAdditionalText="@fiscalTooltip" />
+                                        <Gauge @ref="@_fiscalGaugeRef" Label="Kasy fiskalne" Value="@fiscalValue" ValueLimit="@FiscalGaugeLimit" TooltipAdditionalText="@fiscalTooltip"
+                                               PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
+                                               PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" / />
                                     }
                                     else
                                     {
@@ -72,7 +76,9 @@
                                     <div style="height:25px" />
                                     @if (Client.ReductionType == Data.Enums.ReductionType.ZUSPlus)
                                     {
-                                        <Gauge @ref="@_zusGaugeRef" Label="Mały ZUS Plus" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@ZusGaugeLimit" />
+                                        <Gauge @ref="@_zusGaugeRef" Label="Mały ZUS Plus" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@ZusGaugeLimit"
+                                               PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
+                                               PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" / />
                                     }
                                     else
                                     {
