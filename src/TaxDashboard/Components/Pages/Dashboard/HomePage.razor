@@ -1,9 +1,10 @@
 ﻿@page "/"
 
-@using TaxDashboard.Components.Charts
+@using TaxDashboard.Components.Loading
 @using TaxDashboard.Components.Navbar
 @using ApexCharts
 @using TaxDashboard.Components.Pages.Dashboard.Components
+@using TaxDashboard.Components.Pages.Dashboard.Model
 
 @inherits DashboardPageBase
 
@@ -12,10 +13,7 @@
 
     @if (Client is null)
     {
-        <div class="alert alert-warning text-center m-3">
-            <div class="mb-3">Wybierz klienta z listy, albo dodaj nowego</div>
-            <a class="btn btn-primary ms-auto" href="/add">Dodaj klienta</a>
-        </div>
+        <NoClientAlert />
     }
     else
     {
@@ -28,12 +26,10 @@
                             <div class="card bg-light mb-4">
                                 <div class="card-body gauge-card">
                                     <div style="height:25px" />
-                                    @{
-                                        string vatTooltip = ContextDate.HasValue && Client.JoinDateTime.Year == ContextDate.Value.Year ? $"Limit liczony od: {Client.JoinDateTime.ToShortDateString()}" : "";
-                                        <Gauge @ref="@_vatGaugeRef" Label="Limit do VAT" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@_vatGaugeLimit" TooltipAdditionalText="@vatTooltip"
-                                               PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
-                                               PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" />
-                                    }
+                                    <GaugeChart Label="Limit do VAT" Value="@(_currentYearIncomes.Sum(i => i.Amount))" ValueLimit="@_vatGaugeLimit"
+                                                TooltipAdditionalText="@(ContextDate.HasValue && Client.JoinDateTime.Year == ContextDate.Value.Year ? $"Limit liczony od: {Client.JoinDateTime.ToShortDateString()}" : "")"
+                                                PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
+                                                PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" />
                                 </div>
                             </div>
                         </div>
@@ -52,15 +48,15 @@
 
                                         if (Client.FirstCashRegisterUseDate.Year == DateTime.Today.Year)
                                         {
-                                            fiscalValue = _currentYearIncomes.Where(i => i.Date.Month >= Client.FirstCashRegisterUseDate.Month).Sum(i => i.Amount);
+                                            fiscalValue = _currentYearIncomes.Where(i => i.Month >= Client.FirstCashRegisterUseDate.Month).Sum(i => i.Amount);
                                             fiscalTooltip = $"Liczone od: {Client.FirstCashRegisterUseDate.ToShortDateString()}";
                                         }
                                         else
                                             fiscalValue = _currentYearIncomes.Sum(i => i.Amount);
 
-                                        <Gauge @ref="@_fiscalGaugeRef" Label="Kasy fiskalne" Value="@fiscalValue" ValueLimit="@FiscalGaugeLimit" TooltipAdditionalText="@fiscalTooltip"
-                                               PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
-                                               PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" />
+                                        <GaugeChart Label="Kasy fiskalne" Value="@fiscalValue" ValueLimit="@FiscalGaugeLimit" TooltipAdditionalText="@fiscalTooltip"
+                                                    PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
+                                                    PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" />
                                     }
                                     else
                                     {
@@ -76,10 +72,10 @@
                                     <div style="height:25px" />
                                     @if (Client.ReductionType == Data.Enums.ReductionType.ZUSPlus)
                                     {
-                                        <Gauge @ref="@_zusGaugeRef" Label="Mały ZUS Plus" Value="@_zusIncomeSum" ValueLimit="@ZusGaugeLimit"
-                                               TooltipAdditionalText="@(_zusIncomesStartDate is null ? "" : $"Liczone od {_zusIncomesStartDate.Value.ToShortDateString()} do {_zusIncomesStartDate.Value.AddYears(1).ToShortDateString()}")"
-                                               PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
-                                               PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" />
+                                        <GaugeChart Label="Mały ZUS Plus" Value="@_zusIncomeSum" ValueLimit="@ZusGaugeLimit"
+                                                    TooltipAdditionalText="@(_zusIncomesStartDate is null ? "" : $"Liczone od {_zusIncomesStartDate.Value.ToShortDateString()} do {_zusIncomesStartDate.Value.AddYears(1).ToShortDateString()}")"
+                                                    PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
+                                                    PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" />
                                     }
                                     else
                                     {
@@ -94,20 +90,7 @@
                     @* Income chart *@
                     <div class="card bg-light mb-4">
                         <div class="card-body chart-card">
-                            <h5 class="card-title">Miesięczne przychody</h5>
-                            <ElementRequiringLoad @ref="@_incomeLoadingRef">
-                                <ApexChart @ref="_incomeChartRef" TItem="IncomeData" Height="@("236px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _incomeLoadingRef.HideLoadingIcon())">
-                                    <ApexPointSeries TItem="IncomeData"
-                                                     Name="Przychody"
-                                                     Items="@_incomesDataSeries"
-                                                     SeriesType="@SeriesType.Area"
-                                                     ShowDataLabels
-                                                     XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Month))"
-                                                     YAggregate="@(e => e.Sum(e => e.Amount))" />
-                                </ApexChart>
-                                <label class="form-label" for="income">Przychody w tym miesiącu</label>
-                                <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncomeAmount" onclick="this.select();" />
-                            </ElementRequiringLoad>
+                            <IncomesCard Client="@Client" ContextDate="@ContextDate" OnYearlyIncomesChanged="@((v) => UpdateIncomesAsync(v))" />
                         </div>
                     </div>
                     @* Invoices *@
@@ -142,93 +125,37 @@
     private const decimal FiscalGaugeLimit = 20_000;
     private const decimal ZusGaugeLimit = 120_000;
 
-    private decimal _vatGaugeLimit = BaseVatGaugeLimit;
+    private List<IncomeData> _currentYearIncomes = [];
 
-    private ElementRequiringLoad _incomeLoadingRef = default!;
-
-    private ApexChart<IncomeData> _incomeChartRef = default!;
-    private Gauge _vatGaugeRef = default!;
-    private Gauge? _fiscalGaugeRef;
-    private Gauge? _zusGaugeRef;
-
-    private Income? _currentMonthIncome;
-    private List<Income> _currentYearIncomes = [];
     private decimal _zusIncomeSum = 0;
     private DateTime? _zusIncomesStartDate;
-    private List<IncomeData> _incomesDataSeries = [.. Enumerable.Range(1, 12).Select(month => new IncomeData(month))];
-
-    private string CurrentMonthIncomeAmount
-    {
-        get => (_currentMonthIncome?.Amount ?? 0).ToString("C2");
-        set
-        {
-            if (Client is null || !ContextDate.HasValue)
-                return;
-
-            if (Decimal.TryParse(value, GlobalSettings.CurrencyNumberStyles, GlobalSettings.CurrencyCulture, out decimal currency))
-            {
-                if (currency == 0)
-                {
-                    if (_currentMonthIncome is not null)
-                    {
-                        Client.Incomes.Remove(_currentMonthIncome);
-                        _currentMonthIncome = null;
-                    }
-                }
-                else
-                {
-                    if (_currentMonthIncome is not null)
-                        _currentMonthIncome.Amount = Math.Round(currency, 2);
-                    else
-                    {
-                        _currentMonthIncome = new() { Date = ContextDate.Value };
-                        Client.Incomes.Add(_currentMonthIncome);
-                    }
-
-                    _currentMonthIncome.Amount = Math.Round(currency, 2);
-                }
-
-                _ = Task.Run(async () =>
-                {
-                    await ClientsService.UpdateWithRelatedEntitiesAsync(Client);
-                    await UpdateIncomesWithoutMonthlyIncomeAsync(ContextDate);
-                });
-            }
-        }
-    }
+    private decimal _vatGaugeLimit = BaseVatGaugeLimit;
 
     protected override async Task OnAfterRequiredInitializedAsync()
     {
+        await UpdateIncomesAsync();
         UpdateGaugeChartLimits();
-        await UpdateIncomesAsync(ContextDate, false);
     }
 
     protected override async Task ChangeDateContext(DateOnly date)
     {
         await base.ChangeDateContext(date);
 
+        await UpdateIncomesAsync();
         UpdateGaugeChartLimits();
-        await UpdateIncomesAsync(date);
     }
 
     protected override async Task ChangeSelectedClient(Client client)
     {
         await base.ChangeSelectedClient(client);
 
+        await UpdateIncomesAsync();
         UpdateGaugeChartLimits();
-        await UpdateIncomesAsync(ContextDate);
     }
 
-    // Instead of querying data on every render, data is cached and needs to be updated manually
-    private async Task UpdateIncomesAsync(DateOnly? date, bool updateCharts = true)
+    private async Task UpdateIncomesAsync(List<IncomeData>? incomes = null)
     {
-        _currentMonthIncome = date.HasValue ? Client?.Incomes.Where(i => i.Date == date).FirstOrDefault() : null;
-        await UpdateIncomesWithoutMonthlyIncomeAsync(date, updateCharts);
-    }
-
-    private async Task UpdateIncomesWithoutMonthlyIncomeAsync(DateOnly? date, bool updateCharts = true)
-    {
-        _currentYearIncomes = GetCurrentYearIncomes(date);
+        _currentYearIncomes = incomes is null ? GetCurrentYearIncomes(ContextDate) : incomes;
 
         if (Client is not null && Client.ReductionType == Data.Enums.ReductionType.ZUSPlus && ContextDate.HasValue)
         {
@@ -237,31 +164,14 @@
             DateTime endDate = _zusIncomesStartDate.Value.AddYears(1);
             _zusIncomeSum = await ClientsService.GetIncomeSumAsync(Client.Id, new(_zusIncomesStartDate.Value.Year, _zusIncomesStartDate.Value.Month, 1), new(endDate.Year, endDate.Month, 1));
         }
-
-        if (updateCharts)
-        {
-            UpdateIncomesDataSeries();
-            UpdateIncomeCharts();
-        }
     }
 
-    private void UpdateIncomesDataSeries()
-    {
-        IEnumerable<Income> clientIncomes = ContextDate.HasValue && Client is not null ? Client.Incomes.Where(i => i.Date.Year == ContextDate.Value.Year) : [];
-
-        foreach (IncomeData data in _incomesDataSeries)
-        {
-            Income? currentIncome = clientIncomes.FirstOrDefault(i => i.Date.Month == data.Month);
-            data.Amount = currentIncome is not null ? currentIncome.Amount : 0;
-        }
-    }
-
-    private List<Income> GetCurrentYearIncomes(DateOnly? date)
+    private List<IncomeData> GetCurrentYearIncomes(DateOnly? date)
     {
         int year = date.HasValue ? date.Value.Year : 1;
 
-        IEnumerable<Income> monthlyIncomes = Enumerable.Range(1, 12)
-            .Select(month => new Income { Amount = 0, Date = new DateOnly(year, month, 1) });
+        IEnumerable<IncomeData> monthlyIncomes = Enumerable.Range(1, 12)
+            .Select(month => new IncomeData(month));
 
         if (Client is null || !date.HasValue)
             return [.. monthlyIncomes];
@@ -270,21 +180,12 @@
             .Where(i => i.Date.Year == year);
 
         return monthlyIncomes
-            .Select(monthlyIncome => existingIncomes
-                .FirstOrDefault(existingIncome => existingIncome.Date.Month == monthlyIncome.Date.Month && existingIncome.Date.Year == monthlyIncome.Date.Year)
-                ?? monthlyIncome)
+            .Select(monthlyIncome =>
+            {
+                Income? income = existingIncomes.FirstOrDefault(existingIncome => existingIncome.Date.Month == monthlyIncome.Month && existingIncome.Date.Year == year);
+                return income is not null ? new IncomeData(monthlyIncome.Month, income.Amount) : monthlyIncome;
+            })
             .ToList();
-    }
-
-    private void UpdateIncomeCharts()
-    {
-        List<Task> tasks = [_incomeChartRef.UpdateSeriesAsync(), _vatGaugeRef.UpdateChartAsync()];
-        if (_fiscalGaugeRef is not null)
-            tasks.Add(_fiscalGaugeRef.UpdateChartAsync());
-        if (_zusGaugeRef is not null)
-            tasks.Add(_zusGaugeRef.UpdateChartAsync());
-
-        _ = Task.WhenAll(tasks);
     }
 
     private void UpdateGaugeChartLimits()
@@ -304,11 +205,5 @@
         }
         else
             _vatGaugeLimit = BaseVatGaugeLimit;
-    }
-
-    private class IncomeData(int month)
-    {
-        public int Month { get; set; } = month;
-        public decimal Amount { get; set; } = 0;
     }
 }

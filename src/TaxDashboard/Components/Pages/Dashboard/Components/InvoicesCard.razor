@@ -1,5 +1,7 @@
 ﻿@using ApexCharts
+@using TaxDashboard.Components.Loading
 @using TaxDashboard.Data.Enums
+
 @inject ClientsService ClientsService
 
 <h5 class="card-title mb-2">Faktury</h5>
@@ -10,24 +12,24 @@
                          Items="_sellInvoicesDataSeries"
                          SeriesType="@SeriesType.Bar"
                          ShowDataLabels
-                         XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Month))"
+                         XValue="@(e => DataDisplayHelper.GetMonthLabel(e.Month))"
                          YAggregate="@(e => e.Sum(e => e.Amount))" />
         <ApexPointSeries TItem="InvoiceData"
                          Name="Kosztowe"
                          Items="_costInvoicesDataSeries"
                          SeriesType="@SeriesType.Bar"
                          ShowDataLabels
-                         XValue="@(e => Util.DataDisplayHelper.GetMonthLabel(e.Month))"
+                         XValue="@(e => DataDisplayHelper.GetMonthLabel(e.Month))"
                          YAggregate="@(e => e.Sum(e => e.Amount))" />
     </ApexChart>
     <div class="d-flex gap-2">
         <div>
             <label class="form-label" for="sell">Sprzedażowe</label>
-            <InputNumber id="sell" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentSellInvoiceAmount" onclick="this.select();" />
+            <InputNumber id="sell" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentSellInvoiceAmount" @bind-Value:after="UpdateClientAsync" onclick="this.select();" />
         </div>
         <div>
             <label class="form-label" for="cost">Kosztowe</label>
-            <InputNumber id="cost" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentCostInvoiceAmount" onclick="this.select();" />
+            <InputNumber id="cost" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentCostInvoiceAmount" @bind-Value:after="UpdateClientAsync" onclick="this.select();" />
         </div>
     </div>
 </ElementRequiringLoad>
@@ -41,8 +43,8 @@
     private List<InvoiceData> _sellInvoicesDataSeries = [.. Enumerable.Range(1, 12).Select(month => new InvoiceData(month))];
     private List<InvoiceData> _costInvoicesDataSeries = [.. Enumerable.Range(1, 12).Select(month => new InvoiceData(month))];
 
-    private Client? _lastClientValue = null;
-    private DateOnly? _lastContextDateValue = null;
+    private ChangeTracker<int?> _clientChangeTracker = new();
+    private ChangeTracker<int?> _contextDateYearChangeTracker = new();
 
     [Parameter, EditorRequired]
     public Client Client { get; set; } = default!;
@@ -77,12 +79,6 @@
                     Client.Invoices.Add(_currentSellInvoice);
                 }
             }
-
-            _ = Task.Run(async () =>
-            {
-                await ClientsService.UpdateWithRelatedEntitiesAsync(Client);
-                UpdateInvoices(updateCostInvoice: false);
-            });
         }
     }
 
@@ -114,55 +110,35 @@
                     Client.Invoices.Add(_currentCostInvoice);
                 }
             }
-
-
-            _ = Task.Run(async () =>
-            {
-                await ClientsService.UpdateWithRelatedEntitiesAsync(Client);
-                UpdateInvoices(updateSellInvoice: false);
-            });
         }
     }
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-            UpdateInvoices();
+            await UpdateInvoicesAsync();
     }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
-        bool changed = false;
-        if (_lastClientValue != Client)
-        {
-            _lastClientValue = Client;
-            changed = true;
-        }
-        bool yearChanged = false;
-        if (_lastContextDateValue != ContextDate)
-        {
-            yearChanged = (_lastContextDateValue is null || ContextDate is null || _lastContextDateValue.Value.Year != ContextDate.Value.Year);
-            _lastContextDateValue = ContextDate;
-            changed = true;
-        }
-
-        if (changed && _invoiceChartRef is not null)
-            UpdateInvoices(updateCharts: yearChanged);
+        if ((_clientChangeTracker.HasChanged(Client?.Id) || _contextDateYearChangeTracker.HasChanged(ContextDate?.Year)) && _invoiceChartRef is not null)
+            await UpdateInvoicesAsync();
     }
 
-    private void UpdateInvoices(bool updateCharts = true, bool updateSellInvoice = true, bool updateCostInvoice = true)
+    private async Task UpdateClientAsync()
     {
-        if (updateSellInvoice)
-            _currentSellInvoice = ContextDate.HasValue ? Client.Invoices.FirstOrDefault(i => i.Type == InvoiceType.Sell && i.Date == ContextDate) : null;
-        if (updateCostInvoice)
-            _currentCostInvoice = ContextDate.HasValue ? Client.Invoices.FirstOrDefault(i => i.Type == InvoiceType.Cost && i.Date == ContextDate) : null;
+        await ClientsService.UpdateWithRelatedEntitiesAsync(Client);
+        await UpdateInvoicesAsync();
+    }
 
-        if (updateCharts)
-        {
-            UpdateInvoicesDataSeries(InvoiceType.Sell);
-            UpdateInvoicesDataSeries(InvoiceType.Cost);
-            UpdateChart();
-        }
+    private async Task UpdateInvoicesAsync()
+{
+        _currentSellInvoice = ContextDate.HasValue ? Client.Invoices.FirstOrDefault(i => i.Type == InvoiceType.Sell && i.Date == ContextDate) : null;
+        _currentCostInvoice = ContextDate.HasValue ? Client.Invoices.FirstOrDefault(i => i.Type == InvoiceType.Cost && i.Date == ContextDate) : null;
+
+        UpdateInvoicesDataSeries(InvoiceType.Sell);
+        UpdateInvoicesDataSeries(InvoiceType.Cost);
+        await UpdateChartAsync();
     }
 
     private void UpdateInvoicesDataSeries(InvoiceType type)
@@ -178,7 +154,8 @@
         }
     }
 
-    private void UpdateChart() => _ = _invoiceChartRef.UpdateSeriesAsync();
+    private Task UpdateChartAsync() => _invoiceChartRef.UpdateSeriesAsync();
+
 
     private class InvoiceData(int month)
     {

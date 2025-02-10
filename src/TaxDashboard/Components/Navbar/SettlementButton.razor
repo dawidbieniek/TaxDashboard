@@ -8,7 +8,7 @@
 @code {
     private Settlement? _currentSettlement;
 
-    private DateOnly? _lastContextDateValue;
+    private ChangeTracker<DateOnly?> _contextDateChangeTracker = new();
 
     [Parameter, EditorRequired]
     public Client Client { get; set; } = default!;
@@ -29,7 +29,7 @@
                 Client.Settlements.Add(_currentSettlement);
                 UpdateSettlement();
             }
-            else if(_currentSettlement is not null)
+            else if (_currentSettlement is not null)
             {
                 Client.Settlements.Remove(_currentSettlement);
                 _currentSettlement = null;
@@ -40,11 +40,8 @@
 
     protected override void OnParametersSet()
     {
-        if(_lastContextDateValue != ContextDate)
-        {
-            _lastContextDateValue = ContextDate;
+        if (_contextDateChangeTracker.HasChanged(ContextDate))
             _currentSettlement = ContextDate.HasValue ? Client.Settlements.FirstOrDefault(s => s.ContextDate == ContextDate) : null;
-        }
     }
 
     private async void UpdateSettlement()
@@ -52,5 +49,4 @@
         await ClientsService.UpdateWithRelatedEntitiesAsync(Client);
         await OnSettlementStateChanged.InvokeAsync();
     }
-
 }

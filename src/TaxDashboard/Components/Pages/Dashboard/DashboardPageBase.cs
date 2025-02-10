@@ -27,11 +27,11 @@ public class DashboardPageBase : ComponentBase
         Preferences.Set(GlobalSettings.PreferencesStorage.LastClientIdKey, client.Id);
     }
 
-    protected virtual async Task ChangeDateContext(DateOnly date)
+    protected virtual Task ChangeDateContext(DateOnly date)
     {
         ContextDate = date;
         Preferences.Set(GlobalSettings.PreferencesStorage.LastDateContextKey, date.ToString(GlobalSettings.PreferencesStorage.DateStorageFormat));
-        await Task.Delay(1);    // HACK: Why making this method sync makes income chart ref null on page load !?
+        return Task.CompletedTask;
     }
 
     protected override async Task OnInitializedAsync()

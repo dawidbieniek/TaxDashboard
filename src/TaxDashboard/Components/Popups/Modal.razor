@@ -1,0 +1,84 @@
+﻿@implements IAsyncDisposable
+
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<div class="modal" id="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">@Title</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if(ChildContent is not null)
+                {
+                    @ChildContent
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                @if (!string.IsNullOrEmpty(ButtonText))
+                {
+                    <button type="button" class="btn btn-danger" @onclick="@(async () => {await ButtonClick.InvokeAsync(); await JS.InvokeVoidAsync("hideModal", "modal");})">@ButtonText</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private IDisposable? _navigationLockRegistration;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    [Parameter]
+    public string Title { get; set; } = "Potwierdzenie";
+    [Parameter]
+    public string ButtonText { get; set; } = "Ok";
+    [Parameter]
+    public EventCallback ButtonClick { get; set; }
+    [Parameter]
+    public bool BlockNavigationWhenShowing { get; set; } = true;
+
+    protected bool ModalShowing { get; set; } = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _navigationLockRegistration = Navigation.RegisterLocationChangingHandler(OnLocationChanging);
+            await JS.InvokeVoidAsync("addModalHiddenListener", DotNetObjectReference.Create(this), "OnModalHidden", "modal");
+        }
+    }
+
+    protected virtual async ValueTask OnLocationChanging(LocationChangingContext context)
+    {
+        if (ModalShowing) // Prevents showing multiple modals at once
+        {
+            if (BlockNavigationWhenShowing)
+                context.PreventNavigation();
+            else
+                await HideAsync();
+        }
+    }
+
+    // This method should be called in JS after modal is hidden
+    [JSInvokable]
+    public void OnModalHidden() => ModalShowing = false;
+
+
+    public ValueTask ShowAsync()
+    {
+        ModalShowing = true;
+        return JS.InvokeVoidAsync("showModal", "modal");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await HideAsync();
+        _navigationLockRegistration?.Dispose();
+    }
+
+    protected ValueTask HideAsync() => JS.InvokeVoidAsync("hideModal", "modal");
+}

@@ -51,17 +51,14 @@
         </div>
     </div>
 </div>
-<Toast @ref="@_toastRef" Title="Logowanie">
-    @_toastMessage
-</Toast>
+<Toast @ref="@_toastRef" Title="Logowanie" />
 
 
 @code {
-    private Toast _toastRef = default!;
-    private string _toastMessage = string.Empty;
-
     private LoginDetails _loginDetails = new LoginDetails();
     private EditContext _loginDetailsEditContext;
+
+    private Toast _toastRef = default!;
 
     public EmailLoginPage()
     {
@@ -71,7 +68,7 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-            await JS.InvokeVoidAsync("enablePopovers");
+            await JS.InvokeVoidAsync("enablePopover", "passwordPopover");
     }
 
     private async Task LoginUsingPasswordAsync()
@@ -79,15 +76,14 @@
         LoginResult result = await EmailService.LoginUsingPasswordAsync(_loginDetails.Email, _loginDetails.Password);
         if (result.IsSuccessful)
         {
-            Navigation.NavigateTo("/settings");
+            await JS.InvokeVoidAsync("history.back");
             return;
         }
 
-        _toastMessage = result.Message;
         _loginDetails.Password = string.Empty;
         _loginDetailsEditContext = new(_loginDetails);
 
-        await _toastRef.ShowAsync();
+        await _toastRef.ShowTextAsync(result.Message);
     }
 
     private async Task LoginUsingOAuthAsync()
@@ -100,8 +96,7 @@
             return;
         }
 
-        _toastMessage = result.Message;
-        await _toastRef.ShowAsync();
+        await _toastRef.ShowTextAsync(result.Message);
 
     }
 

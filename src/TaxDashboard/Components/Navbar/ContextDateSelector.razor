@@ -1,14 +1,7 @@
-﻿<select class="form-select flex-grow-0 flex-shrink-0" style="width:6rem; height: 38px" @onchange="ChangeSelectedYear" value="@_selectedYear">
+﻿<select class="form-select flex-grow-0 flex-shrink-0" style="width:6rem;" @onchange="ChangeSelectedYear" value="@_selectedYear">
     @foreach (int year in SelectableYears)
     {
-        @if (_selectedYear == year)
-        {
-            <option value="@year" selected>@year</option>
-        }
-        else
-        {
-            <option value="@year">@year</option>
-        }
+        <option value="@year" selected="@(_selectedYear == year)">@year</option>
     }
 </select>
 
@@ -19,26 +12,26 @@
         int monthValue = i;
         @if (_selectedMonth == i)
         {
-            <input type="radio" class="btn-check" name="months" id="@id" autocomplete="off" @onclick="@(() => ChangeSelectedMonth(monthValue))" checked="@_selectedMonth == i">
+            <input type="radio" class="btn-check" name="months" id="@id" autocomplete="off" @onclick="@(() => ChangeSelectedMonth(monthValue))" checked>
         }
         else
         {
             <input type="radio" class="btn-check" name="months" id="@id" autocomplete="off" @onclick="@(() => ChangeSelectedMonth(monthValue))">
         }
-        <label class="btn month-button @(GetMonthButtonClass(monthValue))" for="@id">@(Util.DataDisplayHelper.GetMonthLabel(i))</label>
+        <label class="btn month-button @(GetMonthButtonClass(monthValue))" for="@id">@(DataDisplayHelper.GetMonthLabel(i))</label>
     }
 </div>
-<select class="form-select month-dropdown ms-2 flex-grow-0 flex-shrink-0" style="width:9rem; height: 38px" @onchange="@((e) => ChangeSelectedMonth(int.Parse((string)e.Value!)))" value="@_selectedMonth">
+<select class="form-select month-dropdown ms-2 flex-grow-0 flex-shrink-0" style="width:9rem;" @onchange="@((e) => ChangeSelectedMonth(int.Parse((string)e.Value!)))" value="@_selectedMonth">
     @for (int i = 1; i <= 12; i++)
     {
         int monthValue = i;
         @if (_selectedMonth == i)
         {
-            <option class="@(GetMonthButtonClass(monthValue))" value="@i" selected>@Util.DataDisplayHelper.GetMonthFullLabel(i)</option>
+            <option class="@(GetMonthButtonClass(monthValue))" value="@i" selected>@DataDisplayHelper.GetMonthFullLabel(i)</option>
         }
         else
         {
-            <option class="@(GetMonthButtonClass(monthValue))" value="@i">@Util.DataDisplayHelper.GetMonthFullLabel(i)</option>
+            <option class="@(GetMonthButtonClass(monthValue))" value="@i">@DataDisplayHelper.GetMonthFullLabel(i)</option>
         }
     }
 </select>

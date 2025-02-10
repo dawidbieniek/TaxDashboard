@@ -1,14 +1,17 @@
 ﻿@using TaxDashboard.Services.Notifications
+
 @inject ClientsService ClientsService
 
 <nav class="navbar navbar-expand sticky-top align-items-start bg-light border-black border-bottom border-2 px-2">
     <div class="dropdown flex-grow-0 flex-shrink-0">
-        <input class="form-select@(_incorrectClientName ? " border border-1 border-danger" : "")" style="min-height:38px; width:14rem;" list="clientList" type="text"
-        placeholder="@(_allClients.Any() ? "Klient" : "Brak klientów")"
-        autocomplete="on" 
-        @onchange="ChangeSelectedClient"
-        value="@(StartingClient?.FullName ?? "")"
-        onclick="this.select();" />
+        <input class="form-select@(_incorrectClientName ? " border border-1 border-danger" : "")" style="width:14rem;"
+               list="clientList"
+               type="text"
+               placeholder="@(_allClients.Any() ? "Klient" : "Brak klientów")"
+               autocomplete="on"
+               @onchange="ChangeSelectedClient"
+               value="@(StartingClient?.FullName ?? "")"
+               onclick="this.select();" />
         <datalist id="clientList">
             @foreach (Client client in _allClients)
             {
@@ -20,7 +23,8 @@
     <button class="btn navigation-button" @onclick="@(() => ChangeSelectedClient(_selectedClientIndex - 1))" disabled="@(LockClientNavigationButtons || _selectedClientIndex <= 0)"><i class="bi-chevron-left" /></button>
     <button class="btn navigation-button" @onclick="@(() => ChangeSelectedClient(_selectedClientIndex + 1))" disabled="@(LockClientNavigationButtons || _selectedClientIndex >= (_allClients.Count - 1) || _selectedClientIndex < 0)"><i class="bi-chevron-right" /></button>
 
-    <NotificationIcon PopoverText="@_notificationText" Severity="@_notificationSeverity" ShowWhenEmptyMessage="false" OccupySpaceWhenEmptyMessage="true" />
+    <ClientSelectorNotificationIcon SelectedClient="_selectedClient" />
+
     @if (ShowDateSelector && _selectedClient is not null)
     {
         <ContextDateSelector ClientSettlements="@(_selectedClient?.Settlements ?? [])" StartingDateContext="@StartingDateContext" OnSelectedDateContextChanged="ChangeSelectedDateContext" />
@@ -32,19 +36,18 @@
 
 @code {
     private Client? _selectedClient;
-    private bool _incorrectClientName = false;
-    private List<Client> _allClients = [];
-    private int _selectedClientIndex = -1;
-
     private DateOnly? _contextDate;
-
-    private string? _notificationText = string.Empty;
-    private NotificationSeverity _notificationSeverity = NotificationSeverity.None;
+    private List<Client> _allClients = [];
+    private bool _incorrectClientName = false;
+    private int _selectedClientIndex = -1;
 
     [Parameter]
     public Client? StartingClient { get; set; }
     [Parameter]
     public EventCallback<Client> OnSelectedClientChanged { get; set; }
+    [Parameter]
+    public bool LockClientNavigationButtons { get; set; } = false;
+
     [Parameter]
     public bool ShowDateSelector { get; set; } = true;
     [Parameter]
@@ -53,8 +56,6 @@
     public EventCallback<DateOnly> OnSelectedDateContextChanged { get; set; }
     [Parameter]
     public EventCallback OnSettlementStateChanged { get; set; }
-    [Parameter]
-    public bool LockClientNavigationButtons { get; set; } = false;
 
     /// <summary>
     /// Refreshes the view and requeries selected client. Won't notify about client change
@@ -64,7 +65,6 @@
         if (_selectedClient is not null)
             _selectedClient = await ClientsService.GetAsync(_selectedClient.Id);
 
-        ShowClientNotificationIconIfNesessary();
         StateHasChanged();
     }
 
@@ -81,8 +81,6 @@
             _selectedClientIndex = Math.Max(_allClients.Select(c => c.Id).ToList().IndexOf(_selectedClient.Id), 0);
 
             _incorrectClientName = false;
-
-            ShowClientNotificationIconIfNesessary();
         }
         else
             _incorrectClientName = true;
@@ -97,8 +95,6 @@
         OnSelectedClientChanged.InvokeAsync(_selectedClient);
         _selectedClientIndex = allClientIndex;
 
-        ShowClientNotificationIconIfNesessary();
-
         _incorrectClientName = false;
     }
 
@@ -106,9 +102,6 @@
     {
         bool clientFound = SelectClientFromName((string)e.Value!);
         _incorrectClientName = !clientFound;
-
-        if (clientFound)
-            ShowClientNotificationIconIfNesessary();
     }
 
     private bool SelectClientFromName(string name)
@@ -129,21 +122,6 @@
     private async Task ChangeSelectedDateContext(DateOnly dateContext)
     {
         _contextDate = dateContext;
-        StateHasChanged();
         await OnSelectedDateContextChanged.InvokeAsync(dateContext);
-    }
-
-    private void ShowClientNotificationIconIfNesessary()
-    {
-        if (_selectedClient is null)
-        {
-            _notificationText = string.Empty;
-            _notificationSeverity = NotificationSeverity.None;
-            return;
-        }
-
-        NotificationInfo info = ClientNotificationService.GetClientReductionNotification(_selectedClient);
-        _notificationText = info.Message;
-        _notificationSeverity = info.Severity;
     }
 }

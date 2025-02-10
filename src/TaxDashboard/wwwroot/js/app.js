@@ -41,7 +41,6 @@ function enableTooltip(id) {
     }
 }
 
-
 function enablePopovers() {
     const popovers = document.querySelectorAll('[data-bs-toggle="popover"]');
     popovers.forEach(t => {

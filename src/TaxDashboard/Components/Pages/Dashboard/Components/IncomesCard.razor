@@ -1,0 +1,112 @@
+﻿@using ApexCharts
+@using TaxDashboard.Components.Loading
+@using TaxDashboard.Components.Pages.Dashboard.Model
+
+@inject ClientsService ClientsService
+
+<h5 class="card-title">Miesięczne przychody</h5>
+<ElementRequiringLoad @ref="@_incomeLoadingRef">
+    <ApexChart @ref="_incomeChartRef" TItem="IncomeData" Height="@("236px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _incomeLoadingRef.HideLoadingIcon())">
+        <ApexPointSeries TItem="IncomeData"
+                         Name="Przychody"
+                         Items="@_incomesDataSeries"
+                         SeriesType="@SeriesType.Area"
+                         ShowDataLabels
+                         XValue="@(e => DataDisplayHelper.GetMonthLabel(e.Month))"
+                         YAggregate="@(e => e.Sum(e => e.Amount))" />
+    </ApexChart>
+    <label class="form-label" for="income">Przychody w tym miesiącu</label>
+    <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncomeAmount" @bind-Value:after="UpdateClientAsync" onclick="this.select();" />
+</ElementRequiringLoad>
+
+@code {
+    private ElementRequiringLoad _incomeLoadingRef = default!;
+    private ApexChart<IncomeData> _incomeChartRef = default!;
+
+    private List<IncomeData> _incomesDataSeries = [.. Enumerable.Range(1, 12).Select(month => new IncomeData(month))];
+    private Income? _currentMonthIncome;
+
+    private ChangeTracker<int?> _clientChangeTracker = new();
+    private ChangeTracker<DateOnly?> _contextDateYearChangeTracker = new();
+
+    [Parameter, EditorRequired]
+    public Client Client { get; set; } = default!;
+    [Parameter, EditorRequired]
+    public DateOnly? ContextDate { get; set; }
+    [Parameter]
+    public EventCallback<List<IncomeData>> OnYearlyIncomesChanged { get; set; }
+
+    private string CurrentMonthIncomeAmount
+    {
+        get => (_currentMonthIncome?.Amount ?? 0).ToString("C2");
+        set
+        {
+            if (Client is null || !ContextDate.HasValue)
+                return;
+
+            if (Decimal.TryParse(value, GlobalSettings.CurrencyNumberStyles, GlobalSettings.CurrencyCulture, out decimal currency))
+            {
+                if (currency == 0)
+                {
+                    if (_currentMonthIncome is not null)
+                    {
+                        Client.Incomes.Remove(_currentMonthIncome);
+                        _currentMonthIncome = null;
+                    }
+                }
+                else
+                {
+                    if (_currentMonthIncome is not null)
+                        _currentMonthIncome.Amount = Math.Round(currency, 2);
+                    else
+                    {
+                        _currentMonthIncome = new() { Date = ContextDate.Value };
+                        Client.Incomes.Add(_currentMonthIncome);
+                    }
+
+                    _currentMonthIncome.Amount = Math.Round(currency, 2);
+                }
+            }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await UpdateIncomesAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if ((_clientChangeTracker.HasChanged(Client?.Id) || _contextDateYearChangeTracker.HasChanged(ContextDate)) && _incomeChartRef is not null)
+            await UpdateIncomesAsync();
+    }
+
+    private async Task UpdateClientAsync()
+    {
+        await ClientsService.UpdateWithRelatedEntitiesAsync(Client);
+        await UpdateIncomesAsync();
+        await OnYearlyIncomesChanged.InvokeAsync(_incomesDataSeries);
+    }
+
+    private async Task UpdateIncomesAsync()
+    {
+        _currentMonthIncome = ContextDate.HasValue ? Client?.Incomes.Where(i => i.Date == ContextDate.Value).FirstOrDefault() : null;
+
+        UpdateIncomesDataSeries();
+        await UpdateChartsAsync();
+    }
+
+    private void UpdateIncomesDataSeries()
+    {
+        IEnumerable<Income> clientIncomes = ContextDate.HasValue && Client is not null ? Client.Incomes.Where(i => i.Date.Year == ContextDate.Value.Year) : [];
+
+        foreach (IncomeData data in _incomesDataSeries)
+        {
+            Income? currentIncome = clientIncomes.FirstOrDefault(i => i.Date.Month == data.Month);
+            data.Amount = currentIncome is not null ? currentIncome.Amount : 0;
+        }
+    }
+
+    private Task UpdateChartsAsync() => _incomeChartRef.UpdateSeriesAsync();
+}

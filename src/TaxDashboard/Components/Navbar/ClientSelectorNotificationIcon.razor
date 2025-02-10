@@ -1,0 +1,30 @@
+﻿@using TaxDashboard.Services.Notifications
+
+<NotificationIcon PopoverText="@_notificationText" Severity="@_notificationSeverity" ShowWhenEmptyMessage="false" OccupySpaceWhenEmptyMessage="true" />
+
+@code {
+    private string? _notificationText = string.Empty;
+    private NotificationSeverity _notificationSeverity = NotificationSeverity.None;
+
+    private ChangeTracker<string?> _selectedClientChangeTracker = new();
+
+    [Parameter]
+    public Client? SelectedClient { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (!_selectedClientChangeTracker.HasChanged(SelectedClient?.FullName))
+            return;
+
+        if (SelectedClient is null)
+        {
+            _notificationText = string.Empty;
+            _notificationSeverity = NotificationSeverity.None;
+            return;
+        }
+
+        NotificationInfo info = ClientNotificationService.GetClientReductionNotification(SelectedClient);
+        _notificationText = info.Message;
+        _notificationSeverity = info.Severity;
+    }
+}

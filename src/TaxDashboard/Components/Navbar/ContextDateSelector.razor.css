@@ -2,14 +2,14 @@
     display: none !important;
 }
 
-@media (max-width: 1371px) {
+@media (max-width: 1395px) {
     .month-button {
         padding-left: 0.25rem;
         padding-right: 0.25rem;
     }
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1205px) {
     .month-button-group {
         display: none !important;
     }

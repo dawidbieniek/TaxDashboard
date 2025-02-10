@@ -64,7 +64,7 @@
                             <label for="nip">NIP</label>
                         </div>
                         <div class="col-8">
-                            <InputText id="nip" class="form-control" @bind-Value="_newClientData.NIP" onclick="this.select();" />
+                            <InputText id="nip" class="form-control" @bind-Value="_newClientData.NIP" onclick="this.select();" required />
                             <ValidationMessage For="@(()=> _newClientData.NIP)" />
                         </div>
                     </div>
@@ -88,9 +88,7 @@
         </div>
     </div>
 </EditForm>
-<Toast @ref="@_toastRef" Title="Dodano klienta">
-    Pomyślnie dodano klienta o imieniu "<b>@_toastClientName</b>"
-</Toast>
+<Toast @ref="@_toastRef" Title="Dodano klienta" />
 
 @code {
     private NewClientData _newClientData = default!;
@@ -99,7 +97,6 @@
     private EditContext _newClientDataEditContext = default!;
 
     private Toast _toastRef = default!;
-    private string _toastClientName = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -133,8 +130,13 @@
 
         await ClientsService.UpdateWithRelatedEntitiesAsync(newClient);
 
-        _toastClientName = newClient.FullName;
-        await _toastRef.ShowAsync();
+        await _toastRef.ShowAsync(builder =>
+        {
+            builder.AddContent(0, "Pomyślnie dodano klienta ");
+            builder.OpenElement(1, "b");
+            builder.AddContent(2, newClient.FullName);
+            builder.CloseElement();
+        });
 
         CreateNewClientData();
     }

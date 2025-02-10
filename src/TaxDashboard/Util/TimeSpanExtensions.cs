@@ -4,7 +4,7 @@ internal static class TimeSpanExtensions
 {
     public static string ToHumanReadableString(this TimeSpan timeSpan)
     {
-        List<string> parts = new List<string>();
+        List<string> parts = [];
 
         if (timeSpan.Days > 0)
         {

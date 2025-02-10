@@ -7,18 +7,39 @@
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">
-            @ChildContent
+            @if (_contentToDisplay is not null)
+            {
+                @_contentToDisplay
+            }
         </div>
     </div>
 </div>
 
 @code {
+    private RenderFragment? _contentToDisplay;
+
     [Parameter, EditorRequired]
     public string Title { get; set; } = "Toast";
-    [Parameter, EditorRequired]
-    public RenderFragment ChildContent { get; set; } = default!;
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
     [Parameter]
     public string Id { get; set; } = "toastPopup";
 
-    public ValueTask ShowAsync() => JS.InvokeVoidAsync("showToast", Id);
+    protected override void OnParametersSet()
+    {
+        _contentToDisplay = ChildContent;
+    }
+
+    public ValueTask ShowTextAsync(string? text = null) => ShowAsync(string.IsNullOrEmpty(text) ? null : builder => builder.AddContent(0, text));
+
+    public ValueTask ShowAsync(RenderFragment? content = null)
+    {
+        if (content is not null)
+        {
+            _contentToDisplay = content;
+            StateHasChanged();
+        }
+
+        return JS.InvokeVoidAsync("showToast", Id);
+    }
 }

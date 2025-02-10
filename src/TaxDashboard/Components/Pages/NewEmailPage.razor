@@ -6,7 +6,6 @@
 @inject NavigationManager Navigation
 @inject EmailService EmailService
 @inject ClientsService ClientsService
-@inject IJSRuntime JS
 
 <EditForm EditContext="@_emailEditContext" class="container pt-3 floating-card" style="max-width:1000px;" OnValidSubmit="SendEmailAsync">
     <DataAnnotationsValidator />
@@ -17,8 +16,10 @@
                     <div class="row mb-2">
                         <label class="label-col" for="from">Od</label>
                         <div class="col">
-                            <InputText id="from" class="form-control" @bind-Value="_email.From" onclick="this.select();" disabled required />
-                            <ValidationMessage For="@(()=> _email.From)" />
+                            <input id="from" class="form-control" value="@_email.From" disabled />
+                        </div>
+                        <div class="col">
+                            <input id="fromName" class="form-control" value="@_email.FromName" disabled />
                         </div>
                     </div>
                     <div class="row mb-2">
@@ -28,20 +29,19 @@
                             <ValidationMessage For="@(()=> _email.To)" />
                         </div>
                         <div class="col">
-                            <InputText id="toName" class="form-control" @bind-Value="_email.ToName" required disabled />
-                            <ValidationMessage For="@(()=> _email.ToName)" />
+                            <input id="toName" class="form-control" value="@_email.ToName" disabled />
                         </div>
                     </div>
                     <div class="row mb-2">
                         <label class="label-col" for="subject">Temat</label>
                         <div class="col">
-                            <InputText id="subject" class="form-control" type="tel" @bind-Value="_email.Subject" required />
+                            <InputText id="subject" class="form-control" type="text" @bind-Value="_email.Subject" required />
                             <ValidationMessage For="@(()=> _email.Subject)" />
                         </div>
                     </div>
                     <div class="row mb-2">
                         <div class="col">
-                            <InputTextArea id="content" class="form-control overflow-y-auto" style="margin:1px;" @bind-Value="_email.Content" rows="10"/>
+                            <InputTextArea id="content" class="form-control overflow-y-auto" @bind-Value="_email.Content" rows="10"/>
                             <ValidationMessage For="@(()=> _email.Content)" />
                         </div>
                     </div>
@@ -56,26 +56,16 @@
         </div>
     </div>
 </EditForm>
-<Toast @ref="@_toastRef" Title="Toast">
-    @_toastMessage
-</Toast>
+<Toast @ref="@_toastRef" Title="Wysyłanie" />
 
 @code {
     private EmailContent _email = new();
     private EditContext _emailEditContext = default!;
 
     private Toast _toastRef = default!;
-    private string _toastMessage = string.Empty;
 
     [SupplyParameterFromQuery]
     public int? ClientId { get; set; }
-
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-            await JS.InvokeVoidAsync("enablePopovers");
-    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -92,29 +82,26 @@
             return;
 
         Client? client = await ClientsService.GetDetailsAsync(ClientId.Value);
-
         if (client is null)
             return;
 
         _email.From = login.EmailAddress!;
+        _email.FromName = Preferences.Get(GlobalSettings.PreferencesStorage.EmailNameKey, string.Empty);
         _email.To = client.Email;
         _email.ToName = client.FullName;
-        // _emailEditContext = new(_email);
     }
 
     private async Task SendEmailAsync()
     {
-        if (await EmailService.SendEmailAsync(_email.To, _email.ToName, Preferences.Get(GlobalSettings.PreferencesStorage.EmailNameKey, string.Empty), _email.Subject, _email.Content))
-            _toastMessage = $"Pomyślnie wysłano wiadomość do {_email.To}";
-        else
-            _toastMessage = $"Nie udało się wysłać wiadomości";
-            await _toastRef.ShowAsync();
+        bool emailSent = await EmailService.SendEmailAsync(_email.To, _email.ToName, _email.FromName, _email.Subject, _email.Content);
+        await _toastRef.ShowTextAsync(emailSent ? $"Pomyślnie wysłano wiadomość do {_email.To}" : $"Nie udało się wysłać wiadomości");
     }
 
     private class EmailContent
     {
         [Required(ErrorMessage = "Podaj adres nadawcy")]
         public string From { get; set; } = string.Empty;
+        public string FromName { get; set; } = string.Empty;
         [Required(ErrorMessage = "Podaj adresata")]
         public string To { get; set; } = string.Empty;
         public string ToName { get; set; } = string.Empty;
@@ -127,5 +114,3 @@
         public string Content { get; set; } = string.Empty;
     }
 }
-
-

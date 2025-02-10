@@ -1,8 +1,10 @@
 ﻿@page "/data"
 
-@using System.Globalization
+@using TaxDashboard.Components.Loading
 @using TaxDashboard.Components.Navbar
 @using TaxDashboard.Components.FormInputs
+@using TaxDashboard.Components.Pages.Dashboard.Components
+@using TaxDashboard.Components.Popups
 @using TaxDashboard.Data.Enums
 @using TaxDashboard.Util
 
@@ -16,10 +18,7 @@
 
     @if (Client is null)
     {
-        <div class="alert alert-warning text-center m-3">
-            <div class="mb-3">Wybierz klienta z listy, albo dodaj nowego</div>
-            <a class="btn btn-primary ms-auto" href="/add">Dodaj klienta</a>
-        </div>
+        <NoClientAlert />
     }
     else
     {
@@ -27,7 +26,6 @@
             <DataAnnotationsValidator />
             <div class="row mb-2">
                 <div class="col-12 d-flex flex-row">
-                    @* <div class="flex-grow-1"> </div> *@
                     <button class="btn btn-primary@(_clientEditContext.IsModified() && !_clientEditContext.GetValidationMessages().Any() ? "" : " disabled")" style="width:9rem;" type="submit">Zapisz zmiany</button>
                 </div>
             </div>
@@ -179,7 +177,7 @@
     }
 </LoadingContentsComponent>
 <!-- Modal -->
-<TaxDashboard.Components.Popups.PreventNavigationModal NavigationBlockCondition="@(() => _clientEditContext is not null && _clientEditContext.IsModified())" />
+<PreventNavigationModal NavigationBlockCondition="@(() => _clientEditContext is not null && _clientEditContext.IsModified())" />
 
 @code {
     private IEnumerable<Bank> _allBanks = [];
