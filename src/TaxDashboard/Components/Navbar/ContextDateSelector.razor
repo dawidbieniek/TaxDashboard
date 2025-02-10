@@ -1,4 +1,4 @@
-﻿<select class="form-select ms-2 flex-grow-0 flex-shrink-0" style="width:6rem; height: 38px" @onchange="ChangeSelectedYear" value="@_selectedYear">
+﻿<select class="form-select flex-grow-0 flex-shrink-0" style="width:6rem; height: 38px" @onchange="ChangeSelectedYear" value="@_selectedYear">
     @foreach (int year in SelectableYears)
     {
         @if (_selectedYear == year)

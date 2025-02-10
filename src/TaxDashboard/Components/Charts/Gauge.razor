@@ -1,16 +1,25 @@
 ﻿@using ApexCharts
+@using TaxDashboard.Services.Notifications
+
+@inject IJSRuntime JS
 
 <div class="d-flex flex-column align-items-center justify-content-center h-100">
     <ElementRequiringLoad @ref="@_loadingRef">
         <ApexChart @ref="@_chartRef" TItem="GaugeValue" OnBeforeMount="@(() => _loadingRef.HideLoadingIcon())">
             <ApexPointSeries TItem="GaugeValue"
                              SeriesType=SeriesType.RadialBar
-                             Items=@([new GaugeValue {Percentage = Math.Min(Value / ValueLimit * 100, 100), Label = Label}])
+                             Items=@([new GaugeValue {Percentage = Math.Round(Math.Min(Value / ValueLimit * 100, 100)), Label = Label}])
                              Name="@Label"
                              XValue="@(e => e.Label)"
                              YValue="@(e => e.Percentage)" />
         </ApexChart>
-        <div class="h5 w-100 text-center@(_valueClass)">@Value.ToString("C2", GlobalSettings.CurrencyCulture)</div>
+        <div id="@_tooltipId" class="h5 w-100 text-center@(_valueClass)"
+             data-bs-toggle="tooltip"
+             data-bs-html="true"
+             data-bs-original-title="@($"{Value:C} / {ValueLimit:C}{(string.IsNullOrEmpty(TooltipAdditionalText) ? "" : $"<br/>{TooltipAdditionalText}")}")">
+            @Value.ToString("C2", GlobalSettings.CurrencyCulture)
+            <NotificationIcon OccupySpaceWhenEmptyMessage="false" ShowWhenEmptyMessage="false" PopoverLocation="right" PopoverText="@_notificationText" Severity="@_notificationSeverity" />
+        </div>
     </ElementRequiringLoad>
 </div>
 
@@ -22,25 +31,72 @@
     private ApexChart<GaugeValue> _chartRef = default!;
     private ElementRequiringLoad _loadingRef = default!;
 
+    private string _tooltipId = Guid.NewGuid().ToString();
+    private NotificationSeverity _notificationSeverity;
+    private string _notificationText = string.Empty;
+
+    private decimal _oldValue = decimal.MinValue;
+    private decimal _oldValueLimit = decimal.MinValue;
+
     [Parameter]
     public string Label { get; set; } = string.Empty;
     [Parameter]
     public decimal Value { get; set; }
     [Parameter]
     public decimal ValueLimit { get; set; } = 10;
+    [Parameter]
+    public string TooltipAdditionalText { get; set; } = string.Empty;
+    [Parameter]
+    public string PopoverWarningText { get; set; } = string.Empty;
+    [Parameter]
+    public string PopoverDangerText { get; set; } = string.Empty;
 
-    protected override void OnParametersSet()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JS.InvokeVoidAsync("enableTooltip", _tooltipId);
+    }
+
+    protected override async Task OnParametersSetAsync()
     {
         if (Value >= ValueLimit * WarningColorPercentage)
         {
             if (Value >= ValueLimit)
+            {
                 _valueClass = " text-danger";
+                _notificationSeverity = NotificationSeverity.Danger;
+                _notificationText = PopoverDangerText;
+            }
             else
+            {
                 _valueClass = " text-warning";
+                _notificationSeverity = NotificationSeverity.Warning;
+                _notificationText = PopoverWarningText;
+
+            }
         }
         else
+        {
             _valueClass = string.Empty;
+            _notificationSeverity = NotificationSeverity.None;
+            _notificationText = string.Empty; ;
+
+        }
+
+        bool updateChart = false;
+        if (_oldValue != Value)
+        {
+            _oldValue = Value;
+            updateChart = true;
+        }
+        if (_oldValueLimit != ValueLimit)
+        {
+            _oldValueLimit = ValueLimit;
+            updateChart = true;
+        }
+        if (updateChart && _chartRef is not null)
+            await _chartRef.UpdateSeriesAsync();
     }
 
-    public Task UpdateChartAsync() => _chartRef.UpdateSeriesAsync();
+    public Task UpdateChartAsync() => Task.CompletedTask;// _chartRef.UpdateSeriesAsync();
 }

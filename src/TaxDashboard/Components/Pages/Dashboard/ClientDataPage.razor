@@ -9,9 +9,10 @@
 @inherits DashboardPageBase
 
 @inject BanksService BanksService
+@inject IJSRuntime JS
 
 <LoadingContentsComponent Initialized="@Initialized">
-    <ClientSelector ShowDateSelector="false" StartingClient="@Client" OnSelectedClientChanged="ChangeSelectedClient" />
+    <ClientSelector @ref="_clientSelectorRef" ShowDateSelector="false" StartingClient="@Client" OnSelectedClientChanged="ChangeSelectedClient" LockClientNavigationButtons="@(_clientEditContext.IsModified())" />
 
     @if (Client is null)
     {
@@ -40,12 +41,12 @@
                             <div class="d-flex gap-2">
                                 <div class="col mb-2">
                                     <label class="form-label" for="name">Imię</label>
-                                    <InputText id="name" class="form-control" @bind-Value="Client.Name" onclick="this.select();" />
+                                    <InputText id="name" class="form-control" @bind-Value="Client.Name" onclick="this.select();" required />
                                     <ValidationMessage For="@(()=> Client.Name)" />
                                 </div>
                                 <div class="col mb-2">
                                     <label class="form-label" for="surname">Nazwisko</label>
-                                    <InputText id="surname" class="form-control" @bind-Value="Client.Surname" onclick="this.select();" />
+                                    <InputText id="surname" class="form-control" @bind-Value="Client.Surname" onclick="this.select();" required />
                                     <ValidationMessage For="@(()=> Client.Surname)" />
                                 </div>
                             </div>
@@ -76,11 +77,11 @@
                                 <InputClassSelect id="bank" class="form-select" @bind-Value="@Client.Bank" Options="@_allBanks" Selector="v => v.Name" />
                                 <ValidationMessage For="@(()=> Client.Bank)" />
                             </div>
-                            <div class="col mb-3 form-check form-switch">
+                            <div class="col mb-3 form-check form-switch" style="margin-top:26px;">
                                 <label class="form-check-label" for="employmentContract">Umowa o pracę</label>
                                 <InputCheckbox id="employmentContract" class="form-check-input" type="checkbox" @bind-Value="Client.EmploymentContract" />
                             </div>
-                            <div class="col form-check form-switch" style="margin-bottom:4px">
+                            <div class="col form-check form-switch" >
                                 <label class="form-check-label" for="cashMethod">Metoda kasowa</label>
                                 <InputCheckbox id="cashMethod" class="form-check-input" type="checkbox" @bind-Value="Client.CashMethod" />
                             </div>
@@ -121,14 +122,7 @@
                             </div>
                             <div class="col mb-2">
                                 <label class="form-label" for="vatType">Sposób opłacania VAT</label>
-                                @if (Client.VAT)
-                                {
-                                    <InputClassSelect id="vatType" class="form-select" @bind-Value="@Client.VATPaymentType" Options="@(Enum.GetValues<PaymentType>())" Selector="v => v.GetDescriptor()" />
-                                }
-                                else
-                                {
-                                    <InputClassSelect disabled id="vatType" class="form-select" @bind-Value="@Client.VATPaymentType" Options="@(Enum.GetValues<PaymentType>())" Selector="v => v.GetDescriptor()" />
-                                }
+                                <InputClassSelect disabled="@(!Client.VAT)" id="vatType" class="form-select" @bind-Value="@Client.VATPaymentType" Options="@(Enum.GetValues<PaymentType>())" Selector="v => v.GetDescriptor()" />
                                 <ValidationMessage For="@(()=> Client.VATPaymentType)" />
                             </div>
                         </div>
@@ -146,14 +140,36 @@
                                 <ValidationMessage For="@(()=> Client.TaxType)" />
                             </div>
                             <div class="col mb-2">
-                                <label class="form-label" for="reductionType">Ulga</label>
+                                <label class="form-label" for="pit">Sposób rozliczania PIT</label>
+                                <InputClassSelect id="pit" class="form-select" @bind-Value="@Client.PITPaymentType" Options="@(Enum.GetValues<PaymentType>())" Selector="v => v.GetDescriptor()" />
+                                <ValidationMessage For="@(()=> Client.PITPaymentType)" />
+                            </div>
+                        </div>
+                    </div>
+                    @* Reduction settings *@
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title" style="margin-bottom:27px;">Ulgi</h5>
+                            <div class="col mb-2">
                                 <InputClassSelect id="reductionType" class="form-select" @bind-Value="@Client.ReductionType" Options="@(Enum.GetValues<ReductionType>())" Selector="v => v.GetDescriptor()" />
                                 <ValidationMessage For="@(()=> Client.ReductionType)" />
                             </div>
                             <div class="col mb-2">
-                                <label class="form-label" for="pit">Sposób rozliczania PIT</label>
-                                <InputClassSelect id="pit" class="form-select" @bind-Value="@Client.PITPaymentType" Options="@(Enum.GetValues<PaymentType>())" Selector="v => v.GetDescriptor()" />
-                                <ValidationMessage For="@(()=> Client.PITPaymentType)" />
+                                <label class="form-label" for="reductionDate">Data przejścia</label>
+                                <InputDate id="reductionDate" class="form-control" @bind-Value="Client.ReductionChangeDate" required />
+                                <ValidationMessage For="@(()=> Client.ReductionChangeDate)" />
+                            </div>
+                            <div class="col mb-2">
+                                <label class="form-label" for="transactionDate">Data pierwszej transakcji fiskalnej</label>
+                                @if(Client.UseCashRegister)
+                                {
+                                    <InputDate id="transactionDate" class="form-control" @bind-Value="Client.FirstCashRegisterUseDate" required />
+                                }
+                                else
+                                {
+                                    <input type="date" id="transactionDate" class="form-control" disabled data-bs-toggle="tooltip" data-bs-title="Klient nie używa kas fiskalnych" />
+                                }
+                                <ValidationMessage For="@(()=> Client.FirstCashRegisterUseDate)" />
                             </div>
                         </div>
                     </div>
@@ -163,12 +179,13 @@
     }
 </LoadingContentsComponent>
 <!-- Modal -->
-<TaxDashboard.Components.Popups.PreventNavigationModal NavigationBlockCondition="@(() => _clientEditContext.IsModified())"/>
+<TaxDashboard.Components.Popups.PreventNavigationModal NavigationBlockCondition="@(() => _clientEditContext is not null && _clientEditContext.IsModified())" />
 
 @code {
     private IEnumerable<Bank> _allBanks = [];
     private EditContext _clientEditContext = default!;
 
+    private ClientSelector? _clientSelectorRef;
 
     protected override Client? Client
     {
@@ -211,12 +228,22 @@
         await base.OnInitializedAsync();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+            await JS.InvokeVoidAsync("enableTooltips");
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
     private async Task UpdateClientAsync()
     {
         if (Client is not null && _clientEditContext.IsModified())
         {
             _clientEditContext = new(Client);
             await ClientsService.UpdateWithRelatedEntitiesAsync(Client);
+
+            await _clientSelectorRef!.RefreshAsync();
         }
     }
 }

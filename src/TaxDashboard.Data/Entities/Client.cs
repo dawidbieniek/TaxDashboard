@@ -25,6 +25,7 @@ public class Client : Entity
     public bool Suspended { get; set; } = false;
 
     public bool UseCashRegister { get; set; } = false;
+    public DateOnly FirstCashRegisterUseDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     [MaxLength(64, ErrorMessage = "Typ abonamenu jest zbyt długi (max 64)")]
     public string Subscription { get; set; } = string.Empty;
     public required Bank Bank { get; set; }
@@ -33,6 +34,7 @@ public class Client : Entity
     public bool CashMethod { get; set; } = false;
     public TaxType TaxType { get; set; } = TaxType.Scale;
     public ReductionType ReductionType { get; set; } = ReductionType.Start;
+    public DateOnly ReductionChangeDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     public decimal AuthorizationPrice { get; set; }
     public decimal SubscriptionPrice { get; set; }
     public PaymentType PITPaymentType { get; set; } = PaymentType.Monthly;

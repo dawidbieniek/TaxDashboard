@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TaxDasboard.Data.Migrations
+namespace TaxDashboard.Data.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration
@@ -38,6 +38,7 @@ namespace TaxDasboard.Data.Migrations
                     Email = table.Column<string>(type: "TEXT", nullable: false),
                     Suspended = table.Column<bool>(type: "INTEGER", nullable: false),
                     UseCashRegister = table.Column<bool>(type: "INTEGER", nullable: false),
+                    FirstCashRegisterUseDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
                     Subscription = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false),
                     BankId = table.Column<int>(type: "INTEGER", nullable: false),
                     EmploymentContract = table.Column<bool>(type: "INTEGER", nullable: false),
@@ -45,6 +46,7 @@ namespace TaxDasboard.Data.Migrations
                     CashMethod = table.Column<bool>(type: "INTEGER", nullable: false),
                     TaxType = table.Column<int>(type: "INTEGER", nullable: false),
                     ReductionType = table.Column<int>(type: "INTEGER", nullable: false),
+                    ReductionChangeDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
                     AuthorizationPrice = table.Column<decimal>(type: "TEXT", nullable: false),
                     SubscriptionPrice = table.Column<decimal>(type: "TEXT", nullable: false),
                     PITPaymentType = table.Column<int>(type: "INTEGER", nullable: false),

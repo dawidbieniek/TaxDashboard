@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 
 namespace TaxDashboard.Services.Emails;
 
-internal partial class OAuthAuthenticator : Authenticator
+internal partial class OAuthAuthenticator
 {
     private const string UserId = "appUser";
     private readonly AuthorizationCodeInstalledApp _authorizationCodeApp;
@@ -77,6 +77,20 @@ internal partial class OAuthAuthenticator : Authenticator
 
     public async Task<LoginResult> LoginAsync() => await AuthenticateUsingOAuthAsync() ? new() : new(false, "Logowanie nie udało się");
 
+    public async Task<SaslMechanism?> GetStoredAuthenticationData()
+    {
+        TokenResponse? token = await GetStoredTokenAsync();
+        if (token is null)
+            return null;
+
+        await RefreshTokenIfNeededAsync(token);
+        string? email = await GetUserEmailAddressAsync(new(_oauthCodeFlow, UserId, token));
+        if (string.IsNullOrEmpty(email))
+            return null;
+
+        return new SaslMechanismOAuthBearer(email, token.AccessToken);
+    }
+
     [GeneratedRegex("\"email\"\\s*:\\s*\"(.*?)\"")]
     private static partial Regex EmailAddressFromJsonRegex();
 
@@ -121,7 +135,7 @@ internal partial class OAuthAuthenticator : Authenticator
         using SmtpClient client = new();
         try
         {
-            await client.ConnectAsync(GmailSmtpAddress, GmailSmtpTSLPort, SecureSocketOptions.StartTls);
+            await client.ConnectAsync(GlobalSettings.Emails.GmailSmtpAddress, GlobalSettings.Emails.GmailSmtpTSLPort, SecureSocketOptions.StartTls);
             await client.AuthenticateAsync(oauth2);
             return true;
         }

@@ -1,0 +1,51 @@
+﻿@using TaxDashboard.Services.Notifications
+@implements IAsyncDisposable
+
+@inject IJSRuntime JS
+
+@if (ShowWhenEmptyMessage || !string.IsNullOrEmpty(PopoverText))
+{
+    <i id="@_id" class="bi-exclamation-diamond align-self-center flex-shrink-0 mx-2 @(Severity.TextClass())" style="font-size:1.25rem;"
+       data-bs-toggle="popover"
+       data-bs-html="true"
+       data-bs-placement="@PopoverLocation"
+       data-bs-title="Przypomnienie"
+       data-bs-content="@PopoverText" />
+}
+else if (OccupySpaceWhenEmptyMessage)
+{
+    <div class="flex-shrink-0" style="width:36px" />
+}
+
+@code {
+    private string _id = Guid.NewGuid().ToString();
+    private string _previousPopoverText = string.Empty;
+
+    [Parameter]
+    public bool OccupySpaceWhenEmptyMessage { get; set; } = true;
+    [Parameter]
+    public bool ShowWhenEmptyMessage { get; set; } = false;
+    [Parameter]
+    public NotificationSeverity Severity { get; set; } = NotificationSeverity.None;
+    [Parameter]
+    public string PopoverText { get; set; } = string.Empty;
+    [Parameter]
+    public string PopoverLocation { get; set; } = "bottom";
+
+    public async ValueTask DisposeAsync()
+    {
+        await JS.InvokeVoidAsync("hidePopover", _id);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_previousPopoverText != PopoverText)
+        {
+            _previousPopoverText = PopoverText;
+
+            // Refresh popover by hiding it and then showing new one
+            await JS.InvokeVoidAsync("hidePopover", _id);
+            await JS.InvokeVoidAsync("enablePopover", _id);
+        }
+    }
+}

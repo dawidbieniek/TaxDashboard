@@ -41,4 +41,18 @@ public class ClientsService(IDbContextFactory<AppDbContext> contextFactory) : Cr
             .Include(c => c.Invoices)
             .FirstOrDefault(c => !c.Suspended);
     }
+
+    public async Task<decimal> GetIncomeSumAsync(int clientId, DateOnly startDate, DateOnly endDate)
+    {
+        using AppDbContext context = await ContextFactory.CreateDbContextAsync();
+        Client? client = context.Clients
+            .Include(c => c.Incomes)
+            .FirstOrDefault(c => c.Id == clientId);
+
+        return client is null
+            ? 0
+            : client.Incomes
+                .Where(i => i.Date >= startDate && i.Date <= endDate)
+                .Sum(i => i.Amount);
+    }
 }

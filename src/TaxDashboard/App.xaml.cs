@@ -14,7 +14,14 @@ namespace TaxDashboard
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(_startingPage ?? new MainPage()) { Title = "TaxDashboard" };
+            var window = new Window(_startingPage ?? new MainPage())
+            {
+                Title = "TaxDashboard",
+                MinimumWidth = 620,
+                MinimumHeight = 440,
+            };
+
+            return window;
         }
     }
 }
