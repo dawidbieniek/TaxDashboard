@@ -99,5 +99,9 @@
         await UpdateLoginDataAsync();
     }
 
-    private async Task UpdateLoginDataAsync() => _emailLoginInfo = await EmailService.GetCurrentLoginInfoAsync();
+    private async Task UpdateLoginDataAsync()
+    {
+        _emailLoginInfo = await EmailService.GetCurrentLoginInfoAsync();
+        StateHasChanged();
+    }
 }
