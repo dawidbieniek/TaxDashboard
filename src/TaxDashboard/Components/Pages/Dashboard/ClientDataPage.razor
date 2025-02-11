@@ -16,7 +16,7 @@
 <LoadingContentsComponent Initialized="@Initialized">
     <ClientSelector @ref="_clientSelectorRef" ShowDateSelector="false" StartingClient="@Client" OnSelectedClientChanged="ChangeSelectedClient" LockClientNavigationButtons="@(_clientEditContext.IsModified())" />
 
-    @if (Client is null || _clientEditContext is null)
+    @if (Client is null)
     {
         <NoClientAlert />
     }
@@ -218,6 +218,12 @@
             if (Decimal.TryParse(value, GlobalSettings.CurrencyNumberStyles, GlobalSettings.CurrencyCulture, out decimal currency))
                 Client!.SubscriptionPrice = Math.Round(currency, 2);
         }
+    }
+
+    public ClientDataPage()
+    {
+        // Even if form is not displayed, edit context must be initialized
+        _clientEditContext = new(new Client() { Bank = null!, JoinDateTime = DateTime.Now,});
     }
 
     protected override async Task OnInitializedAsync()
