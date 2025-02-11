@@ -51,12 +51,12 @@
                             <div class="d-flex gap-2">
                                 <div class="col mb-2">
                                     <label class="form-label" for="phone">Telefon</label>
-                                    <InputText id="phone" class="form-control" type="tel" @bind-Value="Client.PhoneNumber" onclick="this.select();" />
+                                    <InputText id="phone" class="form-control" type="tel" @bind-Value="Client.PhoneNumber" autocomplete="off" onclick="this.select();" />
                                     <ValidationMessage For="@(()=> Client.PhoneNumber)" />
                                 </div>
                                 <div class="col mb-2">
                                     <label class="form-label" for="email">Email</label>
-                                    <InputText id="email" class="form-control" type="email" @bind-Value="Client.Email" onclick="this.select();" />
+                                    <InputText id="email" class="form-control" type="email" @bind-Value="Client.Email" autocomplete="off" onclick="this.select();" />
                                     <ValidationMessage For="@(()=> Client.Email)" />
                                 </div>
                             </div>
@@ -67,7 +67,7 @@
                             </div>
                             <div class="col mb-2">
                                 <label class="form-label" for="nip">NIP</label>
-                                <InputText id="nip" class="form-control" @bind-Value="Client.NIP" onclick="this.select();" />
+                                <InputText id="nip" class="form-control" @bind-Value="Client.NIP" autocomplete="off" onclick="this.select();" />
                                 <ValidationMessage For="@(()=> Client.NIP)" />
                             </div>
                             <div class="col mb-3">

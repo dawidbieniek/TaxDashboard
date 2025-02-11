@@ -115,7 +115,7 @@
                     @* Notes *@
                     <div class="card bg-light h-100 p-3" style="min-height:224px">
                         <h5 class="card-title">Notatki</h5>
-                        <InputTextArea class="form-control h-100" style="resize:none;overflow-y:auto" @bind-Value="@Client.Notes" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" />
+                        <InputTextArea class="form-control h-100" style="resize:none;overflow-y:auto" @bind-Value="@Client.Notes" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" autocomplete="off" />
                     </div>
                 </div>
             </div>

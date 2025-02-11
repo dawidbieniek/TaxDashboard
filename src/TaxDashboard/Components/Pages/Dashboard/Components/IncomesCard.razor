@@ -16,7 +16,7 @@
                          YAggregate="@(e => e.Sum(e => e.Amount))" />
     </ApexChart>
     <label class="form-label" for="income">Przychody w tym miesiącu</label>
-    <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncomeAmount" @bind-Value:after="UpdateClientAsync" onclick="this.select();" />
+    <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncomeAmount" @bind-Value:after="UpdateClientAsync" autocomplete="off" onclick="this.select();" />
 </ElementRequiringLoad>
 
 @code {

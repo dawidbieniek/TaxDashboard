@@ -35,13 +35,13 @@
                     <div class="row mb-2">
                         <label class="label-col" for="subject">Temat</label>
                         <div class="col">
-                            <InputText id="subject" class="form-control" type="text" @bind-Value="_email.Subject" required />
+                            <InputText id="subject" class="form-control" type="text" @bind-Value="_email.Subject" autocomplete="off" required />
                             <ValidationMessage For="@(()=> _email.Subject)" />
                         </div>
                     </div>
                     <div class="row mb-2">
                         <div class="col">
-                            <InputTextArea id="content" class="form-control overflow-y-auto" @bind-Value="_email.Content" rows="10"/>
+                            <InputTextArea id="content" class="form-control overflow-y-auto" @bind-Value="_email.Content" autocomplete="off" rows="10"/>
                             <ValidationMessage For="@(()=> _email.Content)" />
                         </div>
                     </div>

@@ -41,7 +41,7 @@
                 <div class="text-muted">Imię i nazwisko używane przy wysyłaniu wiadomości</div>
             </div>
             <div class="col-auto my-auto d-flex">
-                <InputText class="form-control" @bind-Value="EmailName" @bind-Value:after="@(() => Preferences.Set(GlobalSettings.PreferencesStorage.EmailNameKey, EmailName))" disabled="@(!_emailLoginInfo.LoggedIn)" />
+                <InputText class="form-control bg-light" @bind-Value="EmailName" @bind-Value:after="@(() => Preferences.Set(GlobalSettings.PreferencesStorage.EmailNameKey, EmailName))" disabled="@(!_emailLoginInfo.LoggedIn)" />
             </div>
         </div>
         <div class="list-group-item row flex-column">
