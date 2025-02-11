@@ -26,6 +26,7 @@ public class ClientsService(IDbContextFactory<AppDbContext> contextFactory) : Cr
             .Include(c => c.VATUEHandledDates)
             .Include(c => c.Settlements)
             .Include(c => c.Invoices)
+            .AsSplitQuery()
             .FirstOrDefault(c => c.Id == id);
     }
 
@@ -39,6 +40,7 @@ public class ClientsService(IDbContextFactory<AppDbContext> contextFactory) : Cr
             .Include(c => c.VATUEHandledDates)
             .Include(c => c.Settlements)
             .Include(c => c.Invoices)
+            .AsSplitQuery()
             .FirstOrDefault(c => !c.Suspended);
     }
 

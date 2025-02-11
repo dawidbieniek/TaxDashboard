@@ -44,6 +44,8 @@ public class AppDbSeeder(IDbContextFactory<AppDbContext> contextFactory) : ISeed
     {
         using AppDbContext context = await _contextFactory.CreateDbContextAsync();
 
+        System.Diagnostics.Debug.WriteLine(">> Seeding required data");
+
         foreach (Bank bank in Banks)
         {
             if (!context.Banks.Any(b => b.Name == bank.Name))
@@ -51,15 +53,21 @@ public class AppDbSeeder(IDbContextFactory<AppDbContext> contextFactory) : ISeed
         }
 
         await context.SaveChangesAsync();
+
+        System.Diagnostics.Debug.WriteLine("<< End of seeding required data");
     }
 
     public async Task SeedDebugDataAsync()
     {
         using AppDbContext context = await _contextFactory.CreateDbContextAsync();
 
+        System.Diagnostics.Debug.WriteLine(">> Seeding debug data");
+
         await SeedTestClient(context);
         await SeedIncomes(context);
         await context.SaveChangesAsync();
+
+        System.Diagnostics.Debug.WriteLine("<< End of seeding debug data");
     }
 
     private static async Task SeedTestClient(AppDbContext context)

@@ -79,7 +79,7 @@
                                 <label class="form-check-label" for="employmentContract">Umowa o pracę</label>
                                 <InputCheckbox id="employmentContract" class="form-check-input" type="checkbox" @bind-Value="Client.EmploymentContract" />
                             </div>
-                            <div class="col form-check form-switch" >
+                            <div class="col form-check form-switch">
                                 <label class="form-check-label" for="cashMethod">Metoda kasowa</label>
                                 <InputCheckbox id="cashMethod" class="form-check-input" type="checkbox" @bind-Value="Client.CashMethod" />
                             </div>
@@ -159,7 +159,7 @@
                             </div>
                             <div class="col mb-2">
                                 <label class="form-label" for="transactionDate">Data pierwszej transakcji fiskalnej</label>
-                                @if(Client.UseCashRegister)
+                                @if (Client.UseCashRegister)
                                 {
                                     <InputDate id="transactionDate" class="form-control" @bind-Value="Client.FirstCashRegisterUseDate" required />
                                 }
@@ -180,7 +180,7 @@
 <PreventNavigationModal NavigationBlockCondition="@(() => _clientEditContext is not null && _clientEditContext.IsModified())" />
 
 @code {
-    private IEnumerable<Bank> _allBanks = [];
+    private List<Bank> _allBanks = [];
     private EditContext _clientEditContext = default!;
 
     private ClientSelector? _clientSelectorRef;
@@ -222,13 +222,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _allBanks = await BanksService.GetAllAsync();
+        _allBanks = [.. await BanksService.GetAllAsync()];
         await base.OnInitializedAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender)
+        if (firstRender)
             await JS.InvokeVoidAsync("enableTooltips");
 
         await base.OnAfterRenderAsync(firstRender);

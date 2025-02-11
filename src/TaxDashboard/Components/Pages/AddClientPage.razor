@@ -13,13 +13,13 @@
             <div class="card bg-light">
                 <div class="card-body p-4">
                     <h5 class="card-title w-100 text-center mb-2">Dodaj nowego klienta</h5>
-                    <hr class="mb-4"/>
+                    <hr class="mb-4" />
                     <div class="row mb-2">
                         <div class="col-4">
                             <label for="name">Imię</label>
                         </div>
                         <div class="col-8">
-                            <InputText id="name" class="form-control" @bind-Value="_newClientData.Name" onclick="this.select();" required/>
+                            <InputText id="name" class="form-control" @bind-Value="_newClientData.Name" onclick="this.select();" required />
                             <ValidationMessage For="@(()=> _newClientData.Name)" />
                         </div>
                     </div>
@@ -28,7 +28,7 @@
                             <label for="surname">Nazwisko</label>
                         </div>
                         <div class="col-8">
-                            <InputText id="surname" class="form-control" @bind-Value="_newClientData.Surname" onclick="this.select();" required/>
+                            <InputText id="surname" class="form-control" @bind-Value="_newClientData.Surname" onclick="this.select();" required />
                             <ValidationMessage For="@(()=> _newClientData.Surname)" />
                         </div>
                     </div>
@@ -55,7 +55,7 @@
                             <label for="date">Data założenia</label>
                         </div>
                         <div class="col-8">
-                            <InputDate id="date" class="form-control" @bind-Value="_newClientData.JoinDateTime" required/>
+                            <InputDate id="date" class="form-control" @bind-Value="_newClientData.JoinDateTime" required />
                             <ValidationMessage For="@(()=> _newClientData.JoinDateTime)" />
                         </div>
                     </div>
@@ -73,7 +73,7 @@
                             <label for="bank">Bank</label>
                         </div>
                         <div class="col-8">
-                            <InputClassSelect id="bank" class="form-select" @bind-Value="@_newClientData.Bank" Options="@_allBanks" Selector="v => v.Name" required/>
+                            <InputClassSelect id="bank" class="form-select" @bind-Value="@_newClientData.Bank" Options="@_allBanks" Selector="v => v.Name" required />
                             <ValidationMessage For="@(()=> _newClientData.Bank)" />
                         </div>
                     </div>
@@ -92,7 +92,7 @@
 
 @code {
     private NewClientData _newClientData = default!;
-    private IEnumerable<Bank> _allBanks = [];
+    private List<Bank> _allBanks = [];
 
     private EditContext _newClientDataEditContext = default!;
 
@@ -100,7 +100,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _allBanks = await BanksService.GetAllAsync();
+        _allBanks = [.. await BanksService.GetAllAsync()];
 
         CreateNewClientData();
     }
