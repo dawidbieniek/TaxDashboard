@@ -46,9 +46,12 @@
                                         decimal fiscalValue;
                                         string fiscalTooltip = string.Empty;
 
-                                        if (Client.FirstCashRegisterUseDate.Year == DateTime.Today.Year)
+                                        if (ContextDate?.Year <= Client.FirstCashRegisterUseDate.Year)
                                         {
-                                            fiscalValue = _currentYearIncomes.Where(i => i.Month >= Client.FirstCashRegisterUseDate.Month).Sum(i => i.Amount);
+                                            if (ContextDate?.Year == Client.FirstCashRegisterUseDate.Year)
+                                                fiscalValue = _currentYearIncomes.Where(i => i.Month >= Client.FirstCashRegisterUseDate.Month).Sum(i => i.Amount);
+                                            else
+                                                fiscalValue = 0;
                                             fiscalTooltip = $"Liczone od: {Client.FirstCashRegisterUseDate.ToShortDateString()}";
                                         }
                                         else
