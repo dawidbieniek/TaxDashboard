@@ -1,0 +1,41 @@
+﻿name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 9.0.x
+
+    - name: Install MAUI Workload
+      run: dotnet workload install maui
+
+    - name: Restore
+      run: dotnet restore
+      working-directory: ./src/TaxDashboard
+
+    - name: Build
+      run: dotnet build -c Release -f:net9.0-windows10.0.19041.0
+      working-directory: ./src/TaxDashboard
+
+    - name: Publish
+      run: dotnet publish -c Release -f:net9.0-windows10.0.19041.0 /p:GenerateAppxPackageOnBuild=true /p:AppxPackageSigningEnabled=true /p:ClientAppId=${{ secrets.CLIENT_APP_ID }} /p:ClientAppSecret=${{ secrets.CLIENT_APP_SECRET }}
+      working-directory: ./src/TaxDashboard 
+      
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      path: ./src/TaxDashboard/bin/Release/win10-x64/AppPackages/**/*.msix
