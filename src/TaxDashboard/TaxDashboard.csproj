@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-        <TargetFrameworks>net9.0-windows10.0.19041.0</TargetFrameworks>
+        <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
         
         <OutputType>Exe</OutputType>
         <RootNamespace>TaxDashboard</RootNamespace>
@@ -24,12 +24,22 @@
         <ApplicationVersion>1</ApplicationVersion>
 
         <!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
-        <WindowsPackageType>None</WindowsPackageType>
+        <WindowsPackageType>MSIX</WindowsPackageType>
 
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
         <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
         <UserSecretsId>82fea89f-fbe5-4e78-8a32-00c63fe2ff7d</UserSecretsId>
+        <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+        <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+        <PackageCertificateKeyFile>TaxDashboard_TemporaryKey.pfx</PackageCertificateKeyFile>
+        <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+        <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+        <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+        <GenerateTestArtifacts>True</GenerateTestArtifacts>
+        <HoursBetweenUpdateChecks>48</HoursBetweenUpdateChecks>
+        <DefaultLanguage>pl-PL</DefaultLanguage>
+        <Platforms>AnyCPU;x64</Platforms>
     </PropertyGroup>
 
     <ItemGroup>
@@ -73,5 +83,17 @@
       <ProjectReference Include="..\BlazorTable\src\BlazorTable\BlazorTable.csproj" />
       <ProjectReference Include="..\LifeManagers.Data\src\LifeManagers.Data.csproj" />
       <ProjectReference Include="..\TaxDashboard.Util\TaxDashboard.Util.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="C:\Users\dawid\.nuget\packages\microsoft.windowsappsdk\1.6.240923002\buildTransitive\..\include\DeploymentManagerAutoInitializer.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="C:\Users\dawid\.nuget\packages\microsoft.windowsappsdk\1.6.240923002\buildTransitive\..\include\DeploymentManagerAutoInitializer.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="C:\Users\dawid\.nuget\packages\microsoft.windowsappsdk\1.6.240923002\buildTransitive\..\include\WindowsAppSDK-VersionInfo.cs" />
     </ItemGroup>
 </Project>
