@@ -21,3 +21,15 @@
     ::deep .list-group-item .col-flex {
         padding: 0 1px;
     }
+
+::deep .form-control {
+    background-color: var(--bs-light) !important;
+}
+
+    ::deep .form-control:disabled {
+        background-color: var(--bs-dark) !important;
+    }
+
+    ::deep .form-control.disabled {
+        background-color: var(--bs-dark) !important;
+    }

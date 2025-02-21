@@ -58,8 +58,9 @@ internal partial class OAuthAuthenticator
         if (token is null)
             return null;
 
-        await RefreshTokenIfNeededAsync(token);
-        return await GetUserEmailAddressAsync(new(_oauthCodeFlow, UserId, token));
+        return await TryRefreshTokenIfNeededAsync(token) 
+            ? await GetUserEmailAddressAsync(new(_oauthCodeFlow, UserId, token)) 
+            : null;
     }
 
     public async Task ClearAuthenticationAsync()
@@ -83,7 +84,9 @@ internal partial class OAuthAuthenticator
         if (token is null)
             return null;
 
-        await RefreshTokenIfNeededAsync(token);
+        if (!await TryRefreshTokenIfNeededAsync(token))
+            return null;
+
         string? email = await GetUserEmailAddressAsync(new(_oauthCodeFlow, UserId, token));
         if (string.IsNullOrEmpty(email))
             return null;
@@ -163,12 +166,20 @@ internal partial class OAuthAuthenticator
         await creds.RevokeTokenAsync(CancellationToken.None);
     }
 
-    private async Task RefreshTokenIfNeededAsync(TokenResponse token)
+    private async Task<bool> TryRefreshTokenIfNeededAsync(TokenResponse token)
     {
         if (!token.IsStale)
-            return;
+            return true;
 
         UserCredential creds = new(_oauthCodeFlow, UserId, token);
-        await creds.RefreshTokenAsync(CancellationToken.None);
+        try
+        {
+            await creds.RefreshTokenAsync(CancellationToken.None);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

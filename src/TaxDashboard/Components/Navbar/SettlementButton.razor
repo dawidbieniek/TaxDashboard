@@ -1,8 +1,10 @@
 ﻿@inject ClientsService ClientsService
 
 <div class="flex-grow-0 flex-shrink-0 ms-2">
-    <input type="checkbox" class="btn-check visually-hidden" id="settlement" @bind="@CurrentSettlementValue">
-    <label class="btn btn-outline-secondary toggle-button" style="height:38px; width:8rem;" for="settlement"><b>@(CurrentSettlementValue ? "Rozliczony" : "Nierozliczony")</b></label>
+    <input type="checkbox" class="btn-check visually-hidden" id="settlement" disabled="@Disabled" @bind="@CurrentSettlementValue">
+    <label class="btn btn-outline-secondary toggle-button" style="height:38px; width:8rem;" for="settlement" disabled="@(ContextDate is null)">
+        <b>@(CurrentSettlementValue ? "Rozliczony" : "Nierozliczony")</b>
+        </label>
 </div>
 
 @code {
@@ -14,6 +16,8 @@
     public Client Client { get; set; } = default!;
     [Parameter, EditorRequired]
     public DateOnly? ContextDate { get; set; }
+    [Parameter]
+    public bool Disabled { get; set; } = false;
     [Parameter]
     public EventCallback OnSettlementStateChanged { get; set; }
 

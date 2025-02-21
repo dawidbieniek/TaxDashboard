@@ -2,6 +2,8 @@
 using TaxDashboard.Services;
 using TaxDashboard.Services.Emails;
 
+using Windows.UI.Notifications;
+
 namespace TaxDashboard;
 
 internal static class DependencyInjection
@@ -13,6 +15,8 @@ internal static class DependencyInjection
         services.AddTransient<BanksService>();
         services.AddTransient<BackupService>();
         services.AddTransient<OAuthAuthenticator>();
+        services.AddTransient<EmailTemplatesService>();
+        services.AddTransient<ClientNotificationService>();
         services.AddTransient<EmailService>();
         return services;
     }

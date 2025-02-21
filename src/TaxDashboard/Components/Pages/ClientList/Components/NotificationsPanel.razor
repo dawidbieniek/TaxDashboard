@@ -1,0 +1,26 @@
+﻿@using TaxDashboard.Services.Notifications
+
+@inject ClientNotificationService ClientNotificationService
+
+<span class="d-flex align-items-center" style="gap:4px">
+    @if (!string.IsNullOrEmpty(Client.Notes))
+    {
+        <i class="bi-card-text text-success ms-1" data-bs-toggle="tooltip" data-bs-title="@Client.Notes" />
+    }
+    @foreach (var notification in _notifications)
+    {
+        <NotificationIcon Size="1" OccupySpaceWhenEmptyMessage="false" ShowWhenEmptyMessage="false" Severity="@notification.Severity" PopoverText="@notification.Message" />
+    }
+</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public Client Client { get; set; } = default!;
+
+    private IEnumerable<NotificationInfo> _notifications = [];
+
+    protected override void OnInitialized()
+    {
+        _notifications = [.. ClientNotificationService.GetAllClientLimitNotifications(Client, DateOnly.FromDateTime(DateTime.Today)), ClientNotificationService.GetClientReductionNotification(Client)];
+    }
+}

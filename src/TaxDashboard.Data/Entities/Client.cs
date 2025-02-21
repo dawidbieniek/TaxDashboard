@@ -4,12 +4,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 using LifeManagers.Data;
 
 using TaxDashboard.Data.Enums;
+using TaxDashboard.Util;
 using TaxDashboard.Data.Validators;
 
 namespace TaxDashboard.Data.Entities;
 
 public class Client : Entity
 {
+    private const int StartReductionValidMonths = 6;
+    private const int PreferentialReductionValidYears = 2;
+    private const int PlusReductionValidYears = 3;
+
     [MaxLength(64, ErrorMessage = "Imię jest zbyt długie (max 64)")]
     public string Name { get; set; } = string.Empty;
     [MaxLength(64, ErrorMessage = "Nazwisko jest zbyt długie (max 64)")]
@@ -22,6 +27,7 @@ public class Client : Entity
     [EmailOrEmpty(ErrorMessage = "Nieprawidłowy adres email")]
     public string Email { get; set; } = string.Empty;
 
+    public Gender Gender { get; set; } = Gender.Male;
     public bool Suspended { get; set; } = false;
 
     public bool UseCashRegister { get; set; } = false;
@@ -57,6 +63,21 @@ public class Client : Entity
 
     [NotMapped]
     public string FullName => $"{Name} {Surname}";
+
+    [NotMapped]
+    public DateOnly? LastDayOfReduction => ReductionType switch
+    {
+        ReductionType.Start => DateOnly.FromDateTime(JoinDateTime).FirstOfCurrentMonth().AddMonths(StartReductionValidMonths).AddDays(-1),
+        ReductionType.PrefZUS => DateOnly.FromDateTime(JoinDateTime).FirstOfCurrentMonth().AddYears(PreferentialReductionValidYears).AddMonths(StartReductionValidMonths).AddDays(-1),
+        ReductionType.ZUSPlus => ReductionChangeDate.FirstOfCurrentMonth().AddYears(PlusReductionValidYears).AddDays(-1),
+        _ => null
+    };
+    [NotMapped]
+    public DateOnly FirstDayOfIncome => DateOnly.FromDateTime(JoinDateTime).FirstOfCurrentMonth();
+    [NotMapped]
+    public DateOnly FirstDayOfZusIncome => ReductionChangeDate.FirstOfCurrentMonth();
+    [NotMapped]
+    public DateOnly FirstDayOfFiscalIncome => FirstCashRegisterUseDate.FirstOfCurrentMonth();
 }
 
 public record NewClientData

@@ -6,16 +6,21 @@
     private string? _notificationText = string.Empty;
     private NotificationSeverity _notificationSeverity = NotificationSeverity.None;
 
-    private ChangeTracker<string?> _selectedClientChangeTracker = new();
+    private ClassFieldChangeTracker<Client> _selectedClientChangeTracker = new(c => c.FullName, c => c.ReductionType, c=>c.ReductionChangeDate);
 
     [Parameter]
     public Client? SelectedClient { get; set; }
 
     protected override void OnParametersSet()
     {
-        if (!_selectedClientChangeTracker.HasChanged(SelectedClient?.FullName))
+        if (!_selectedClientChangeTracker.HasChanged(SelectedClient))
             return;
 
+        RefreshNotification();
+    }
+
+    private void RefreshNotification()
+    {
         if (SelectedClient is null)
         {
             _notificationText = string.Empty;

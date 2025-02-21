@@ -1,0 +1,21 @@
+﻿@inject IJSRuntime JS
+
+<div id="tokenTooltip" class="bi-info-circle" style="font-size:1.5rem;" data-bs-toggle="tooltip" data-bs-html="true" data-bs-original-title="@_tooltipContent" />
+
+@code {
+    private string _tooltipContent = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await JS.InvokeVoidAsync("enableTooltip", "tokenTooltip");
+    }
+
+    protected override void OnInitialized()
+    {
+        string tokenList = string.Concat(EmailTemplatesService.AvailableTokens.Select(v => $"<li>{v}</li>"));
+        _tooltipContent = $"W szablonie można używać tokenów, które zostaną zastąpione wartościami specyficznymi dla danego klienta.<hr/>Format tokena: {{nazwaTokena}}.<br/>Dostępne tokeny: {tokenList}";
+    }
+
+    protected override bool ShouldRender() => false;
+}

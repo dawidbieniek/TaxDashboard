@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LifeManagers.Data", "LifeMa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxDashboard.Data", "TaxDashboard.Data\TaxDashboard.Data.csproj", "{EBFC3DAC-5CA9-46E3-AC6E-B0BF2F40DB51}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaxDashboard.Util", "TaxDashboard.Util\TaxDashboard.Util.csproj", "{7494970C-807B-4715-983E-F7C1387D7752}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{EBFC3DAC-5CA9-46E3-AC6E-B0BF2F40DB51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBFC3DAC-5CA9-46E3-AC6E-B0BF2F40DB51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBFC3DAC-5CA9-46E3-AC6E-B0BF2F40DB51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7494970C-807B-4715-983E-F7C1387D7752}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7494970C-807B-4715-983E-F7C1387D7752}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7494970C-807B-4715-983E-F7C1387D7752}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7494970C-807B-4715-983E-F7C1387D7752}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

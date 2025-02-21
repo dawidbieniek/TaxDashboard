@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LifeManagers.Data\src\LifeManagers.Data.csproj" />
+    <ProjectReference Include="..\TaxDashboard.Util\TaxDashboard.Util.csproj" />
   </ItemGroup>
 
 </Project>

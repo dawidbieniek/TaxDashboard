@@ -1,4 +1,14 @@
-﻿.client-table table th:nth-child(1) {
+﻿.client-table .form-check-input {
+    transform: scale(1.5);
+}
+
+.client-table button {
+    padding: 0;
+    height: 22px;
+    width: 22px;
+}
+
+.client-table table th:nth-child(1) {
     min-width: 50px;
 }
 
@@ -7,7 +17,7 @@
 }
 
 .client-table table th:nth-child(3) {
-    min-width: 120px;
+    min-width: 90px;
 }
 
 .client-table table th:nth-child(4) {
@@ -19,19 +29,19 @@
 }
 
 .client-table table th:nth-child(6) {
-    min-width: 75px;
+    min-width: 120px;
 }
 
 .client-table table th:nth-child(7) {
-    min-width: 150px;
+    min-width: 75px;
 }
 
 .client-table table th:nth-child(8) {
-    min-width: 90px;
+    min-width: 150px;
 }
 
 .client-table table th:nth-child(9) {
-    min-width: 75px;
+    min-width: 90px;
 }
 
 .client-table table th:nth-child(10) {
@@ -47,11 +57,11 @@
 }
 
 .client-table table th:nth-child(13) {
-    min-width: 150px;
+    min-width: 75px;
 }
 
 .client-table table th:nth-child(14) {
-    min-width: 75px;
+    min-width: 150px;
 }
 
 .client-table table th:nth-child(15) {
@@ -59,7 +69,7 @@
 }
 
 .client-table table th:nth-child(16) {
-    min-width: 130px;
+    min-width: 75px;
 }
 
 .client-table table th:nth-child(17) {
@@ -67,7 +77,7 @@
 }
 
 .client-table table th:nth-child(18) {
-    min-width: 100px;
+    min-width: 130px;
 }
 
 .client-table table th:nth-child(19) {
@@ -75,6 +85,10 @@
 }
 
 .client-table table th:nth-child(20) {
+    min-width: 100px;
+}
+
+.client-table table th:nth-child(21) {
     min-width: 30px;
 }
 

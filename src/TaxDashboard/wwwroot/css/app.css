@@ -8,7 +8,7 @@ body {
 }
 
 textarea {
-    white-space: pre !important;
+    white-space: pre-line !important;
 }
 
 h1:focus {
@@ -99,6 +99,7 @@ h1:focus {
 
 .chart-card {
     height: 385px !important;
+    overflow: hidden;
 }
 
 .card-body {
@@ -117,12 +118,8 @@ h1:focus {
     align-self: center;
 }
 
-.form-control, h5, label {
+.form-control, h5, label, .text-body-secondary {
     white-space: nowrap;
-    overflow: hidden;
-}
-
-.d-flex, .text-nowrap, .col, .col-auto {
     overflow: hidden;
 }
 

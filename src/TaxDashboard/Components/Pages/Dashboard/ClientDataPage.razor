@@ -6,6 +6,7 @@
 @using TaxDashboard.Components.Pages.Dashboard.Components
 @using TaxDashboard.Components.Popups
 @using TaxDashboard.Data.Enums
+@using TaxDashboard.Services.Notifications
 @using TaxDashboard.Util
 
 @inherits DashboardPageBase
@@ -61,14 +62,20 @@
                                 </div>
                             </div>
                             <div class="col mb-2">
-                                <label class="form-label" for="date">Data założenia</label>
-                                <InputDate id="date" class="form-control" @bind-Value="Client.JoinDateTime" />
-                                <ValidationMessage For="@(()=> Client.JoinDateTime)" />
+                                <label class="form-label" for="gender">Płeć</label>
+                                <InputClassSelect id="gender" class="form-select" @bind-Value="Client.Gender" Options="@(Enum.GetValues<Gender>())" Selector="v => v.GetDescriptor()"/>
                             </div>
-                            <div class="col mb-2">
-                                <label class="form-label" for="nip">NIP</label>
-                                <InputText id="nip" class="form-control" @bind-Value="Client.NIP" autocomplete="off" onclick="this.select();" />
-                                <ValidationMessage For="@(()=> Client.NIP)" />
+                            <div class="d-flex gap-2">
+                                <div class="col mb-2">
+                                    <label class="form-label" for="date">Data założenia</label>
+                                    <InputDate id="date" class="form-control" @bind-Value="Client.JoinDateTime" />
+                                    <ValidationMessage For="@(()=> Client.JoinDateTime)" />
+                                </div>
+                                <div class="col mb-2">
+                                    <label class="form-label" for="nip">NIP</label>
+                                    <InputText id="nip" class="form-control" @bind-Value="Client.NIP" autocomplete="off" onclick="this.select();" />
+                                    <ValidationMessage For="@(()=> Client.NIP)" />
+                                </div>
                             </div>
                             <div class="col mb-3">
                                 <label class="form-label" for="bank">Bank</label>
@@ -148,14 +155,35 @@
                     <div class="card bg-light mb-4">
                         <div class="card-body">
                             <h5 class="card-title" style="margin-bottom:27px;">Ulgi</h5>
-                            <div class="col mb-2">
-                                <InputClassSelect id="reductionType" class="form-select" @bind-Value="@Client.ReductionType" Options="@(Enum.GetValues<ReductionType>())" Selector="v => v.GetDescriptor()" />
-                                <ValidationMessage For="@(()=> Client.ReductionType)" />
+                            <div class="d-flex gap-2">
+                                <div class="col mb-2">
+                                    <InputClassSelect id="reductionType" class="form-select" @bind-Value="@Client.ReductionType" @bind-Value:after="@UpdateReductionWarning" Options="@(Enum.GetValues<ReductionType>())" Selector="v => v.GetDescriptor()" />
+                                    <ValidationMessage For="@(()=> Client.ReductionType)" />
+                                </div>
+                                <div class="col-auto my-auto">
+                                    @if (_showReductionWarning)
+                                    {
+                                        <NotificationIcon PopoverText="@($"Klient przekroczył {ClientsService.ZusPlusLimit} w roku {Client.ReductionChangeDate.Year - 1}")" Severity="@NotificationSeverity.Danger" />
+                                    }
+                                </div>
                             </div>
-                            <div class="col mb-2">
-                                <label class="form-label" for="reductionDate">Data przejścia</label>
-                                <InputDate id="reductionDate" class="form-control" @bind-Value="Client.ReductionChangeDate" required />
-                                <ValidationMessage For="@(()=> Client.ReductionChangeDate)" />
+                            <div class="d-flex gap-2">
+                                <div class="col mb-2">
+                                    <label class="form-label" for="endDate">Koniec ulgi</label>
+                                    <input id="endDate" class="form-control" value="@(Client.LastDayOfReduction)" disabled />
+                                </div>
+                                <div class="col mb-2">
+                                    <label class="form-label" for="reductionDate">Data przejścia</label>
+                                    @if(Client.ReductionType == ReductionType.ZUSPlus)
+                                    {
+                                        <InputDate id="reductionDate" class="form-control" @bind-Value="Client.ReductionChangeDate" @bind-Value:after="@UpdateReductionWarning" required />
+                                        <ValidationMessage For="@(()=> Client.ReductionChangeDate)" />
+                                    }
+                                    else
+                                    {
+                                        <input id="reductionDate" class="form-control" disabled data-bs-toggle="tooltip" data-bs-title="Klient nie jest na Małym ZUSie Plus" />
+                                    }
+                                </div>
                             </div>
                             <div class="col mb-2">
                                 <label class="form-label" for="transactionDate">Data pierwszej transakcji fiskalnej</label>
@@ -184,6 +212,8 @@
     private EditContext _clientEditContext = default!;
 
     private ClientSelector? _clientSelectorRef;
+
+    private bool _showReductionWarning = false;
 
     protected override Client? Client
     {
@@ -223,7 +253,7 @@
     public ClientDataPage()
     {
         // Even if form is not displayed, edit context must be initialized
-        _clientEditContext = new(new Client() { Bank = null!, JoinDateTime = DateTime.Now,});
+        _clientEditContext = new(new Client() { Bank = null!, JoinDateTime = DateTime.Now, });
     }
 
     protected override async Task OnInitializedAsync()
@@ -249,5 +279,15 @@
 
             await _clientSelectorRef!.RefreshAsync();
         }
+    }
+
+    private void UpdateReductionWarning() 
+    {
+        _showReductionWarning = Client is null
+        ? false
+        : Client.ReductionType != ReductionType.ZUSPlus
+            ? false
+            : ClientsService.GetZusIncomeSum(Client, Client.ReductionChangeDate.AddYears(-1)) > ClientsService.ZusPlusLimit;
+        ;
     }
 }

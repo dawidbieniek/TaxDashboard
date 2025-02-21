@@ -96,6 +96,7 @@ internal partial class EmailService(OAuthAuthenticator oAuthAuthenticator)
             await client.DisconnectAsync(true);
         }
     }
+
     private static async Task<bool> SendEmailUsingPasswordAsync(string email, string password, MimeMessage message)
     {
         using SmtpClient client = new();

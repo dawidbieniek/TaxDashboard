@@ -14,7 +14,7 @@
                              XValue="@(e => e.Label)"
                              YValue="@(e => e.Percentage)" />
         </ApexChart>
-        <div id="@_tooltipId" class="h5 w-100 text-center@(_valueClass)"
+        <div id="@_tooltipId" class="h5 w-100 text-center @(_valueClass)"
              data-bs-toggle="tooltip"
              data-bs-html="true"
              data-bs-original-title="@($"{Value:C} / {ValueLimit:C}{(string.IsNullOrEmpty(TooltipAdditionalText) ? "" : $"<br/>{TooltipAdditionalText}")}")">
@@ -64,25 +64,22 @@
         {
             if (Value >= ValueLimit)
             {
-                _valueClass = " text-danger";
                 _notificationSeverity = NotificationSeverity.Danger;
                 _notificationText = PopoverDangerText;
             }
             else
             {
-                _valueClass = " text-warning";
                 _notificationSeverity = NotificationSeverity.Warning;
                 _notificationText = PopoverWarningText;
-
             }
         }
         else
         {
-            _valueClass = string.Empty;
             _notificationSeverity = NotificationSeverity.None;
-            _notificationText = string.Empty; ;
-
+            _notificationText = string.Empty;
         }
+
+        _valueClass = _notificationSeverity.TextClass();
 
         bool updateChart = false;
         if (_oldValue != Value)
@@ -98,6 +95,4 @@
         if (updateChart && _chartRef is not null)
             await _chartRef.UpdateSeriesAsync();
     }
-
-    public Task UpdateChartAsync() => Task.CompletedTask;// _chartRef.UpdateSeriesAsync();
 }

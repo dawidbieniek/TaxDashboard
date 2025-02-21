@@ -20,26 +20,38 @@
         </datalist>
     </div>
 
-    <button class="btn navigation-button" @onclick="@(() => ChangeSelectedClient(_selectedClientIndex - 1))" disabled="@(LockClientNavigationButtons || _selectedClientIndex <= 0)"><i class="bi-chevron-left" /></button>
-    <button class="btn navigation-button" @onclick="@(() => ChangeSelectedClient(_selectedClientIndex + 1))" disabled="@(LockClientNavigationButtons || _selectedClientIndex >= (_allClients.Count - 1) || _selectedClientIndex < 0)"><i class="bi-chevron-right" /></button>
+    <button class="btn navigation-button" @onclick="@(() => ChangeSelectedClient(_selectedClientIndex - 1))"
+            disabled="@(LockClientNavigationButtons || _selectedClientIndex <= 0)">
+        <i class="bi-chevron-left" />
+    </button>
+    <button class="btn navigation-button" @onclick="@(() => ChangeSelectedClient(_selectedClientIndex + 1))"
+            disabled="@(LockClientNavigationButtons || _selectedClientIndex >= (_allClients.Count - 1) || _selectedClientIndex < 0)">
+        <i class="bi-chevron-right" />
+    </button>
 
-    <ClientSelectorNotificationIcon SelectedClient="_selectedClient" />
+    <div class="align-self-center flex-shrink-0 mx-2">
+        <ClientSelectorNotificationIcon @ref="@_notificationIconRef" SelectedClient="_selectedClient" />
+    </div>
 
     @if (ShowDateSelector && _selectedClient is not null)
     {
-        <ContextDateSelector ClientSettlements="@(_selectedClient?.Settlements ?? [])" StartingDateContext="@StartingDateContext" OnSelectedDateContextChanged="ChangeSelectedDateContext" />
+        <ContextDateSelector ClientSettlements="@(_selectedClient.Settlements)"
+                             StartingDateContext="@StartingDateContext" OnSelectedDateContextChanged="ChangeSelectedDateContext"
+                             JoinDateTime="@_selectedClient.JoinDateTime" />
         <div class="flex-grow-1" />
-        <SettlementButton Client="@_selectedClient" ContextDate="@_contextDate" OnSettlementStateChanged="@(() => StateHasChanged())" />
+        <SettlementButton Client="@_selectedClient" ContextDate="@_contextDate?.Date" OnSettlementStateChanged="@(() => StateHasChanged())" Disabled="@(_contextDate?.IsValid ?? false)" />
     }
 </nav>
 
 
 @code {
     private Client? _selectedClient;
-    private DateOnly? _contextDate;
+    private ContextDate? _contextDate;
     private List<Client> _allClients = [];
     private bool _incorrectClientName = false;
     private int _selectedClientIndex = -1;
+
+    private ClientSelectorNotificationIcon? _notificationIconRef;
 
     [Parameter]
     public Client? StartingClient { get; set; }
@@ -53,9 +65,7 @@
     [Parameter]
     public DateOnly? StartingDateContext { get; set; }
     [Parameter]
-    public EventCallback<DateOnly> OnSelectedDateContextChanged { get; set; }
-    [Parameter]
-    public EventCallback OnSettlementStateChanged { get; set; }
+    public EventCallback<ContextDate> OnSelectedDateContextChanged { get; set; }
 
     /// <summary>
     /// Refreshes the view and requeries selected client. Won't notify about client change
@@ -119,7 +129,7 @@
         return false;
     }
 
-    private async Task ChangeSelectedDateContext(DateOnly dateContext)
+    private async Task ChangeSelectedDateContext(ContextDate dateContext)
     {
         _contextDate = dateContext;
         await OnSelectedDateContextChanged.InvokeAsync(dateContext);

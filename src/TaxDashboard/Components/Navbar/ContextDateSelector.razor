@@ -1,7 +1,7 @@
 ﻿<select class="form-select flex-grow-0 flex-shrink-0" style="width:6rem;" @onchange="ChangeSelectedYear" value="@_selectedYear">
     @foreach (int year in SelectableYears)
     {
-        <option value="@year" selected="@(_selectedYear == year)">@year</option>
+        <option class="@(year < JoinDateTime.Year ? "text-muted" : "")" value="@year" selected="@(_selectedYear == year)">@year</option>
     }
 </select>
 
@@ -10,21 +10,27 @@
     {
         string id = $"month{i}";
         int monthValue = i;
+
         @if (_selectedMonth == i)
         {
-            <input type="radio" class="btn-check" name="months" id="@id" autocomplete="off" @onclick="@(() => ChangeSelectedMonth(monthValue))" checked>
+            <input type="radio" class="btn-check" name="months" id="@id" autocomplete="off"
+            @onclick="@(() => ChangeSelectedMonth(monthValue))" checked>
         }
         else
         {
-            <input type="radio" class="btn-check" name="months" id="@id" autocomplete="off" @onclick="@(() => ChangeSelectedMonth(monthValue))">
+            <input type="radio" class="btn-check" name="months" id="@id" autocomplete="off"
+            @onclick="@(() => ChangeSelectedMonth(monthValue))">
         }
-        <label class="btn month-button @(GetMonthButtonClass(monthValue))" for="@id">@(DataDisplayHelper.GetMonthLabel(i))</label>
+        <label class="btn month-button @(GetMonthButtonClass(monthValue))" for="@id">
+            @(DataDisplayHelper.GetMonthLabel(i))
+        </label>
     }
 </div>
 <select class="form-select month-dropdown ms-2 flex-grow-0 flex-shrink-0" style="width:9rem;" @onchange="@((e) => ChangeSelectedMonth(int.Parse((string)e.Value!)))" value="@_selectedMonth">
     @for (int i = 1; i <= 12; i++)
     {
         int monthValue = i;
+
         @if (_selectedMonth == i)
         {
             <option class="@(GetMonthButtonClass(monthValue))" value="@i" selected>@DataDisplayHelper.GetMonthFullLabel(i)</option>
@@ -46,9 +52,11 @@
     [Parameter]
     public DateOnly? StartingDateContext { get; set; }
     [Parameter]
-    public EventCallback<DateOnly> OnSelectedDateContextChanged { get; set; }
+    public EventCallback<ContextDate> OnSelectedDateContextChanged { get; set; }
     [Parameter, EditorRequired]
     public IEnumerable<Settlement> ClientSettlements { get; set; } = [];
+    [Parameter, EditorRequired]
+    public DateTime JoinDateTime { get; set; }
 
 
     protected override void OnInitialized()
@@ -83,10 +91,14 @@
     private void UpdateSelectedContextDate()
     {
         DateOnly dateContext = new(_selectedYear, _selectedMonth, 1);
-        OnSelectedDateContextChanged.InvokeAsync(dateContext);
+            OnSelectedDateContextChanged.InvokeAsync(new(dateContext, IsDateDisabled(dateContext.Month, dateContext.Year)));
     }
 
-    private string GetMonthButtonClass(int monthValue) => ClientSettlements.Any(s => s.ContextDate.Year == _selectedYear && s.ContextDate.Month == monthValue)
-            ? "text-success"
-            : "text-warning";
+    private string GetMonthButtonClass(int monthValue) =>  IsMonthDisabled(monthValue) ? "text-muted"
+        : ClientSettlements.Any(s => s.ContextDate.Year == _selectedYear && s.ContextDate.Month == monthValue)
+                ? "text-success"
+                : "text-warning";
+
+    private bool IsMonthDisabled(int monthValue) => IsDateDisabled(monthValue, _selectedYear);
+    private bool IsDateDisabled(int monthValue, int year) => year < JoinDateTime.Year || (year == JoinDateTime.Year && monthValue < JoinDateTime.Month);
 }

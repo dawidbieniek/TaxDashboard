@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 
+using TaxDashboard.Components.Navbar;
 using TaxDashboard.Data.Entities;
 using TaxDashboard.Services;
 
@@ -14,7 +15,7 @@ public class DashboardPageBase : ComponentBase
     protected bool Initialized { get; private set; } = false;
 
     protected virtual Client? Client { get; set; }
-    protected DateOnly? ContextDate { get; private set; }
+    protected ContextDate? ContextDate { get; private set; }
 
     protected override void BuildRenderTree(RenderTreeBuilder builder)
     {
@@ -27,10 +28,10 @@ public class DashboardPageBase : ComponentBase
         Preferences.Set(GlobalSettings.PreferencesStorage.LastClientIdKey, client.Id);
     }
 
-    protected virtual Task ChangeDateContext(DateOnly date)
+    protected virtual Task ChangeDateContext(ContextDate date)
     {
         ContextDate = date;
-        Preferences.Set(GlobalSettings.PreferencesStorage.LastDateContextKey, date.ToString(GlobalSettings.PreferencesStorage.DateStorageFormat));
+        Preferences.Set(GlobalSettings.PreferencesStorage.LastDateContextKey, date.Date.ToString(GlobalSettings.PreferencesStorage.DateStorageFormat));
         return Task.CompletedTask;
     }
 
@@ -46,7 +47,7 @@ public class DashboardPageBase : ComponentBase
         Client ??= await ClientsService.GetFirstSelectableClientWithDetailsAsync();
 
         if (DateOnly.TryParseExact(Preferences.Get(GlobalSettings.PreferencesStorage.LastDateContextKey, null), GlobalSettings.PreferencesStorage.DateStorageFormat, out DateOnly storedDateContext))
-            ContextDate = storedDateContext;
+            ContextDate = new(storedDateContext, false);
 
         await OnAfterRequiredInitializedAsync();
 

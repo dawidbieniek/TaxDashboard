@@ -6,7 +6,7 @@
 
 @if (ShowWhenEmptyMessage || !string.IsNullOrEmpty(PopoverText))
 {
-    <i id="@_id" class="bi-exclamation-diamond align-self-center flex-shrink-0 mx-2 @(Severity.TextClass())" style="font-size:1.25rem;"
+    <i id="@_id" class="bi-exclamation-diamond @(Severity.TextClass())" style="font-size:@(Size.ToString(System.Globalization.CultureInfo.InvariantCulture))rem;"
        data-bs-toggle="popover"
        data-bs-html="true"
        data-bs-placement="@PopoverLocation"
@@ -15,7 +15,7 @@
 }
 else if (OccupySpaceWhenEmptyMessage)
 {
-    <div class="flex-shrink-0" style="width:36px" />
+    <div class="flex-shrink-0" style="width:@(Size.ToString(System.Globalization.CultureInfo.InvariantCulture))rem" />
 }
 
 @code {
@@ -32,6 +32,8 @@ else if (OccupySpaceWhenEmptyMessage)
     public string PopoverText { get; set; } = string.Empty;
     [Parameter]
     public string PopoverLocation { get; set; } = "bottom";
+    [Parameter]
+    public float Size { get; set; } = 1.25f;
 
     public async ValueTask DisposeAsync()
     {

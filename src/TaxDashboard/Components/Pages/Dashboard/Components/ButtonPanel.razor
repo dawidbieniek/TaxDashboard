@@ -26,11 +26,11 @@
         <label class="btn btn-outline-secondary toggle-button" for="tax"><b>Podatek</b>@(Client.TaxHandledDate is not null ? Client.TaxHandledDate.Value.ToString(DateFormat) : "")</label>
     </div>
     <div class="col">
-        <input type="checkbox" class="btn-check visually-hidden" id="jpkv7" @bind="@CurrentJpkV7Exists" @bind:after="UpdateClientAsync">
+        <input type="checkbox" class="btn-check visually-hidden" id="jpkv7" disabled="@Disabled" @bind="@CurrentJpkV7Exists" @bind:after="UpdateClientAsync">
         <label class="btn btn-outline-secondary toggle-button" for="jpkv7"><b>JPK V7</b>@(_currentJpkV7 is not null ? _currentJpkV7.ChangedDateTime.ToString(DateFormat) : "")</label>
     </div>
     <div class="col">
-        <input type="checkbox" class="btn-check visually-hidden" id="vatue" @bind="@CurrentVatUeExists" @bind:after="UpdateClientAsync">
+        <input type="checkbox" class="btn-check visually-hidden" id="vatue" disabled="@Disabled" @bind="@CurrentVatUeExists" @bind:after="UpdateClientAsync">
         <label class="btn btn-outline-secondary toggle-button" for="vatue"><b>VAT UE</b>@(_currentVatUe is not null ? _currentVatUe.ChangedDateTime.ToString(DateFormat) : "")</label>
     </div>
 </div>
@@ -48,6 +48,8 @@
     public Client Client { get; set; } = default!;
     [Parameter, EditorRequired]
     public DateOnly? ContextDate { get; set; }
+    [Parameter]
+    public bool Disabled { get; set; } = false;
 
     private bool CurrentJpkV7Exists
     {

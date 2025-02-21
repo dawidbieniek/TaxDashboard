@@ -14,6 +14,6 @@ public static class NotificationSeverityExtensions
     {
         NotificationSeverity.Warning => "text-warning",
         NotificationSeverity.Danger => "text-danger",
-        _ => "text-secondary"
+        _ => ""
     };
 }

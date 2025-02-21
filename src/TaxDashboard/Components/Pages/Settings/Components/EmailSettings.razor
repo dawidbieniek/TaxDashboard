@@ -1,5 +1,6 @@
 ﻿@using TaxDashboard.Components.Loading
 @using TaxDashboard.Components.Popups
+@using TaxDashboard.Services.Emails
 @using TaxDashboard.Util
 
 @inject EmailService EmailService
@@ -41,7 +42,9 @@
                 <div class="text-muted">Imię i nazwisko używane przy wysyłaniu wiadomości</div>
             </div>
             <div class="col-auto my-auto d-flex">
-                <InputText class="form-control bg-light" @bind-Value="EmailName" @bind-Value:after="@(() => Preferences.Set(GlobalSettings.PreferencesStorage.EmailNameKey, EmailName))" disabled="@(!_emailLoginInfo.LoggedIn)" />
+                <InputText class="form-control" autocomplete="of"
+                           @bind-Value="EmailName" @bind-Value:after="@(() => Preferences.Set(GlobalSettings.PreferencesStorage.EmailNameKey, EmailName))"
+                           disabled="@(!_emailLoginInfo.LoggedIn)" />
             </div>
         </div>
         <div class="list-group-item row flex-column">
@@ -50,23 +53,44 @@
                     <div class="fw-bold">Szablon</div>
                     <div class="text-muted">Treść szablonu używana przy wysyłaniu wiadomości</div>
                 </div>
-                <div class="col-auto my-auto">
-                    <button class="btn btn-primary" @onclick="@ChangeEditState">@(_editingEmailTemplate ? "Zapisz" : "Edytuj")</button>
+                <div class="col-auto d-flex">
+                    <div class="my-auto me-2">
+                        <TokenListIcon />
+                    </div>
+                    <TaxDashboard.Components.FormInputs.InputClassSelect class="form-select form-control my-auto me-2" style="max-width:16em"
+                                                                            Options="Enum.GetValues<EmailTemplateType>()" Selector="v => v.GetDescriptor()"
+                                                                            @bind-Value="_selectedTemplateType" @bind-Value:after="ChangeSelectedTemplateType"
+                                                                            disabled="@_editingEmailTemplate" />
+                    <button class="btn btn-primary my-auto" @onclick="@ChangeEditState">@(_editingEmailTemplate ? "Zapisz" : "Edytuj")</button>
                 </div>
             </div>
             <div class="row m-0 p-0">
                 <div class="col">
-                    <InputTextArea rows="8" readonly="@(!_editingEmailTemplate)" class="@(_editingEmailTemplate ? "form-control bg-light" : "form-control")" style="resize:none;overflow-y:auto;" @bind-Value="@_emailTemplate" />
+                    <div class="input-group">
+                        <label for="subject" class="input-group-text">Temat</label>
+                        <InputText id="subject" class="form-control" style="margin-right:0" autocomplete="off"
+                                   @bind-Value="@_emailSubjectTemplate"
+                                   readonly="@(!_editingEmailTemplate)" disabled="@(!_editingEmailTemplate)" />
+                    </div>
+                </div>
+            </div>
+            <div class="row m-0 p-0">
+                <div class="col">
+                    <InputTextArea rows="8" class="form-control" style="resize:none;overflow-y:auto;"
+                                   @bind-Value="@_emailTemplate"
+                                   readonly="@(!_editingEmailTemplate)" disabled="@(!_editingEmailTemplate)" />
                 </div>
             </div>
         </div>
     </div>
 </LoadingContentsComponent>
 <!-- Modal -->
-<PreventNavigationModal NavigationBlockCondition="@(() => _editingEmailTemplate)"/>
+<PreventNavigationModal NavigationBlockCondition="@(() => _editingEmailTemplate)" />
 
 @code {
     private bool _editingEmailTemplate = false;
+    private EmailTemplateType _selectedTemplateType = EmailTemplateType.AmountFiscal;
+    private string _emailSubjectTemplate { get; set; } = string.Empty;
     private string _emailTemplate { get; set; } = string.Empty;
 
     private string EmailName { get; set; } = string.Empty;
@@ -78,7 +102,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _emailTemplate = Preferences.Get(GlobalSettings.PreferencesStorage.EmailTemplateKey, string.Empty);
+        ChangeSelectedTemplateType();
         EmailName = Preferences.Get(GlobalSettings.PreferencesStorage.EmailNameKey, string.Empty);
 
         await UpdateLoginDataAsync();
@@ -87,11 +111,13 @@
     private void ChangeEditState()
     {
         if (_editingEmailTemplate)
-            Preferences.Set(GlobalSettings.PreferencesStorage.EmailTemplateKey, _emailTemplate);
+            EmailTemplatesService.SetTemplate(_selectedTemplateType, _emailSubjectTemplate, _emailTemplate);
 
         _editingEmailTemplate = !_editingEmailTemplate;
         OnTempateEditChanged.InvokeAsync(_editingEmailTemplate);
     }
+
+    private void ChangeSelectedTemplateType() => (_emailSubjectTemplate, _emailTemplate) = EmailTemplatesService.GetTemplate(_selectedTemplateType);
 
     private async Task LogoutEmailAsync()
     {

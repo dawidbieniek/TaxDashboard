@@ -34,7 +34,7 @@
 
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\logo.png"  />
+        <MauiIcon Include="Resources\AppIcon\logo.png" />
 
         <!-- Splash Screen -->
         <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
@@ -72,5 +72,6 @@
       <ProjectReference Include="..\TaxDashboard.Data\TaxDashboard.Data.csproj" />
       <ProjectReference Include="..\BlazorTable\src\BlazorTable\BlazorTable.csproj" />
       <ProjectReference Include="..\LifeManagers.Data\src\LifeManagers.Data.csproj" />
+      <ProjectReference Include="..\TaxDashboard.Util\TaxDashboard.Util.csproj" />
     </ItemGroup>
 </Project>

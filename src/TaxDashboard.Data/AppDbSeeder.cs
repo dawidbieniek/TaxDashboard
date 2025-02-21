@@ -109,40 +109,26 @@ public class AppDbSeeder(IDbContextFactory<AppDbContext> contextFactory) : ISeed
         await context.Clients.AddAsync(client2);
         await context.Clients.AddAsync(new()
         {
-            Name = "Plus",
+            Name = "Start",
             Surname = "Warning",
-            JoinDateTime = DateTime.Now,
+            JoinDateTime = new(2024, 8, 1),
             ReductionType = Enums.ReductionType.Start,
             ReductionChangeDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-26).AddMonths(-5)),
             Bank = context.Banks.First(),
         });
         await context.Clients.AddAsync(new()
         {
-            Name = "Plus",
+            Name = "Start",
             Surname = "Danger",
-            JoinDateTime = DateTime.Now,
+            JoinDateTime = new(2024, 7, 1),
             ReductionType = Enums.ReductionType.Start,
             ReductionChangeDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-1).AddMonths(-6)),
             Bank = context.Banks.First(),
         });
-        await context.Clients.AddAsync(new()
-        {
-            Name = "Preferential",
-            Surname = "Warning",
-            JoinDateTime = DateTime.Now,
-            ReductionType = Enums.ReductionType.PrefZUS,
-            ReductionChangeDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-26).AddMonths(-11).AddYears(-1)),
-            Bank = context.Banks.First(),
-        });
-        await context.Clients.AddAsync(new()
-        {
-            Name = "Preferential",
-            Surname = "Danger",
-            JoinDateTime = DateTime.Now,
-            ReductionType = Enums.ReductionType.PrefZUS,
-            ReductionChangeDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-1).AddYears(-3)),
-            Bank = context.Banks.First(),
-        });
+
+        Bank bank = context.Banks.First();
+        IEnumerable<Client> manyClients = Enumerable.Range(1, 30).Select(i => new Client() { Bank = bank, JoinDateTime = DateTime.Today.AddMonths(-6), Name = "Client" + i, Surname = "CLient" + i, Notes = i.ToString() });
+        await context.Clients.AddRangeAsync(manyClients);
     }
 
     private static async Task SeedIncomes(AppDbContext context)
