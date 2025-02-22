@@ -18,21 +18,23 @@ namespace TaxDashboard.Services.Emails;
 internal partial class OAuthAuthenticator
 {
     private const string UserId = "appUser";
-    private readonly AuthorizationCodeInstalledApp _authorizationCodeApp;
+    private readonly AuthorizationCodeInstalledApp? _authorizationCodeApp;
     private readonly FileDataStore _tokenStore;
-    private readonly IAuthorizationCodeFlow _oauthCodeFlow;
+    private readonly IAuthorizationCodeFlow? _oauthCodeFlow;
+
+    public bool IsInvalid { get; private set; } = false;
 
     public OAuthAuthenticator(IOptions<DataServicesOptions> dataOptions, IConfiguration config)
     {
         _tokenStore = new FileDataStore(Path.Combine(dataOptions.Value.DataDirectoryPath, "OAuthTokens"), true);
 
         string? clientAppOAuthId = config["OAuth:ClientAppId"];
-        if (string.IsNullOrEmpty(clientAppOAuthId))
-            throw new ArgumentException("Config doesn't contain ClientAppId");
-
         string? clientAppOAuthClientSecret = config["OAuth:ClientAppSecret"];
-        if (string.IsNullOrEmpty(clientAppOAuthClientSecret))
-            throw new ArgumentException("Config doesn't contain ClientAppSecret");
+        if (string.IsNullOrEmpty(clientAppOAuthId) || string.IsNullOrEmpty(clientAppOAuthClientSecret))
+        {
+            IsInvalid = true;
+            return;
+        }
 
         _oauthCodeFlow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer()
         {
@@ -54,6 +56,9 @@ internal partial class OAuthAuthenticator
 
     public async Task<string?> GetAuthenticatedUserEmailAddressAsync()
     {
+        if(IsInvalid)
+            return null;
+
         TokenResponse? token = await GetStoredTokenAsync();
         if (token is null)
             return null;
@@ -65,6 +70,9 @@ internal partial class OAuthAuthenticator
 
     public async Task ClearAuthenticationAsync()
     {
+        if (IsInvalid)
+            return;
+
         TokenResponse? token = await GetStoredTokenAsync();
         if (token is not null)
             await RevokeTokenAsync(token);
@@ -76,10 +84,19 @@ internal partial class OAuthAuthenticator
         }
     }
 
-    public async Task<LoginResult> LoginAsync() => await AuthenticateUsingOAuthAsync() ? new() : new(false, "Logowanie nie udało się");
+    public async Task<LoginResult?> LoginAsync()
+    {
+        if (IsInvalid)
+            return null;
+
+        return await AuthenticateUsingOAuthAsync() ? new() : new(false, "Logowanie nie udało się");
+    }
 
     public async Task<SaslMechanism?> GetStoredAuthenticationData()
     {
+        if (IsInvalid)
+            return null;
+
         TokenResponse? token = await GetStoredTokenAsync();
         if (token is null)
             return null;
