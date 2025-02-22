@@ -1,0 +1,63 @@
+name: Version
+
+on: 
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: dev
+        token: ${{ secrets.PAT }}
+        submodules: recursive
+        
+    - name: Extract Version
+      id: extractVersion
+      shell: pwsh
+      run: |
+        $xml = [Xml] (Get-Content ./src/TaxDashboard/TaxDashboard.csproj)
+        [string] $version = [Version] $xml.Project.PropertyGroup.ApplicationDisplayVersion
+        echo "version=$($version)" >> $env:GITHUB_OUTPUT
+        
+    - name: Update package version
+      shell: pwsh
+      run: |
+        $path = "./src/TaxDashboard/Platforms/Windows/Package.appxmanifest"
+        $doc = [Xml](Get-Content $path)
+        $doc.Package.Identity.Version="${{ steps.extractVersion.outputs.version }}.0"
+        $doc.Save($path)
+               
+    - name: Update installer version
+      shell: pwsh
+      run: |
+        $path = "./src/TaxDashboard/TaxDashboard.appinstaller"
+        $doc = [Xml](Get-Content $path)
+        $doc.AppInstaller.MainPackage.Version="${{ steps.extractVersion.outputs.version }}.0"
+        $doc.Save($path)
+
+    - name: Commit version bump
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
+        git add ./src/TaxDashboard/TaxDashboard.appinstaller
+        git add ./src/TaxDashboard/Platforms/Windows/Package.appxmanifest
+        git commit -m "Bump version"
+          
+    - name: Push version bump
+      run: git push origin dev
+
+    - name: Dev -> Main
+      run: |
+        git fetch origin main
+        git checkout -b main origin/main
+        git merge dev
+        git push origin main

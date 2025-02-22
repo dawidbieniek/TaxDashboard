@@ -25,6 +25,8 @@ internal partial class EmailService(OAuthAuthenticator oAuthAuthenticator)
 {
     private readonly OAuthAuthenticator _oAuthAuthenticator = oAuthAuthenticator;
 
+    public bool IsOAuthInvalid => _oAuthAuthenticator.IsInvalid;
+
     public static Task<LoginResult> LoginUsingPasswordAsync(string emailAddress, string password) => PasswordAuthenticator.LoginAsync(emailAddress, password);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "<Pending>")]
@@ -41,7 +43,7 @@ internal partial class EmailService(OAuthAuthenticator oAuthAuthenticator)
         return new(false, null, EmailLoginOption.None);
     }
 
-    public Task<LoginResult> LoginUsingOAuthAsync() => _oAuthAuthenticator.LoginAsync();
+    public Task<LoginResult?> LoginUsingOAuthAsync() => _oAuthAuthenticator.LoginAsync();
 
     public async Task ClearAllLoginDataAsync()
     {

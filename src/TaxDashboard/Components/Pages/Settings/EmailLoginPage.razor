@@ -17,7 +17,7 @@
                 <div class="card-body p-4">
                     <h5 class="card-title w-100 text-center mb-2">Logowanie na konto Gmail</h5>
                     <hr class="mb-4" />
-                    <button class="btn btn-primary w-100" @onclick="@LoginUsingOAuthAsync"><span class="bi-google me-3" />Zaloguj z Google</button>
+                    <button class="btn btn-primary w-100" @onclick="@LoginUsingOAuthAsync"><span class="bi-google me-3" disabled="@EmailService.IsOAuthInvalid"/>Zaloguj z Google</button>
                     <div class="h6 text-uppercase w-100 text-center my-3">Albo</div>
                     <EditForm EditContext="@_loginDetailsEditContext" OnValidSubmit="LoginUsingPasswordAsync" onkeypress="if(event.keyCode==13){document.activeElement.blur();return false;}">
                         <DataAnnotationsValidator />
@@ -88,7 +88,13 @@
 
     private async Task LoginUsingOAuthAsync()
     {
-        LoginResult result = await EmailService.LoginUsingOAuthAsync();
+        LoginResult? result = await EmailService.LoginUsingOAuthAsync();
+
+        if (result is null)
+        {
+            await _toastRef.ShowTextAsync("System OAuth nie jest prawidłowo skonfigurowany");
+            return;
+        }
 
         if (result.IsSuccessful)
         {
