@@ -20,5 +20,33 @@
                 </div>
             </div>
         </div>
+        <div class="col-12">
+            @* Application *@
+            <div class="card bg-light mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Aplikacja</h5>
+                    <div class="list-group shadow">
+                        <div class="list-group-item row">
+                            <div class="col">
+                                <div class="fw-bold">Wersja</div>
+                                <div class="text-muted">Obecna wersja aplikacji</div>
+                            </div>
+                            <div class="col-auto my-auto d-flex">
+                                <input type="text" class="form-control" value="@_version" disabled/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+@code {
+    private string _version = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        _version = ('v' + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString()) ?? string.Empty;
+    }
+}

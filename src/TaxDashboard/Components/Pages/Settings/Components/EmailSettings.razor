@@ -36,13 +36,14 @@
                     <a href="/email/login" class="btn btn-primary">Logowanie</a>
                 }
             </div>
-        </div><div class="list-group-item row">
+        </div>
+        <div class="list-group-item row">
             <div class="col">
                 <div class="fw-bold">Imię</div>
                 <div class="text-muted">Imię i nazwisko używane przy wysyłaniu wiadomości</div>
             </div>
             <div class="col-auto my-auto d-flex">
-                <InputText class="form-control" autocomplete="of"
+                <InputText class="form-control" autocomplete="off"
                            @bind-Value="EmailName" @bind-Value:after="@(() => Preferences.Set(GlobalSettings.PreferencesStorage.EmailNameKey, EmailName))"
                            disabled="@(!_emailLoginInfo.LoggedIn)" />
             </div>

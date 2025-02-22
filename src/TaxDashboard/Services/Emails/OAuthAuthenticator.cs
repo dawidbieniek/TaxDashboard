@@ -135,7 +135,7 @@ internal partial class OAuthAuthenticator
         SaslMechanismOAuthBearer oauth2;
         try
         {
-            UserCredential creds = await _authorizationCodeApp.AuthorizeAsync(UserId, CancellationToken.None);
+            UserCredential creds = await _authorizationCodeApp!.AuthorizeAsync(UserId, CancellationToken.None);
 
             if (creds.Token.IsStale)
                 await creds.RefreshTokenAsync(CancellationToken.None);

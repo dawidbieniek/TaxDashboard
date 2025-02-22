@@ -11,7 +11,7 @@
             <div class="text-muted">Data i godzina ostatniej automatycznej kopii zapasowej</div>
         </div>
         <div class="col-auto my-auto">
-            <div class="form-control disabled">@_lastBackupDateTimeString</div>
+            <input class="form-control" value="@_lastBackupDateTimeString" disabled />
         </div>
     </div>
     <div class="list-group-item row">
@@ -20,9 +20,7 @@
             <div class="text-muted">Miejsce zapisu danych</div>
         </div>
         <div class="col-auto my-auto">
-            <div class="form-control disabled">
-                @FileSystem.Current.AppDataDirectory
-            </div>
+            <input class="form-control" style="width:260px;" value="@FileSystem.Current.AppDataDirectory" disabled />
         </div>
     </div>
     <div class="list-group-item row">
