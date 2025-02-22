@@ -45,6 +45,7 @@
 
     private ChangeTracker<int?> _clientChangeTracker = new();
     private ChangeTracker<int?> _contextDateYearChangeTracker = new();
+    private ChangeTracker<DateOnly?> _contextDateChangeTracker = new();
 
     [Parameter, EditorRequired]
     public Client Client { get; set; } = default!;
@@ -123,6 +124,9 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        if (_contextDateChangeTracker.HasChanged(ContextDate))
+            UpdateInvoiceInputs();
+
         if ((_clientChangeTracker.HasChanged(Client?.Id) || _contextDateYearChangeTracker.HasChanged(ContextDate?.Year)) && _invoiceChartRef is not null)
             await UpdateInvoicesAsync();
     }
@@ -133,11 +137,14 @@
         await UpdateInvoicesAsync();
     }
 
-    private async Task UpdateInvoicesAsync()
-{
+    private void UpdateInvoiceInputs()
+    {
         _currentSellInvoice = ContextDate.HasValue ? Client.Invoices.FirstOrDefault(i => i.Type == InvoiceType.Sell && i.Date == ContextDate) : null;
         _currentCostInvoice = ContextDate.HasValue ? Client.Invoices.FirstOrDefault(i => i.Type == InvoiceType.Cost && i.Date == ContextDate) : null;
+    }
 
+    private async Task UpdateInvoicesAsync()
+    {
         UpdateInvoicesDataSeries(InvoiceType.Sell);
         UpdateInvoicesDataSeries(InvoiceType.Cost);
         await UpdateChartAsync();
