@@ -2,6 +2,10 @@
 <AppInstaller xmlns="http://schemas.microsoft.com/appx/appinstaller/2018" Version="1.0.0.0" Uri="https://github.com/dawidbieniek/TaxDashboard/releases/latest/download/TaxDashboard.appinstaller">
   <MainPackage Name="db.myapps.taxdashboard" Publisher="CN=Dawid Bieniek" Version="0.4.0.0" ProcessorArchitecture="x64" Uri="https://github.com/dawidbieniek/TaxDashboard/releases/latest/download/AutoUpdate.msix" />
   <UpdateSettings>
-    <OnLaunch HoursBetweenUpdateChecks="0" />
+    <OnLaunch HoursBetweenUpdateChecks="0" 
+              ShowPrompt="true"
+              UpdateBlocksActivation="true" />
+    <AutomaticBackgroundTask />
+    <ForceUpdateFromAnyVersion>true</ForceUpdateFromAnyVersion>
   </UpdateSettings>
 </AppInstaller>

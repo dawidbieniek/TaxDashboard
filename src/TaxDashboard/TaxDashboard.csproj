@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
-
     <PropertyGroup>
         <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
         
@@ -20,7 +19,7 @@
         <ApplicationId>db.myapps.taxdashboard</ApplicationId>
 
         <!-- Versions -->
-        <ApplicationDisplayVersion>0.4.0</ApplicationDisplayVersion>
+        <ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
 
         <!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
         <WindowsPackageType>MSIX</WindowsPackageType>
@@ -31,7 +30,6 @@
         
         <PackageCertificateKeyFile>TaxDashboard_Certificate.pfx</PackageCertificateKeyFile>
         <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-        
     </PropertyGroup>
 
     <ItemGroup>
@@ -75,21 +73,5 @@
       <ProjectReference Include="..\BlazorTable\src\BlazorTable\BlazorTable.csproj" />
       <ProjectReference Include="..\LifeManagers.Data\src\LifeManagers.Data.csproj" />
       <ProjectReference Include="..\TaxDashboard.Util\TaxDashboard.Util.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="C:\Users\dawid\.nuget\packages\microsoft.windowsappsdk\1.6.240923002\buildTransitive\..\include\DeploymentManagerAutoInitializer.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="C:\Users\dawid\.nuget\packages\microsoft.windowsappsdk\1.6.240923002\buildTransitive\..\include\DeploymentManagerAutoInitializer.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="C:\Users\dawid\.nuget\packages\microsoft.windowsappsdk\1.6.240923002\buildTransitive\..\include\WindowsAppSDK-VersionInfo.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="C:\Users\dawid\.nuget\packages\microsoft.windowsappsdk\1.6.240923002\buildTransitive\..\include\DeploymentManagerAutoInitializer.cs" />
     </ItemGroup>
 </Project>
