@@ -1,0 +1,40 @@
+﻿@inject IJSRuntime JS
+
+﻿<div class="alert alert-danger m-1" role="alert">
+    <div class="d-flex align-items-center">
+        <i class="bi-exclamation-triangle-fill fs-4 text-warning me-2"></i>
+        <span>Błąd działania!</span>
+        <span class="flex-grow-1"/>
+        @if(DisplayedException is not null)
+        {
+            <button class="btn btn-warning me-2" data-bs-toggle="collapse" data-bs-target="#exceptionDetails">Szczegóły</button>
+        }
+        <button @onclick="() => OnRecoverClicked.InvokeAsync()" class="btn btn-primary">Napraw</button>
+    </div>
+    @if(DisplayedException is not null)
+    {
+        <div class="collapse" id="exceptionDetails">
+            <hr />
+            <p>@DisplayedException.GetType() (@DisplayedException.Message)</p>
+            <pre style="white-space:pre-wrap;font-size:x-small;line-height:1.1;"><code>@DisplayedException.StackTrace</code></pre>
+            <button @onclick="CopyExceptionDetailsToClipboard" class="btn btn-secondary mt-2">Kopiuj</button>
+        </div>
+    }
+</div>
+
+@code 
+{
+    [Parameter]
+    public EventCallback OnRecoverClicked { get; set; }
+    [Parameter]
+    public Exception? DisplayedException { get; set; }
+
+    private async Task CopyExceptionDetailsToClipboard()
+    {
+        if (DisplayedException is not null)
+        {
+            string exceptionDetails = $"{DisplayedException.GetType()} ({DisplayedException.Message})\n{DisplayedException.StackTrace}";
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", exceptionDetails);
+        }
+    }
+}

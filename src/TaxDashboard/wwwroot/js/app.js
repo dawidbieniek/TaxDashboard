@@ -68,5 +68,4 @@ function hidePopover(id) {
     else {
         console.log(`Couldn\'t find popover with id: ${id}`)
     }
-    
 }

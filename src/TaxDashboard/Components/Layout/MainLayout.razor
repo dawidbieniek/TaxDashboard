@@ -46,7 +46,14 @@
     </aside>
 
     <content>
-        @Body
+        <ErrorBoundary @ref="@_errorBoundaryRef">
+            <ChildContent>
+                @Body
+            </ChildContent>
+            <ErrorContent>
+                <TaxDashboard.Components.Layout.Components.ErrorMessage DisplayedException="@context" OnRecoverClicked="@_errorBoundaryRef.Recover" />
+            </ErrorContent>
+        </ErrorBoundary>
     </content>
 </div>
 
@@ -61,6 +68,8 @@
         };
 
     private IJSObjectReference _JSModule = default!;
+
+    private ErrorBoundary _errorBoundaryRef = default!;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
