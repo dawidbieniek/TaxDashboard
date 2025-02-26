@@ -33,3 +33,7 @@
     ::deep .form-control.disabled {
         background-color: var(--bs-dark) !important;
     }
+
+::deep .list-group-item input {
+    width: 260px;
+}

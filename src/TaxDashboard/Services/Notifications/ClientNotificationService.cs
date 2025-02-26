@@ -9,7 +9,7 @@ using TaxDashboard.Util;
 namespace TaxDashboard.Services;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
-public class ClientNotificationService(ClientsService clientsService)
+public class ClientNotificationService
 {
     private const int ReductionWarningDays = 7;
     private const decimal WarningPoint = 0.9m;
@@ -29,9 +29,7 @@ public class ClientNotificationService(ClientsService clientsService)
         return new();
     }
 
-    private readonly ClientsService _clientsService = clientsService;
-
-    public NotificationInfo GetClientLimitNotification(Client client, DateOnly contextDate, NotificationLimitType limitType)
+    public static NotificationInfo GetClientLimitNotification(Client client, DateOnly contextDate, NotificationLimitType limitType)
     {
         if ((limitType == NotificationLimitType.Zus && client.ReductionType != ReductionType.ZUSPlus)
             || (limitType == NotificationLimitType.Fiscal && !client.UseCashRegister))
@@ -61,7 +59,7 @@ public class ClientNotificationService(ClientsService clientsService)
         return new();
     }
 
-    public IEnumerable<NotificationInfo> GetAllClientLimitNotifications(Client client, DateOnly contextDate)
+    public static IEnumerable<NotificationInfo> GetAllClientLimitNotifications(Client client, DateOnly contextDate)
     {
         List<NotificationInfo> notifications = new();
         foreach (NotificationLimitType limitType in Enum.GetValues<NotificationLimitType>())

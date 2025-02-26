@@ -37,7 +37,8 @@ public class DashboardPageBase : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        if (int.TryParse(Preferences.Get(GlobalSettings.PreferencesStorage.LastClientIdKey, null), out int storedClientId))
+        int storedClientId = Preferences.Get(GlobalSettings.PreferencesStorage.LastClientIdKey, -1);
+        if (storedClientId > 0)
         {
             Client? storedClient = await ClientsService.GetDetailsAsync(storedClientId);
             if (storedClient is not null && !storedClient.Suspended)

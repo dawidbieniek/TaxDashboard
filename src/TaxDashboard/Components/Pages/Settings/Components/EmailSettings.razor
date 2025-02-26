@@ -26,9 +26,7 @@
             <div class="col-auto my-auto d-flex">
                 @if (_emailLoginInfo.LoggedIn)
                 {
-                    <div class="form-control disabled me-2">
-                        @_emailLoginInfo.EmailAddress
-                    </div>
+                    <input class="form-control me-2" value="@_emailLoginInfo.EmailAddress" disabled />
                     <button class="btn btn-danger" @onclick="LogoutEmailAsync">Wyloguj</button>
                 }
                 else
@@ -40,7 +38,7 @@
         <div class="list-group-item row">
             <div class="col">
                 <div class="fw-bold">Imię</div>
-                <div class="text-muted">Imię i nazwisko używane przy wysyłaniu wiadomości</div>
+                <div class="text-muted">Nazwa używana przy wysyłaniu wiadomości</div>
             </div>
             <div class="col-auto my-auto d-flex">
                 <InputText class="form-control" autocomplete="off"
@@ -55,19 +53,19 @@
                     <div class="text-muted">Treść szablonu używana przy wysyłaniu wiadomości</div>
                 </div>
                 <div class="col-auto d-flex">
-                    <div class="my-auto me-2">
+                    <div class="my-auto me-1">
                         <TokenListIcon />
                     </div>
                     <TaxDashboard.Components.FormInputs.InputClassSelect class="form-select form-control my-auto me-2" style="max-width:16em"
-                                                                            Options="Enum.GetValues<EmailTemplateType>()" Selector="v => v.GetDescriptor()"
-                                                                            @bind-Value="_selectedTemplateType" @bind-Value:after="ChangeSelectedTemplateType"
-                                                                            disabled="@_editingEmailTemplate" />
+                                                                         Options="Enum.GetValues<EmailTemplateType>()" Selector="v => v.GetDescriptor()"
+                                                                         @bind-Value="_selectedTemplateType" @bind-Value:after="ChangeSelectedTemplateType"
+                                                                         disabled="@_editingEmailTemplate" />
                     <button class="btn btn-primary my-auto" @onclick="@ChangeEditState">@(_editingEmailTemplate ? "Zapisz" : "Edytuj")</button>
                 </div>
             </div>
             <div class="row m-0 p-0">
                 <div class="col">
-                    <div class="input-group">
+                    <div class="input-group mb-1">
                         <label for="subject" class="input-group-text">Temat</label>
                         <InputText id="subject" class="form-control" style="margin-right:0" autocomplete="off"
                                    @bind-Value="@_emailSubjectTemplate"

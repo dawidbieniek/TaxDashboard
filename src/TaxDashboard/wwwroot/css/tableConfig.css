@@ -2,100 +2,28 @@
     transform: scale(1.5);
 }
 
-.client-table button {
+.client-table td .btn-icon {
     padding: 0;
     height: 22px;
     width: 22px;
 }
 
-.client-table table th:nth-child(1) {
+.client-table table .column-small > div {
     min-width: 50px;
 }
 
-.client-table table th:nth-child(2) {
-    min-width: 150px;
-}
-
-.client-table table th:nth-child(3) {
-    min-width: 90px;
-}
-
-.client-table table th:nth-child(4) {
+.client-table table .column-medium > div {
     min-width: 120px;
 }
 
-.client-table table th:nth-child(5) {
-    min-width: 120px;
-}
-
-.client-table table th:nth-child(6) {
-    min-width: 120px;
-}
-
-.client-table table th:nth-child(7) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(8) {
+.client-table table .column-big > div {
     min-width: 150px;
-}
-
-.client-table table th:nth-child(9) {
-    min-width: 90px;
-}
-
-.client-table table th:nth-child(10) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(11) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(12) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(13) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(14) {
-    min-width: 150px;
-}
-
-.client-table table th:nth-child(15) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(16) {
-    min-width: 75px;
-}
-
-.client-table table th:nth-child(17) {
-    min-width: 130px;
-}
-
-.client-table table th:nth-child(18) {
-    min-width: 130px;
-}
-
-.client-table table th:nth-child(19) {
-    min-width: 100px;
-}
-
-.client-table table th:nth-child(20) {
-    min-width: 100px;
-}
-
-.client-table table th:nth-child(21) {
-    min-width: 30px;
 }
 
 td:has(>input[type='checkbox']) {
     text-align: center;
 }
 
-.suspended td{
+.suspended td {
     color: var(--bs-secondary);
 }

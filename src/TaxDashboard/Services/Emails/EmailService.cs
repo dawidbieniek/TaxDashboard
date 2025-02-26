@@ -58,7 +58,7 @@ internal partial class EmailService(OAuthAuthenticator oAuthAuthenticator)
         message.Subject = subject;
         message.Body = new TextPart("html")
         {
-            Text = content
+            Text = "<div style='white-space: pre-line;'>"+content+"</div>"
         };
 
         SaslMechanism? oAuthAuthentication = await _oAuthAuthenticator.GetStoredAuthenticationData();

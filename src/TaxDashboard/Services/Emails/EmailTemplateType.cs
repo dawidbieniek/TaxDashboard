@@ -11,7 +11,7 @@ public enum EmailTemplateType
     TimeStart,
     [Description("Blisko końca preferencji (Pełny)")]
     TimePreferentialFull,
-    [Description("Blisko końca preferencji (Pełny)")]
+    [Description("Blisko końca preferencji (Plus)")]
     TimePreferentialPlus,
     [Description("Przekroczenie limitu kasy fiskalnej")]
     AmountFiscalDanger,
@@ -21,6 +21,6 @@ public enum EmailTemplateType
     TimeStartDanger,
     [Description("Przekroczenie końca preferencji (Pełny)")]
     TimePreferentialFullDanger,
-    [Description("Przekroczenie końca preferencji (Pełny)")]
+    [Description("Przekroczenie końca preferencji (Plus)")]
     TimePreferentialPlusDanger,
 }
