@@ -1,6 +1,9 @@
 ﻿@using TaxDashboard.Services.Notifications
 
+@implements IAsyncDisposable
+
 @inject ClientsService ClientsService
+@inject IJSRuntime JS
 
 <nav class="navbar navbar-expand sticky-top align-items-start bg-light border-black border-bottom border-2 px-2">
     <div class="dropdown flex-grow-0 flex-shrink-0">
@@ -9,7 +12,9 @@
                type="text"
                placeholder="@(_allClients.Any() ? "Klient" : "Brak klientów")"
                autocomplete="on"
-               @onchange="ChangeSelectedClient"
+               @onchange="ChangeSelectedClientAndBlurAsync"
+               onfocus="this.value.trim()!=''?this.setAttribute('placeholder',this.value):'';this.value='';"
+               onfocusout="if (this.value.trim() === '' && this.placeholder !== '' && this.placeholder !== 'Klient' && this.placeholder !== 'Brak klientów') { this.value = this.placeholder; }"
                value="@(StartingClient?.FullName ?? "")"
                onclick="this.select();" />
         <datalist id="clientList">
@@ -52,6 +57,8 @@
     private int _selectedClientIndex = -1;
 
     private ClientSelectorNotificationIcon? _notificationIconRef;
+
+    private IJSObjectReference? _JSModule;
 
     [Parameter]
     public Client? StartingClient { get; set; }
@@ -96,6 +103,12 @@
             _incorrectClientName = true;
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            _JSModule = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Navbar/ClientSelector.razor.js");
+    }
+
     private void ChangeSelectedClient(int allClientIndex)
     {
         if (allClientIndex < 0 || allClientIndex >= _allClients.Count || LockClientNavigationButtons)
@@ -108,10 +121,11 @@
         _incorrectClientName = false;
     }
 
-    private void ChangeSelectedClient(ChangeEventArgs e)
+    private async Task ChangeSelectedClientAndBlurAsync(ChangeEventArgs e)
     {
         bool clientFound = SelectClientFromName((string)e.Value!);
         _incorrectClientName = !clientFound;
+        await _JSModule!.InvokeVoidAsync("blurInput");
     }
 
     private bool SelectClientFromName(string name)
@@ -133,5 +147,19 @@
     {
         _contextDate = dateContext;
         await OnSelectedDateContextChanged.InvokeAsync(dateContext);
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (_JSModule is not null)
+        {
+            try
+            {
+                await _JSModule.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+            }
+        }
     }
 }
