@@ -65,13 +65,22 @@ public class Client : Entity
     public string FullName => $"{Name} {Surname}";
 
     [NotMapped]
-    public DateOnly? LastDayOfReduction => ReductionType switch
+    public DateOnly? LastDayOfReduction
     {
-        ReductionType.Start => DateOnly.FromDateTime(JoinDateTime).FirstOfCurrentMonth().AddMonths(StartReductionValidMonths).AddDays(-1),
-        ReductionType.PrefZUS => DateOnly.FromDateTime(JoinDateTime).FirstOfCurrentMonth().AddYears(PreferentialReductionValidYears).AddMonths(StartReductionValidMonths).AddDays(-1),
-        ReductionType.ZUSPlus => ReductionChangeDate.FirstOfCurrentMonth().AddYears(PlusReductionValidYears).AddDays(-1),
-        _ => null
-    };
+        get
+        {
+            DateOnly contextDate = ReductionType == ReductionType.ZUSPlus ? ReductionChangeDate : DateOnly.FromDateTime(JoinDateTime);
+            int additionalOffset = contextDate.Day == 1 ? 0 : 1;
+
+            return ReductionType switch
+            {
+                ReductionType.Start => contextDate.FirstOfCurrentMonth().AddMonths(StartReductionValidMonths + additionalOffset).AddDays(-1),
+                ReductionType.PrefZUS => contextDate.FirstOfCurrentMonth().AddYears(PreferentialReductionValidYears).AddMonths(StartReductionValidMonths + additionalOffset).AddDays(-1),
+                ReductionType.ZUSPlus => contextDate.FirstOfCurrentMonth().AddYears(PlusReductionValidYears).AddMonths(additionalOffset).AddDays(-1),
+                _ => null
+            };
+        }
+    }
     [NotMapped]
     public DateOnly FirstDayOfIncome => DateOnly.FromDateTime(JoinDateTime).FirstOfCurrentMonth();
     [NotMapped]
