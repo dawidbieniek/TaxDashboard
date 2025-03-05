@@ -27,8 +27,9 @@ namespace TaxDashboard
                 });
 
             builder.Configuration
-                .AddJsonFile("appsettings.json")
-                .AddUserSecrets(System.Reflection.Assembly.GetExecutingAssembly(), true);
+                .AddJsonFile("appsettings.json", optional:true)
+                .AddUserSecrets(System.Reflection.Assembly.GetExecutingAssembly(), true)
+                .AddEnvironmentVariables();
 
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddBlazorTable();
