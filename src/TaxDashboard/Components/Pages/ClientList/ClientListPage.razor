@@ -10,7 +10,7 @@
 @inject NavigationManager Navigation
 
 <div class="client-table container-fluid flex-row pt-3">
-    <Table TableItem="Client" Items="@_allClients" TableClass="table table-striped table-hover table-bordered table-sm small w-100 rounded" TableRowClass="@((c) => c.Suspended ? "suspended" : "")" OnNewPageRendered="@(() => EnableVisibleTooltipsAsync())" >
+    <Table TableItem="Client" Items="@_allClients" ShowSearchBar="true" TableClass="table table-striped table-hover table-bordered table-sm small w-100 rounded" TableRowClass="@((c) => c.Suspended ? "suspended" : "")" OnNewPageRendered="@(() => EnableVisibleTooltipsAsync())" >
         <Pager ShowPageNumber="true" ShowTotalCount="true" ShowPageSizes="true" PageSizes="[10, 15, 20]" />
         <Column TableItem="Client" Title="Id" Field="@(x => x.Id)" Sortable="true" Filterable="true" DefaultSortColumn="true" Class="column-small" />
         <Column TableItem="Client" Title="Imię" Field="@(x => x.FullName)" Sortable="true" Filterable="true" Class="column-big"/>
