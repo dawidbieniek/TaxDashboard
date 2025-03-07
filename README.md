@@ -85,11 +85,19 @@ After successfull build, packed app should be created inside `/bin/Release/net9.
 
 
 ## Screenshots
-Give some screenshots of an app or its results for bragging puproses
+### Views
+![Data page][ss-dataView]
+![List page][ss-listView]
+![Settings page][ss-settingsView]
+![Other pages][ss-otherViews]
+
+### Emails
+![Emails][ss-email]
+
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[app-screenshot]: https://placehold.co/600x400
+[app-screenshot]: img/appScreenshot.png
 [dotnet-badge]: https://img.shields.io/badge/.NET-512BD4?style=for-the-badge&logo=dotnet&logoColor=white
 [dotnet-url]: https://dotnet.microsoft.com/en-us/
 [bootstrap-badge]: https://img.shields.io/badge/Bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white
@@ -102,3 +110,9 @@ Give some screenshots of an app or its results for bragging puproses
 [maui-url]: https://github.com/dotnet/maui
 [mailkit-badge]: https://img.shields.io/badge/MailKit-3498db?style=for-the-badge
 [mailkit-url]: https://github.com/jstedfast/MailKit
+
+[ss-dataView]: img/data.png
+[ss-listView]: list/data.png
+[ss-settingsView]: img/settings.png
+[ss-otherViews]: img/otherViews.png
+[ss-email]: img/email.png
