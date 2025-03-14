@@ -73,7 +73,7 @@
         <Column TableItem="Client" Title="Opłacanie VAT" Field="@(x => x.VATPaymentType)" Sortable="true" Filterable="true" Class="column-medium">
             <Template>@(context.VATPaymentType.GetDescriptor())</Template>
         </Column>
-        <Column TableItem="Client" Title="" Align="Align.Center" Class="column-small" >
+        <Column TableItem="Client" Title="" Align="BlazorTable.Align.Center" Class="column-small" >
             <Template><button class="btn btn-danger btn-icon" @onclick="@(async () => await ShowDeleteModalAsync(context))"><i class="bi-trash3 d-block" style="margin-top:-2px;" /></button></Template>
         </Column>
     </Table>
