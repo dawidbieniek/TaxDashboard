@@ -8,7 +8,7 @@
 @inject BanksService BanksService
 @inject ISnackbar Toast
 
-<EditForm Model="@_newClientData" OnValidSubmit="CreateNewClient" onkeypress="if(event.keyCode==13){document.activeElement.blur();return false;}">
+<EditForm Model="@_newClientData" class="pt-3" OnValidSubmit="CreateNewClient" onkeypress="if(event.keyCode==13){document.activeElement.blur();return false;}">
     <DataAnnotationsValidator />
     <MudContainer MaxWidth="MaxWidth.Small">
         <MudCard Class="pa-4" Elevation="4" Outlined>
