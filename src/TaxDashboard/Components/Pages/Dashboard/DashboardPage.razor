@@ -1,0 +1,209 @@
+﻿@page "/dashboard"
+
+@using TaxDashboard.Components.Loading
+@using TaxDashboard.Components.Navbar
+@using ApexCharts
+@using TaxDashboard.Components.Pages.Dashboard.Components
+@using TaxDashboard.Components.Pages.Dashboard.Model
+@using TaxDashboard.Services.Emails
+
+@inherits DashboardPageBase
+
+<LoadingContentsComponent Initialized="@Initialized">
+    <ClientSelector StartingClient="@Client" StartingDateContext="@ContextDate?.Date" OnSelectedClientChanged="ChangeSelectedClient" OnSelectedDateContextChanged="ChangeDateContext" />
+
+    @if (Client is null)
+    {
+        <NoClientAlert />
+    }
+    else
+    {
+        <div class="container-fluid flex-row mt-3">
+            <div class="row">
+                <div class="col-12 col-xl-3">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-1">
+                        @* VAT gauge *@
+                        <div class="col">
+                            <div class="card bg-light mb-4">
+                                <div class="card-body gauge-card">
+                                    <div style="height:25px" />
+                                    <GaugeChart Label="Limit do VAT" Value="@_vatIncomeSum" ValueLimit="@_vatGaugeLimit"
+                                    TooltipAdditionalText="@(Client.JoinDateTime.Year == ContextDate?.Date.Year ? $"Liczone od: {Client.JoinDateTime.ToShortDateString()}" : "")"
+                                    PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountVAT}'>tutaj</a>, aby go poinformować")"
+                                    PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountVATDanger}'>tutaj</a>, aby go poinformować")" />
+                                </div>
+                            </div>
+                        </div>
+                        @* Fiscal gauge *@
+                        <div class="col">
+                            <div class="card bg-light mb-4">
+                                <div class="card-body gauge-card">
+                                    <div class="col form-check form-switch" style="margin-top:-.5rem;">
+                                        <label class="form-check-label overflow-hidden" style="height:1.5rem;" for="cashMethod">Używaj kasy fiskalnej</label>
+                                        <InputCheckbox id="cashMethod" class="form-check-input" type="checkbox" @bind-Value="Client.UseCashRegister" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" />
+                                    </div>
+                                    @if (Client.UseCashRegister)
+                                    {
+                                        <GaugeChart Label="Kasy fiskalne" Value="@_fiscalIncomeSum" ValueLimit="@ClientsService.FiscalLimit"
+                                        TooltipAdditionalText="@(Client.FirstCashRegisterUseDate.Year == ContextDate?.Date.Year ? $"Liczone od: {Client.FirstCashRegisterUseDate.ToShortDateString()}" : "")"
+                                        PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountFiscal}'>tutaj</a>, aby go poinformować")"
+                                        PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountFiscalDanger}'>tutaj</a>, aby go poinformować")" />
+                                    }
+                                    else
+                                    {
+                                        <div class="text-secondary text-center w-100 mt-5">Klient nie używa kasy fiskalnej</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        @* ZUS gauge *@
+                        <div class="col">
+                            <div class="card bg-light mb-4">
+                                <div class="card-body gauge-card">
+                                    <div style="height:25px" />
+                                    @if (Client.ReductionType == Data.Enums.ReductionType.ZUSPlus)
+                                    {
+                                        <GaugeChart Label="Mały ZUS Plus" Value="@_zusIncomeSum" ValueLimit="@ClientsService.ZusPlusLimit"
+                                        TooltipAdditionalText="@($"Liczone od: {ContextDate?.Date.FirstDayOfCurrentYear()} do {ContextDate?.Date.LastDayOfCurrentYear()}")"
+                                        PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
+                                        PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" />
+                                    }
+                                    else
+                                    {
+                                        <div class="text-secondary text-center w-100 mt-5">Klient nie jest na Małym ZUSie Plus</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-xl-9">
+                    @* Income chart *@
+                    <div class="card bg-light mb-4">
+                        <div class="card-body chart-card">
+                            <IncomesCard Client="@Client" ContextDate="@ContextDate?.Date" Disabled="@(ContextDate?.IsValid ?? false)" OnYearlyIncomesChanged="@((v) => UpdateIncomes(v))" />
+                        </div>
+                    </div>
+                    @* Invoices *@
+                    <div class="card bg-light mb-4">
+                        <div class="card-body chart-card">
+                            <InvoicesCard Client="@Client" ContextDate="@ContextDate?.Date" Disabled="@(ContextDate?.IsValid ?? false)" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg">
+                    @* Button panel *@
+                    <div class="card bg-light mb-4 mb-lg-2">
+                        <ButtonPanel Client="@Client" ContextDate="@ContextDate?.Date" Disabled="@(ContextDate?.IsValid ?? false)" />
+                    </div>
+                </div>
+                <div class="col-lg mb-2">
+                    @* Notes *@
+                    <div class="card bg-light h-100 p-3" style="min-height:224px">
+                        <h5 class="card-title">Notatki</h5>
+                        <InputTextArea class="form-control h-100" style="resize:none;overflow-y:auto" @bind-Value="@Client.Notes" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" autocomplete="off" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</LoadingContentsComponent>
+
+@code {
+    private List<IncomeData> _currentYearIncomes = [];
+
+    private decimal _vatIncomeSum = 0;
+    private decimal _fiscalIncomeSum = 0;
+    private decimal _zusIncomeSum = 0;
+
+    private decimal _vatGaugeLimit = ClientsService.BaseVatLimit;
+
+    protected override Task OnAfterRequiredInitializedAsync()
+    {
+        UpdateIncomes();
+        return Task.CompletedTask;
+    }
+
+    protected override async Task ChangeDateContext(ContextDate date)
+    {
+        await base.ChangeDateContext(date);
+
+        UpdateIncomes();
+    }
+
+    protected override async Task ChangeSelectedClient(Client client)
+    {
+        await base.ChangeSelectedClient(client);
+
+        UpdateIncomes();
+    }
+
+    private void UpdateIncomes(List<IncomeData>? incomes = null)
+    {
+        _currentYearIncomes = incomes ?? GetCurrentYearIncomes(ContextDate?.Date);
+
+        UpdateVatIncome();
+        UpdateFiscalIncome();
+        UpdateZusIncome();
+    }
+
+    private void UpdateVatIncome()
+    {
+        if (Client is null || ContextDate is null)
+        {
+            _vatIncomeSum = 0;
+            _vatGaugeLimit = 0;
+            return;
+        }
+
+        _vatIncomeSum = ClientsService.GetVatIncomeSum(Client, ContextDate.Date);
+        _vatGaugeLimit = ClientsService.GetVatLimit(Client, ContextDate.Date);
+    }
+
+    private void UpdateFiscalIncome()
+    {
+        if (Client is null || ContextDate is null || ContextDate.Date.Year < Client.FirstDayOfFiscalIncome.Year)
+        {
+            _fiscalIncomeSum = 0;
+            return;
+        }
+
+        _fiscalIncomeSum = ClientsService.GetFiscalIncomeSum(Client, ContextDate.Date);
+    }
+
+    private void UpdateZusIncome()
+    {
+        if (Client is null || ContextDate is null || ContextDate.Date.Year < Client.FirstDayOfZusIncome.Year)
+        {
+            _zusIncomeSum = 0;
+            return;
+        }
+
+        _zusIncomeSum = ClientsService.GetZusIncomeSum(Client, ContextDate.Date);
+    }
+
+
+    private List<IncomeData> GetCurrentYearIncomes(DateOnly? date)
+    {
+        int year = date.HasValue ? date.Value.Year : 1;
+
+        IEnumerable<IncomeData> monthlyIncomes = Enumerable.Range(1, 12)
+            .Select(month => new IncomeData(month));
+
+        if (Client is null || !date.HasValue)
+            return [.. monthlyIncomes];
+
+        IEnumerable<Income> existingIncomes = Client!.Incomes
+            .Where(i => i.Date.Year == year);
+
+        return monthlyIncomes
+            .Select(monthlyIncome =>
+            {
+                Income? income = existingIncomes.FirstOrDefault(existingIncome => existingIncome.Date.Month == monthlyIncome.Month && existingIncome.Date.Year == year);
+                return income is not null ? new IncomeData(monthlyIncome.Month, income.Amount) : monthlyIncome;
+            })
+            .ToList();
+    }
+}
