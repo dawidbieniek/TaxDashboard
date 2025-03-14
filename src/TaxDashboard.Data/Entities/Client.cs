@@ -98,7 +98,7 @@ public record NewClientData
     [Required(ErrorMessage = "Nazwisko jest wymagane")]
     public string Surname { get; set; } = string.Empty;
     [Required(ErrorMessage = "Data założenia jest wymagana")]
-    public DateTime JoinDateTime { get; set; }
+    public DateTime? JoinDateTime { get; set; }
     [MaxLength(10, ErrorMessage = "NIP jest zbyt długi (max 10)")]
     [Required(ErrorMessage = "NIP jest wymagany")]
     public string NIP { get; set; } = string.Empty;
