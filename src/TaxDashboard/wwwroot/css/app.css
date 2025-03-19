@@ -166,3 +166,23 @@ label {
 .form-control {
     margin: 1px;
 }
+
+.compact-card.mud-card {
+    --compact-card-horizontal-padding: 12px;
+    padding: 4px var(--compact-card-horizontal-padding);
+    position: relative;
+}
+
+    .compact-card.mud-card .mud-card-header {
+        padding: 0;
+        display: block;
+    }
+
+        .compact-card.mud-card .mud-card-header hr {
+            border: solid red 1px;
+            margin: 0 calc(-1 * var(--compact-card-horizontal-padding));
+        }
+
+    .compact-card.mud-card .mud-card-content {
+        padding: 4px 0;
+    }
