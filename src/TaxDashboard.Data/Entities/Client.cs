@@ -87,6 +87,21 @@ public class Client : Entity
     public DateOnly FirstDayOfZusIncome => ReductionChangeDate.FirstOfCurrentMonth();
     [NotMapped]
     public DateOnly FirstDayOfFiscalIncome => FirstCashRegisterUseDate.FirstOfCurrentMonth();
+    [NotMapped]
+    public DateTime? JoinDateTimeNullable { get => JoinDateTime; set => JoinDateTime = value ?? JoinDateTime; }
+    [NotMapped]
+    public DateTime? ReductionChangeDateNullable { get => ReductionChangeDate.ToDateTime(TimeOnly.MinValue); set => ReductionChangeDate = DateOnly.FromDateTime(value ?? DateTime.MinValue); }
+    public DateTime? LastDayOfReductionNullable
+    {
+        get
+        {
+            DateOnly? lastDayOfReduction = LastDayOfReduction;
+            return lastDayOfReduction.HasValue ? lastDayOfReduction.Value.ToDateTime(TimeOnly.MinValue) : DateTime.MinValue;
+        }
+    }
+
+    [NotMapped]
+    public DateTime? FirstCashRegisterUseDateNullable { get => FirstCashRegisterUseDate.ToDateTime(TimeOnly.MinValue); set => FirstCashRegisterUseDate = DateOnly.FromDateTime(value ?? DateTime.MinValue); }
 }
 
 public record NewClientData
@@ -99,7 +114,7 @@ public record NewClientData
     public string Surname { get; set; } = string.Empty;
     [Required(ErrorMessage = "Data założenia jest wymagana")]
     public DateTime? JoinDateTime { get; set; }
-    [MaxLength(10, ErrorMessage = "NIP jest zbyt długi (max 10)")]
+    [MaxLength(13, ErrorMessage = "NIP jest zbyt długi (max 10)")]
     [Required(ErrorMessage = "NIP jest wymagany")]
     public string NIP { get; set; } = string.Empty;
     [PhoneOrEmpty(ErrorMessage = "Nieprawidłowy numer telefonu")]

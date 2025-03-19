@@ -17,12 +17,12 @@
             </MudCardHeader>
             <MudCardContent>
                 <MudStack Spacing="3">
-                    <MudTextField  Label="Imię" @bind-Value="_newClientData.Name" For="@(() => _newClientData.Name)" Clearable="true" Required />
-                    <MudTextField Label="Nazwisko" @bind-Value="_newClientData.Surname" For="@(() => _newClientData.Surname)" Clearable="true" Required />
-                    <MudTextField Label="Telefon" @bind-Value="_newClientData.PhoneNumber" For="@(() => _newClientData.PhoneNumber)" Clearable="true" />
-                    <MudTextField Label="Email" @bind-Value="_newClientData.Email" For="@(() => _newClientData.Email)" Clearable="true" />
+                    <MudTextField Label="Imię" InputType="InputType.Text" @bind-Value="_newClientData.Name" For="@(() => _newClientData.Name)" Clearable="true" Required />
+                    <MudTextField Label="Nazwisko" InputType="InputType.Text" @bind-Value="_newClientData.Surname" For="@(() => _newClientData.Surname)" Clearable="true" Required />
+                    <MudTextField Label="Telefon" InputType="InputType.Telephone" @bind-Value="_newClientData.PhoneNumber" For="@(() => _newClientData.PhoneNumber)" Clearable="true" />
+                    <MudTextField Label="Email" InputType="InputType.Email" @bind-Value="_newClientData.Email" For="@(() => _newClientData.Email)" Clearable="true" />
                     <MudDatePicker Label="Data założenia" @bind-Date="_newClientData.JoinDateTime" ShowToolbar="false" For="@(()=>_newClientData.JoinDateTime)" Clearable="true" Required />
-                    <MudTextField Label="NIP" @bind-Value="_newClientData.NIP" For="@(() => _newClientData.NIP)" Mask="@(new PatternMask("000-000-00-00"))" Immediate="true" MaxLength="13" Clearable="true" Required />
+                    <MudTextField Label="NIP" InputType="InputType.Text" @bind-Value="@_newClientData.NIP" For="@(() => _newClientData.NIP)" Mask="@(new PatternMask("000-000-00-00"))" Immediate="true" MaxLength="13" Clearable="true" Required />
                     <MudSelect Label="Bank" @bind-Value="_newClientData.Bank" Required>
                         @foreach (var bank in _allBanks)
                         {

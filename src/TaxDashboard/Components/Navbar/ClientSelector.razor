@@ -26,8 +26,6 @@
         </datalist>
     </div>
 
-    <MudAutocomplete />
-
     <button class="btn navigation-button" @onclick="@(() => ChangeSelectedClient(_selectedClientIndex - 1))"
             disabled="@(LockClientNavigationButtons || _selectedClientIndex <= 0)">
         <i class="bi-chevron-left" />
