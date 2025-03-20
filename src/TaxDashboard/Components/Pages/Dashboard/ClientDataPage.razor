@@ -155,7 +155,7 @@
     }
 </LoadingContentsComponent>
 <!-- Modal -->
-<PreventNavigationModal NavigationBlockCondition="@(() => _clientEditContext is not null && _clientEditContext.IsModified())" />
+<TaxDashboard.Components.Dialogs.UnsavedContextChecker NavigationBlockCondition="@(() => _clientEditContext is not null && _clientEditContext.IsModified())" />
 
 @code {
     private List<Bank> _allBanks = [];
@@ -180,26 +180,6 @@
         }
     }
 
-    private string AuthorizationPrice
-    {
-        get => Client!.AuthorizationPrice.ToString("C2");
-        set
-        {
-            if (Decimal.TryParse(value, GlobalSettings.CurrencyNumberStyles, GlobalSettings.CurrencyCulture, out decimal currency))
-                Client!.AuthorizationPrice = Math.Round(currency, 2);
-        }
-    }
-
-    private string SubscriptionPrice
-    {
-        get => Client!.SubscriptionPrice.ToString("C2");
-        set
-        {
-            if (Decimal.TryParse(value, GlobalSettings.CurrencyNumberStyles, GlobalSettings.CurrencyCulture, out decimal currency))
-                Client!.SubscriptionPrice = Math.Round(currency, 2);
-        }
-    }
-
     public ClientDataPage()
     {
         // Even if form is not displayed, edit context must be initialized
@@ -210,14 +190,6 @@
     {
         _allBanks = [.. await BanksService.GetAllAsync()];
         await base.OnInitializedAsync();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-            await JS.InvokeVoidAsync("enableTooltips");
-
-        await base.OnAfterRenderAsync(firstRender);
     }
 
     private async Task UpdateClientAsync()
@@ -238,6 +210,5 @@
         : Client.ReductionType != ReductionType.ZUSPlus
             ? false
             : ClientsService.GetZusIncomeSum(Client, Client.ReductionChangeDate.AddYears(-1)) > ClientsService.ZusPlusLimit;
-        ;
     }
 }
