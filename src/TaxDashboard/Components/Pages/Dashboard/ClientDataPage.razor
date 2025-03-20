@@ -25,18 +25,15 @@
     {
         <EditForm EditContext="_clientEditContext" class="container-fluid flex-row mt-2" OnValidSubmit="UpdateClientAsync" onkeypress="if(event.keyCode==13){document.activeElement.blur();return false;}">
             <DataAnnotationsValidator />
-            <div class="row mb-2">
-                <div class="col-12 d-flex flex-row">
-                    <button class="btn btn-primary@(_clientEditContext.IsModified() && !_clientEditContext.GetValidationMessages().Any() ? "" : " disabled")" style="width:9rem;" type="submit">Zapisz zmiany</button>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 col-lg-6 col-xl-4">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled" Disabled="!_clientEditContext.IsModified() && !_clientEditContext.GetValidationMessages().Any()">Zapisz zmiany</MudButton>
+                </MudItem>
+                <MudItem xs="4">
                     @* General *@
                     <MudCard Class="compact-card" Elevation="4" Outlined>
                         <MudCardHeader>
                             <MudText Typo="Typo.h6">Dane</MudText>
-                            <hr />
                         </MudCardHeader>
                         <MudCardContent>
                             <MudStack Spacing="3">
@@ -48,15 +45,15 @@
                                     <MudTextField Label="Telefon" InputType="InputType.Telephone" @bind-Value="Client.PhoneNumber" For="@(() => Client.PhoneNumber)" />
                                     <MudTextField Label="Email" InputType="InputType.Email" @bind-Value="Client.Email" For="@(() => Client.Email)" />
                                 </MudStack>
-                                <MudSelect Label="Płeć" @bind-Value="Client.Gender" >
+                                <MudSelect Label="Płeć" @bind-Value="Client.Gender">
                                     @foreach (var gender in Enum.GetValues<Gender>())
                                     {
                                         <MudSelectItem Value="@gender">@gender.GetDescriptor()</MudSelectItem>
                                     }
                                 </MudSelect>
-                                <MudDatePicker Label="Data założenia" @bind-Date="Client.JoinDateTimeNullable" ShowToolbar="false" Clearable="true"  />
-                                <MudTextField Label="NIP" InputType="InputType.Text" @bind-Value="@Client.NIP" For="@(() => Client.NIP)" Mask="@(new PatternMask("000-000-00-00"))" Immediate="true" MaxLength="13" Clearable="true"  />
-                                <MudSelect Label="Bank" @bind-Value="Client.Bank" >
+                                <MudDatePicker Label="Data założenia" @bind-Date="Client.JoinDateTimeNullable" ShowToolbar="false" Clearable="true" />
+                                <MudTextField Label="NIP" InputType="InputType.Text" @bind-Value="@Client.NIP" For="@(() => Client.NIP)" Mask="@(new PatternMask("000-000-00-00"))" Immediate="true" MaxLength="13" Clearable="true" />
+                                <MudSelect Label="Bank" @bind-Value="Client.Bank">
                                     @foreach (var bank in _allBanks)
                                     {
                                         <MudSelectItem Value="@bank">@bank.Name</MudSelectItem>
@@ -67,17 +64,16 @@
                             </MudStack>
                         </MudCardContent>
                     </MudCard>
-                </div>
-                <div class="col-12 col-lg-6 col-xl-4">
+                </MudItem>
+                <MudItem xs="4">
                     @* Subscription *@
                     <MudCard Class="compact-card" Elevation="4" Outlined>
                         <MudCardHeader>
                             <MudText Typo="Typo.h6">Abonament</MudText>
-                            <hr />
                         </MudCardHeader>
                         <MudCardContent>
                             <MudStack Spacing="3">
-                                <MudTextField Label="Abonament" InputType="InputType.Text" @bind-Value="Client.Subscription" For="@(() => Client.Subscription)"  />
+                                <MudTextField Label="Abonament" InputType="InputType.Text" @bind-Value="Client.Subscription" For="@(() => Client.Subscription)" />
                                 <MudNumericField Label="Kwota autoryzacyjna" @bind-Value="Client.AuthorizationPrice" For="@(() => Client.AuthorizationPrice)" Format="C2" T="decimal" Immediate="false" />
                                 <MudNumericField Label="Koszt abonamentu" @bind-Value="Client.SubscriptionPrice" For="@(() => Client.SubscriptionPrice)" Format="C2" T="decimal" Immediate="false" />
                             </MudStack>
@@ -87,7 +83,6 @@
                     <MudCard Class="compact-card" Elevation="4" Outlined>
                         <MudCardHeader>
                             <MudText Typo="Typo.h6">VAT</MudText>
-                            <hr />
                         </MudCardHeader>
                         <MudCardContent>
                             <MudStack Spacing="3">
@@ -101,13 +96,12 @@
                             </MudStack>
                         </MudCardContent>
                     </MudCard>
-                </div>
-                <div class="col-12 col-lg-6 col-xl-4">
+                </MudItem>
+                <MudItem xs="4">
                     @* Tax settings *@
                     <MudCard Class="compact-card" Elevation="4" Outlined>
                         <MudCardHeader>
                             <MudText Typo="Typo.h6">Podatki</MudText>
-                            <hr />
                         </MudCardHeader>
                         <MudCardContent>
                             <MudStack Spacing="3">
@@ -130,7 +124,6 @@
                     <MudCard Class="compact-card" Elevation="4" Outlined>
                         <MudCardHeader>
                             <MudText Typo="Typo.h6">Ulgi</MudText>
-                            <hr />
                         </MudCardHeader>
                         <MudCardContent>
                             <MudStack Spacing="3">
@@ -147,17 +140,17 @@
                                     }
                                 </MudStack>
                                 <MudTooltip Text="Klient nie jest na Małym ZUSie Plus" ShowOnHover="Client.ReductionType != ReductionType.ZUSPlus">
-                                    <MudDatePicker Label="Data przejścia" @bind-Date="Client.ReductionChangeDateNullable" ShowToolbar="false" Disabled="Client.ReductionType != ReductionType.ZUSPlus"/>
+                                    <MudDatePicker Label="Data przejścia" @bind-Date="Client.ReductionChangeDateNullable" ShowToolbar="false" Disabled="Client.ReductionType != ReductionType.ZUSPlus" />
                                 </MudTooltip>
                                 <MudTooltip Text="Klient nie używa kas fiskalnych" ShowOnHover="!Client.UseCashRegister">
-                                    <MudDatePicker Label="Data pierwszej transakcji fiskalnej" @bind-Date="Client.FirstCashRegisterUseDateNullable" ShowToolbar="false" Disabled="!Client.UseCashRegister"/>
+                                    <MudDatePicker Label="Data pierwszej transakcji fiskalnej" @bind-Date="Client.FirstCashRegisterUseDateNullable" ShowToolbar="false" Disabled="!Client.UseCashRegister" />
                                 </MudTooltip>
                                 <MudDatePicker Label="Koniec ulgi" Date="Client.LastDayOfReductionNullable" Disabled="true" />
                             </MudStack>
                         </MudCardContent>
                     </MudCard>
-                </div>
-            </div>
+                </MudItem>
+            </MudGrid>
         </EditForm>
     }
 </LoadingContentsComponent>

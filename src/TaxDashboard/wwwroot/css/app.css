@@ -178,11 +178,14 @@ label {
         display: block;
     }
 
-        .compact-card.mud-card .mud-card-header hr {
-            border: solid red 1px;
+        .compact-card.mud-card .mud-card-header::after {
+            content:"";
+            display:block;
+            border-bottom: solid var(--mud-palette-black) 3px;
             margin: 0 calc(-1 * var(--compact-card-horizontal-padding));
+            width:auto;
         }
 
     .compact-card.mud-card .mud-card-content {
-        padding: 4px 0;
+        padding: 8px 0;
     }
