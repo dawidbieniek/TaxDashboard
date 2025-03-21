@@ -37,3 +37,18 @@
 ::deep .list-group-item input {
     width: 260px;
 }
+
+
+
+
+::deep .setting-item {
+    flex-wrap:nowrap;
+    white-space:nowrap;
+    overflow-x:hidden;
+}
+
+    ::deep .setting-item .setting-data {
+        width: 260px;
+        margin-top: auto;
+        margin-bottom: auto;
+    }

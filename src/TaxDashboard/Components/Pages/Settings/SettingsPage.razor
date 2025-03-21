@@ -2,13 +2,66 @@
 
 @using TaxDashboard.Components.Pages.Settings.Components
 
+<div class="pt-3">
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudGrid>
+            <MudItem xs="12">
+                <MudCard Elevation="3">
+                    <MudCardHeader>
+                        <MudText Typo="Typo.h6">Kopia zapasowa</MudText>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudStack Spacing="2">
+                                    <MudStack Row="true" Class="setting-item">
+                                        <MudStack Spacing="0">
+                                            <MudStack Row="true">
+                                                <MudText Typo="Typo.body1"><b>Ostatni zapis</b></MudText>
+                                                <MudChip T="string" Size="Size.Small" Class="ma-0">Co 18 godzin</MudChip>
+                                            </MudStack>
+                                            <MudText Typo="Typo.body2">Data i godzina ostatniej automatycznej kopii zapasowej</MudText>
+                                        </MudStack>
+                                        <MudSpacer />
+                                        <MudText Typo="Typo.body1" Class="setting-data">21.03.2025 10:55</MudText>
+                                    </MudStack>
+                                    <MudDivider />
+                                    <MudStack Row="true" Class="setting-item">
+                                        <MudStack Spacing="0">
+                                            <MudText Typo="Typo.body1"><b>Lokalizacja</b></MudText>
+                                            <MudText Typo="Typo.body2">Miejsce zapisu danych</MudText>
+                                        </MudStack>
+                                        <MudSpacer />
+                                        <MudText Typo="Typo.body1" Class="setting-data">C:\Users\dawid\AppData\Local\Packages\db.myapps.taxdashboard_way9j9n82cstc\LocalState</MudText>
+                                    </MudStack>
+                                    <MudDivider />
+                                    <MudStack Row="true" Class="setting-item">
+                                        <MudStack Spacing="0">
+                                            <MudText Typo="Typo.body1"><b>Zarządzaj</b></MudText>
+                                            <MudText Typo="Typo.body2">Twórz i przywracaj kopie zapasowe</MudText>
+                                        </MudStack>
+                                        <MudSpacer />
+                                        <MudStack Row="true" Class="setting-data">
+                                            <MudButton Variant="Variant.Filled" Color="Color.Primary">Stwórz kopię</MudButton>
+                                            <MudButton Variant="Variant.Filled" Color="Color.Primary">Przywróć dane</MudButton>
+                                        </MudStack>
+                                    </MudStack>
+                                </MudStack>
+                            </MudItem>
+                        </MudGrid>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+</div>
 <div class="container pt-3 floating-card" style="max-width:1000px;">
     <div class="row">
         <div class="col-12">
             @* Backups *@
             <div class="card bg-light mb-4 shadow">
                 <div class="card-body">
-                    <BackupSettings/>
+                    <BackupSettings />
                 </div>
             </div>
         </div>
@@ -16,7 +69,7 @@
             @* Mail *@
             <div class="card bg-light mb-4">
                 <div class="card-body">
-                    <EmailSettings/>
+                    <EmailSettings />
                 </div>
             </div>
         </div>
@@ -32,7 +85,7 @@
                                 <div class="text-muted">Obecna wersja aplikacji</div>
                             </div>
                             <div class="col-auto my-auto d-flex">
-                                <input type="text" class="form-control" value="@_version" disabled/>
+                                <input type="text" class="form-control" value="@_version" disabled />
                             </div>
                         </div>
                     </div>
