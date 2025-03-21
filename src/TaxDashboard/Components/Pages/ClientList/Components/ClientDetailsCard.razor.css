@@ -1,0 +1,8 @@
+﻿.data-table {
+    table-layout: fixed;
+    width:100%;
+}
+
+    .data-table td {
+        width: 50%;
+    }

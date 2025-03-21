@@ -1,0 +1,124 @@
+﻿<MudCard Elevation="0">
+    <MudCardHeader Class="py-0">
+        <MudText Typo="Typo.h6">@Client.FullName</MudText>
+        @if(Client.Suspended)
+        {
+            <MudText Class="ms-4" Typo="Typo.h6" Color="Color.Warning">Zawieszony</MudText>
+        }
+    </MudCardHeader>
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="3">
+                <table class="data-table">
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Id</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.Id</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Imię</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.FullName</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Płeć</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.Gender.GetDescriptor()</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">NIP</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.NIP</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Bank</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.Bank.Name</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Email</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.Email</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Telefon</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.PhoneNumber</MudText></td>
+                    </tr>
+                </table>
+            </MudItem>
+            <MudItem xs="3">
+                <table class="data-table">
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Data założenia</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.JoinDateTime.ToShortDateString()</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Kasa fiskalna</MudText></td>
+                        <td><MudText Typo="Typo.body1">@(Client.UseCashRegister ? "Tak" : "Nie")</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Umowa o pracę</MudText></td>
+                        <td><MudText Typo="Typo.body1">@(Client.EmploymentContract ? "Tak" : "Nie")</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">VAT</MudText></td>
+                        <td><MudText Typo="Typo.body1">@(Client.VAT ? "Tak" : "Nie")</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Metoda kasowa</MudText></td>
+                        <td><MudText Typo="Typo.body1">@(Client.CashMethod ? "Tak" : "Nie")</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Abonament</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.Subscription</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Koszt abonamentu</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.SubscriptionPrice.ToString("C2")</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Kwota autoryzacyjna</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.AuthorizationPrice.ToString("C2")</MudText></td>
+                    </tr>
+                </table>
+            </MudItem>
+            <MudItem xs="3">
+                <table class="data-table">
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Podatek</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.TaxType.GetDescriptor()</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Ulga</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.ReductionType.GetDescriptor()</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Rozliczenie PIT</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.PITPaymentType.GetDescriptor()</MudText></td>
+                    </tr>
+                    <tr>
+                        <td><MudText Typo="Typo.body1">Rozliczenie VAT</MudText></td>
+                        <td><MudText Typo="Typo.body1">@Client.VATPaymentType.GetDescriptor()</MudText></td>
+                    </tr>
+                </table>
+            </MudItem>
+            <MudItem xs="3">
+                <MudCard Elevation="0" Class="mud-height-full">
+                    <MudCardHeader Class="pa-0">
+                        <MudText Typo="Typo.body1"><b>Notatki</b></MudText>
+                    </MudCardHeader>
+                    <MudCardContent Class="pa-0 mud-height-full">
+                        @if(string.IsNullOrEmpty(Client.Notes))
+                        {
+                            <MudText Typo="Typo.body1" >(brak)</MudText>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body1" Class="mud-height-full" Style="white-space:pre-line; overflow-y:auto;">@Client.Notes</MudText>
+                        }
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter, EditorRequired]
+    public Client Client { get; set; } = default!;
+}
