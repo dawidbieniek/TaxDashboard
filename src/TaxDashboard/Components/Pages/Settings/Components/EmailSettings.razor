@@ -27,8 +27,9 @@
                     <MudSpacer />
                     @if (_emailLoginInfo!.LoggedIn)
                     {
-                        <MudStack Row="true" Class="setting-data">
+                        <MudStack Row="true" Class="setting-data setting-data-fixed">
                             <MudText Typo="Typo.body2">@_emailLoginInfo.EmailAddress</MudText>
+                            <MudSpacer/>
                             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LogoutEmailAsync">Wyloguj</MudButton>
                         </MudStack>
                     }
