@@ -42,13 +42,21 @@
 
 
 ::deep .setting-item {
-    flex-wrap:nowrap;
-    white-space:nowrap;
-    overflow-x:hidden;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow-x: hidden;
 }
 
     ::deep .setting-item .setting-data {
-        width: 260px;
         margin-top: auto;
         margin-bottom: auto;
+    }
+
+        ::deep .setting-item .setting-data > * {
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+    ::deep .setting-item .setting-data-fixed {
+        width: 260px;
     }

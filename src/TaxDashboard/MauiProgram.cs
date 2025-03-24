@@ -9,6 +9,7 @@ using LifeManagers.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
+using MudBlazor;
 using MudBlazor.Services;
 
 using TaxDashboard.Data;
@@ -35,7 +36,13 @@ namespace TaxDashboard
 
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddBlazorTable();
-            builder.Services.AddMudServices();
+            builder.Services.AddMudServices(opt =>
+            {
+                opt.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
+                opt.SnackbarConfiguration.PreventDuplicates = true;
+                opt.SnackbarConfiguration.NewestOnTop = true;
+                opt.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+            });
             builder.Services.AddAppServices();
             builder.Services.AddDataServices<AppDbContext>(opt =>
             {
