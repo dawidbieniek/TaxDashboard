@@ -12,7 +12,6 @@
 @inherits DashboardPageBase
 
 @inject BanksService BanksService
-@inject IJSRuntime JS
 
 <LoadingContentsComponent Initialized="@Initialized">
     <ClientSelector @ref="_clientSelectorRef" ShowDateSelector="false" StartingClient="@Client" OnSelectedClientChanged="ChangeSelectedClient" LockClientNavigationButtons="@(_clientEditContext.IsModified())" />

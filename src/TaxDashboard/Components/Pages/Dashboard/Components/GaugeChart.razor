@@ -19,7 +19,7 @@
              data-bs-html="true"
              data-bs-original-title="@($"{Value:C} / {ValueLimit:C}{(string.IsNullOrEmpty(TooltipAdditionalText) ? "" : $"<br/>{TooltipAdditionalText}")}")">
             @Value.ToString("C2", GlobalSettings.CurrencyCulture)
-            <NotificationIcon OccupySpaceWhenEmptyMessage="false" ShowWhenEmptyMessage="false" PopoverLocation="right" PopoverText="@_notificationText" Severity="@_notificationSeverity" />
+            <NotificationIcon ShowWhenEmptyMessage="false" PopoverLocation="right" PopoverText="@_notificationText" Severity="@_notificationSeverity" />
         </div>
     </ElementRequiringLoad>
 </div>
@@ -79,7 +79,7 @@
             _notificationText = string.Empty;
         }
 
-        _valueClass = _notificationSeverity.TextClass();
+        // _valueClass = _notificationSeverity.TextClass();
 
         bool updateChart = false;
         if (_oldValue != Value)

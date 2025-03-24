@@ -1,5 +1,5 @@
 ﻿namespace TaxDashboard.Services.Notifications;
-public record NotificationInfo(NotificationSeverity Severity = NotificationSeverity.None, string ? Message = null);
+public record NotificationInfo(NotificationSeverity Severity = NotificationSeverity.None, string? Message = null);
 
 public enum NotificationSeverity
 {
@@ -10,10 +10,10 @@ public enum NotificationSeverity
 
 public static class NotificationSeverityExtensions
 {
-    public static string TextClass(this NotificationSeverity severity) => severity switch
+    public static MudBlazor.Color Color(this NotificationSeverity severity) => severity switch
     {
-        NotificationSeverity.Warning => "text-warning",
-        NotificationSeverity.Danger => "text-danger",
-        _ => ""
+        NotificationSeverity.Warning => MudBlazor.Color.Warning,
+        NotificationSeverity.Danger => MudBlazor.Color.Error,
+        _ => MudBlazor.Color.Default
     };
 }
