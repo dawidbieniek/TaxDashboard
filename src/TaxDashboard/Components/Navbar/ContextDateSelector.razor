@@ -1,11 +1,37 @@
-﻿<select class="form-select flex-grow-0 flex-shrink-0" style="width:6rem;" @onchange="ChangeSelectedYear" value="@_selectedYear">
+﻿@* <select class="form-select flex-grow-0 flex-shrink-0" style="width:6rem;" @onchange="ChangeSelectedYear" value="@_selectedYear">
     @foreach (int year in SelectableYears)
     {
         <option class="@(year < JoinDateTime.Year ? "text-muted" : "")" value="@year" selected="@(_selectedYear == year)">@year</option>
     }
-</select>
+</select> *@
+<div class="d-flex flex-row">
+<MudSelect T="int" Class="me-2" Value="@_selectedYear" ValueChanged="ChangeSelectedYear">
+    @foreach (int year in SelectableYears)
+    {
+        <MudSelectItem Style="@(year < JoinDateTime.Year ? "color:var(--mud-palette-text-disabled)" : "")" Value="@year">@year</MudSelectItem>
+    }
+</MudSelect>
 
-<div class="d-flex gap-0 ms-2 flex-shrink-1 flex-wrap month-button-group">
+<MudStack Row Spacing="1" Class="month-group">
+    @for (int i = 1; i <= 12; i++)
+    {
+        int monthValue = i;
+
+        @if (_selectedMonth == i)
+        {
+            <MudButton Variant="Variant.Filled" Color="GetMonthButtonColor(monthValue)" Class="month-button" OnClick="() => ChangeSelectedMonth(monthValue)">
+                @(DataDisplayHelper.GetMonthLabel(monthValue))
+            </MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Outlined" Color="GetMonthButtonColor(monthValue)" Class="month-button" OnClick="() => ChangeSelectedMonth(monthValue)">
+                @(DataDisplayHelper.GetMonthLabel(monthValue))
+            </MudButton>
+        }
+    }
+</MudStack>
+@* <div class="d-flex gap-0 ms-2 flex-shrink-1 flex-wrap month-button-group">
     @for (int i = 1; i <= 12; i++)
     {
         string id = $"month{i}";
@@ -25,8 +51,8 @@
             @(DataDisplayHelper.GetMonthLabel(i))
         </label>
     }
-</div>
-<select class="form-select month-dropdown ms-2 flex-grow-0 flex-shrink-0" style="width:9rem;" @onchange="@((e) => ChangeSelectedMonth(int.Parse((string)e.Value!)))" value="@_selectedMonth">
+</div> *@
+@* <select class="form-select month-dropdown ms-2 flex-grow-0 flex-shrink-0" style="width:9rem;" @onchange="@((e) => ChangeSelectedMonth(int.Parse((string)e.Value!)))" value="@_selectedMonth">
     @for (int i = 1; i <= 12; i++)
     {
         int monthValue = i;
@@ -40,8 +66,8 @@
             <option class="@(GetMonthButtonClass(monthValue))" value="@i">@DataDisplayHelper.GetMonthFullLabel(i)</option>
         }
     }
-</select>
-
+</select> *@
+</div>
 @code {
 
     private static readonly int[] SelectableYears = [2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035];
@@ -81,20 +107,24 @@
         UpdateSelectedContextDate();
     }
 
-    private void ChangeSelectedYear(ChangeEventArgs e)
+    private void ChangeSelectedYear(int value)
     {
-        _selectedYear = int.Parse((string)e.Value!);
-
+        _selectedYear = value;
         UpdateSelectedContextDate();
     }
 
     private void UpdateSelectedContextDate()
     {
         DateOnly dateContext = new(_selectedYear, _selectedMonth, 1);
-            OnSelectedDateContextChanged.InvokeAsync(new(dateContext, IsDateDisabled(dateContext.Month, dateContext.Year)));
+        OnSelectedDateContextChanged.InvokeAsync(new(dateContext, IsDateDisabled(dateContext.Month, dateContext.Year)));
     }
 
-    private string GetMonthButtonClass(int monthValue) =>  IsMonthDisabled(monthValue) ? "text-muted"
+    private MudBlazor.Color GetMonthButtonColor(int monthValue) => IsMonthDisabled(monthValue) ? Color.Surface
+    : ClientSettlements.Any(s => s.ContextDate.Year == _selectedYear && s.ContextDate.Month == monthValue)
+            ? Color.Success
+            : Color.Warning;
+
+    private string GetMonthButtonClass(int monthValue) => IsMonthDisabled(monthValue) ? "text-muted"
         : ClientSettlements.Any(s => s.ContextDate.Year == _selectedYear && s.ContextDate.Month == monthValue)
                 ? "text-success"
                 : "text-warning";

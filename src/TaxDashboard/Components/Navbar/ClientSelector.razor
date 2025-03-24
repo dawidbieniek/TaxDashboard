@@ -4,32 +4,34 @@
 @inject ClientsService ClientsService
 @inject IJSRuntime JS
 
-<MudAppBar Color="Color.Dark" Fixed>
-    <MudAutocomplete @ref="_autocompleteRef" T="Client" Class="client-selector"
-                     ToStringFunc="c => c?.FullName ?? string.Empty"
-                     @bind-Value="_autocompleteClient" @bind-Value:after="ChangeSelectedClientAndBlurAsync"
-                     SearchFunc="AutocompleteSearchFunction"
-                     CoerceText ResetValueOnEmptyText Clearable
-                     Placeholder="@(_allClients.Any() ? "Wybierz klienta" : "Brak klientów")" />
+<div>
+    <MudAppBar Color="Color.Dark" Fixed>
+        <MudAutocomplete @ref="_autocompleteRef" T="Client" Class="client-selector"
+                         ToStringFunc="c => c?.FullName ?? string.Empty"
+                         @bind-Value="_autocompleteClient" @bind-Value:after="ChangeSelectedClientAndBlurAsync"
+                         SearchFunc="AutocompleteSearchFunction"
+                         CoerceText ResetValueOnEmptyText Clearable
+                         Placeholder="@(_allClients.Any() ? "Wybierz klienta" : "Brak klientów")" />
 
-    <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
-                   OnClick="() => ChangeSelectedClientByIndex(_selectedClientIndex - 1)"
-                   Disabled="@(LockClientNavigationButtons || _selectedClientIndex <= 0)" />
-    <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
-                   OnClick="() => ChangeSelectedClientByIndex(_selectedClientIndex + 1)"
-                   Disabled="@(LockClientNavigationButtons || _selectedClientIndex >= (_allClients.Count - 1) || _selectedClientIndex < 0)" />
+        <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
+                       OnClick="() => ChangeSelectedClientByIndex(_selectedClientIndex - 1)"
+                       Disabled="@(LockClientNavigationButtons || _selectedClientIndex <= 0)" />
+        <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
+                       OnClick="() => ChangeSelectedClientByIndex(_selectedClientIndex + 1)"
+                       Disabled="@(LockClientNavigationButtons || _selectedClientIndex >= (_allClients.Count - 1) || _selectedClientIndex < 0)" />
 
-    <ClientSelectorNotificationIcon SelectedClient="_selectedClient" />
+        <ClientSelectorNotificationIcon SelectedClient="_selectedClient" />
 
-    @if (ShowDateSelector && _selectedClient is not null)
-    {
-        <ContextDateSelector ClientSettlements="@(_selectedClient.Settlements)"
-                             StartingDateContext="@StartingDateContext" OnSelectedDateContextChanged="ChangeSelectedDateContext"
-                             JoinDateTime="@_selectedClient.JoinDateTime" />
-        <MudSpacer />
-        <SettlementButton Client="@_selectedClient" ContextDate="@_contextDate?.Date" OnSettlementStateChanged="@(() => StateHasChanged())" Disabled="@(_contextDate?.IsValid ?? false)" />
-    }
-</MudAppBar>
+        @if (ShowDateSelector && _selectedClient is not null)
+        {
+            <ContextDateSelector ClientSettlements="@(_selectedClient.Settlements)"
+                                 StartingDateContext="@StartingDateContext" OnSelectedDateContextChanged="ChangeSelectedDateContext"
+                                 JoinDateTime="@_selectedClient.JoinDateTime" />
+            <MudSpacer />
+            <SettlementButton Client="@_selectedClient" ContextDate="@_contextDate?.Date" OnSettlementStateChanged="@(() => StateHasChanged())" Disabled="@(_contextDate?.IsValid ?? false)" />
+        }
+    </MudAppBar>
+</div>
 
 
 @code {

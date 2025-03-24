@@ -1,1 +1,8 @@
-﻿
+﻿::deep .client-selector {
+    width:12em;
+    flex: 0 0 auto;
+}
+
+::deep .mud-select:has(.client-selector) {
+    flex-grow:0;
+}
