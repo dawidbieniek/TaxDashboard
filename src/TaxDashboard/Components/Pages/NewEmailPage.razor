@@ -7,67 +7,48 @@
 @inject NavigationManager Navigation
 @inject EmailService EmailService
 @inject ClientsService ClientsService
+@inject ISnackbar Snackbar
 
 <LoadingContentsComponent Initialized="@(_emailLoginInfo is not null)">
-    <EditForm EditContext="@_emailEditContext" class="container pt-3 floating-card" style="max-width:1000px;" OnValidSubmit="SendEmailAsync">
-        <DataAnnotationsValidator />
-        <div class="row">
-            <div class="col">
-                <div class="card bg-light">
-                    <div class="card-body p-4">
-                        <div class="row mb-2">
-                            <label class="label-col" for="from">Od</label>
-                            <div class="col">
-                                <input id="from" class="form-control" value="@_email.From" disabled />
-                            </div>
-                            <div class="col">
-                                <input id="fromName" class="form-control" value="@_email.FromName" disabled />
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <label class="label-col" for="to">Do</label>
-                            <div class="col">
-                                <InputText id="to" class="form-control" @bind-Value="_email.To" required />
-                                <ValidationMessage For="@(()=> _email.To)" />
-                            </div>
-                            <div class="col">
-                                <input id="toName" class="form-control" value="@_email.ToName" disabled />
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <label class="label-col" for="subject">Temat</label>
-                            <div class="col">
-                                <InputText id="subject" class="form-control" type="text" @bind-Value="_email.Subject" autocomplete="off" required />
-                                <ValidationMessage For="@(()=> _email.Subject)" />
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col">
-                                <InputTextArea id="content" class="form-control overflow-y-auto" @bind-Value="_email.Content" autocomplete="off" rows="10" />
-                                <ValidationMessage For="@(()=> _email.Content)" />
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col d-flex">
-                                <div class="flex-grow-1" />
-                                <button class="btn btn-primary" style="width:8rem;" type="submit">Wyślij</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </EditForm>
+
+    <div class="py-3">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <EditForm EditContext="@_emailEditContext" OnValidSubmit="SendEmailAsync">
+                <DataAnnotationsValidator />
+                <MudCard>
+                    <MudCardContent>
+                        <MudStack>
+                            <MudStack Row>
+                                <MudText Typo="Typo.body1" Class="label-col">Od</MudText>
+                                <MudText Typo="Typo.body1" Class="data-col">@_email.From</MudText>
+                                <MudText Typo="Typo.body1" Class="data-col">@_email.FromName</MudText>
+                            </MudStack>
+                            <MudStack Row>
+                                <MudText Typo="Typo.body1" Class="label-col">Do</MudText>
+                                <MudTextField Typo="Typo.body1" Class="data-col" @bind-Value="@_email.To" For="() => _email.To" Required />
+                                <MudText Typo="Typo.body1" Class="data-col">@_email.ToName</MudText>
+                            </MudStack>
+                            <MudTextField T="string" Typo="Typo.body1" Variant="Variant.Outlined" @bind-Value="_email.Subject" For="() => _email.Subject"
+                                          Adornment="Adornment.Start" AdornmentText="Temat" />
+                            <MudTextField T="string" Typo="Typo.body1" Variant="Variant.Outlined" @bind-Value="_email.Content" For="() => _email.Content"
+                                          AutoGrow Lines="8" />
+                            <MudStack Row>
+                                <MudSpacer />
+                                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Wyślij</MudButton>
+                            </MudStack>
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </EditForm>
+        </MudContainer>
+    </div>
 </LoadingContentsComponent>
-<Toast @ref="@_toastRef" Title="Wysyłanie" />
 
 @code {
     private EmailContent _email = new();
     private EditContext _emailEditContext = default!;
 
     private EmailLoginInfo? _emailLoginInfo;
-
-    private Toast _toastRef = default!;
 
     [SupplyParameterFromQuery]
     public int? ClientId { get; set; }
@@ -84,7 +65,7 @@
     private async Task SendEmailAsync()
     {
         bool emailSent = await EmailService.SendEmailAsync(_email.To, _email.ToName, _email.FromName, _email.Subject, _email.Content);
-        await _toastRef.ShowTextAsync(emailSent ? $"Pomyślnie wysłano wiadomość do {_email.To}" : $"Nie udało się wysłać wiadomości");
+        Snackbar.Add(emailSent ? "Pomyślnie wysłano wiadomość" : "Nie udało się wysłać wiadomości", emailSent ? Severity.Normal : Severity.Error);
     }
 
 
@@ -111,7 +92,7 @@
             (_email.Subject, string template) = EmailTemplatesService.GetTemplate(templateType);
             _email.Content = EmailTemplatesService.ReplaceTokensInMessage(template, client);
 
-            await _toastRef.ShowTextAsync($"Użyto szablonu dla {templateType.GetDescriptor()}");
+            Snackbar.Add($"Użyto szablonu dla {templateType.GetDescriptor()}");
         }
 
         _email.From = _emailLoginInfo.EmailAddress!;
