@@ -1,0 +1,20 @@
+﻿@using ApexCharts
+<ApexChart TItem="Data" >
+    <ApexPointSeries TItem="Data"
+                     Name="Opłaty"
+                     Items="@([new("Podatek", TaxValue), new("Zdrowotna", HealthContributionValue), new("Społeczna", SocialContributionValue)])"
+                     XValue="d => d.Name"
+                     YValue="d => d.Value"
+                     SeriesType="SeriesType.Bar" />
+</ApexChart>
+
+@code {
+    [Parameter]
+    public decimal TaxValue { get; set; }
+    [Parameter]
+    public decimal HealthContributionValue { get; set; }
+    [Parameter]
+    public decimal SocialContributionValue { get; set; }
+
+    private record Data(string Name, decimal Value);
+}

@@ -32,5 +32,6 @@ internal static class AppTheme
             DrawerWidthLeft = "240px",
         }
 
+
     };
 }
