@@ -5,7 +5,7 @@
 @inject IJSRuntime JS
 
 <div>
-    <MudAppBar Color="Color.Dark" Fixed>
+    <MudAppBar Fixed>
         <MudAutocomplete @ref="_autocompleteRef" T="Client" Class="client-selector"
                          ToStringFunc="c => c?.FullName ?? string.Empty"
                          @bind-Value="_autocompleteClient" @bind-Value:after="ChangeSelectedClientAndBlurAsync"

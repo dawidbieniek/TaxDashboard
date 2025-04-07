@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider IsDarkMode="true" />
+<MudThemeProvider IsDarkMode="true" Theme="AppTheme.Theme" />
 <MudPopoverProvider />
 <MudDialogProvider BackdropClick="false" CloseOnEscapeKey="true" CloseButton="true" />
 <MudSnackbarProvider />
@@ -8,12 +8,16 @@
 <MudLayout>
     <MudDrawer Elevation="2" Open="true" Breakpoint="Breakpoint.Xs" Style="top:0">
         <MudNavMenu Class="mud-width-full">
-            <MudText Typo="Typo.h5" Class="mb-2" Align="Align.Center">TaxDashboard</MudText>
+            <MudText Typo="Typo.h5" Class="my-2" Align="Align.Center">TaxDashboard</MudText>
             <MudDivider />
             <MudNavGroup Title="Klient" Icon="@Icons.Material.Filled.Person" Expanded="true">
                 <MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
                 <MudNavLink Href="/data" Icon="@Icons.Material.Filled.EditNote">Dane</MudNavLink>
                 <MudNavLink Href="/add" Icon="@Icons.Material.Filled.PersonAdd">Nowy</MudNavLink>
+            </MudNavGroup>
+            <MudNavGroup Title="Kalkulator" Icon="@Icons.Material.Filled.Calculate" Expanded="true">
+                <MudNavLink Href="/calculator/data" Icon="@Icons.Material.Filled.Description">Dane</MudNavLink>
+                <MudNavLink Href="/calculator" Icon="@Icons.Material.Filled.Analytics">Wykresy</MudNavLink>
             </MudNavGroup>
             <MudNavLink Href="/list" Icon="@Icons.Material.Filled.FormatListBulleted">Lista klientów</MudNavLink>
             <MudNavLink Href="/settings" Icon="@Icons.Material.Filled.Settings">Ustawienia</MudNavLink>
