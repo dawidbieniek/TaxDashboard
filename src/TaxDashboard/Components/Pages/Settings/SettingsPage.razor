@@ -1,35 +1,26 @@
 ﻿@page "/settings"
 
 @using TaxDashboard.Components.Pages.Settings.Components
-
-<div class="py-3">
-    <MudContainer MaxWidth="MaxWidth.Large">
-        <MudGrid>
-            <MudItem xs="12">
-                <BackupSettings />
-            </MudItem>
-            <MudItem xs="12">
-                <EmailSettings />
-            </MudItem>
-            <MudItem xs="12">
-                <MudCard Elevation="3">
-                    <MudCardHeader>
-                        <MudText Typo="Typo.h6">Aplikacja</MudText>
-                    </MudCardHeader>
-                    <MudCardContent>
-                        <MudStack Row="true" Class="setting-item">
-                            <MudStack Spacing="0">
-                                <MudText Typo="Typo.body1"><b>Wersja</b></MudText>
-                                <MudText Typo="Typo.body2">Obecna wersja aplikacji</MudText>
-                            </MudStack>
-                            <MudSpacer />
-                            <MudText Typo="Typo.body1" Class="setting-data setting-data-fixed">@_version</MudText>
-                        </MudStack>
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-        </MudGrid>
-    </MudContainer>
+<div class="pa-2">
+    <MudStack Spacing="4">
+        <BackupSettings />
+        <EmailSettings />
+        <MudCard Elevation="3">
+            <MudCardHeader>
+                <MudText Typo="Typo.h6">Aplikacja</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudStack Row="true" Class="setting-item">
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.body1"><b>Wersja</b></MudText>
+                        <MudText Typo="Typo.body2">Obecna wersja aplikacji</MudText>
+                    </MudStack>
+                    <MudSpacer />
+                    <MudText Typo="Typo.body1" Class="setting-data setting-data-fixed">@_version</MudText>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudStack>
 </div>
 
 @code {

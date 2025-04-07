@@ -22,7 +22,7 @@
     }
     else
     {
-        <EditForm EditContext="_clientEditContext" class="container-fluid flex-row mt-16 my-4 px-4" OnValidSubmit="UpdateClientAsync" onkeypress="if(event.keyCode==13){document.activeElement.blur();return false;}">
+        <EditForm EditContext="_clientEditContext" class="topbar-page pa-2" OnValidSubmit="UpdateClientAsync" onkeypress="if(event.keyCode==13){document.activeElement.blur();return false;}">
             <DataAnnotationsValidator />
             <MudGrid Spacing="4">
                 <MudItem xs="12">

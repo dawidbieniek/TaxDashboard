@@ -190,6 +190,13 @@ label {
         padding: 8px 0;
     }
 
+.topbar-page {
+    margin-top: var(--mud-appbar-height);
+    margin-left: var(--mud-drawer-width-left);
+    position: absolute;
+    left: 0;
+    right: 0
+}
 
 .mud-popover-provider a {
     color: var(--mud-palette-primary);

@@ -28,7 +28,8 @@ internal static class AppTheme
         },
         LayoutProperties = new()
         { 
-            AppbarHeight = "48px"
+            AppbarHeight = "48px",
+            DrawerWidthLeft = "240px",
         }
 
     };
