@@ -1,6 +1,8 @@
 ﻿@page "/calculator"
+
 @using ApexCharts
 @using TaxDashboard.Components.Pages.Calculator.Components
+@using TaxDashboard.Services.Calculator
 
 <MudStack Class="pa-2">
     <MudContainer MaxWidth="MaxWidth.Small">
@@ -9,7 +11,12 @@
                 <MudStack Spacing="3">
                     <MudNumericField Label="Przychody" @bind-Value="_calculationData.Income" For="@(() => _calculationData.Income)" Format="C2" T="decimal" Immediate="false" Required />
                     <MudNumericField Label="Koszty" @bind-Value="_calculationData.Expenses" For="@(() => _calculationData.Expenses)" Format="C2" T="decimal" Immediate="false" Required />
-                    <MudNumericField Label="Stawka" @bind-Value="_calculationData.Rate" For="@(() => _calculationData.Rate)" Format="C2" T="decimal" Immediate="false" Required />
+                    <MudSelect Label="Stawka" @bind-Value="_calculationData.Rate" Required>
+                        @foreach (var rate in Enum.GetValues<LumpSumRate>())
+                        {
+                            <MudSelectItem Value="@rate">@rate.GetDescriptor()</MudSelectItem>
+                        }
+                    </MudSelect>
                     <MudSelect Label="Składka społeczna" @bind-Value="_calculationData.ContributionVariant" Required>
                         @foreach (var variant in Enum.GetValues<ContributionVariant>())
                         {
@@ -27,7 +34,9 @@
                     <MudText Typo="Typo.h6">Ryczałt</MudText>
                 </MudCardHeader>
                 <MudCardContent>
-                    <CalculatorChart TaxValue="10" HealthContributionValue="20" SocialContributionValue="30" />
+                    <CalculatorChart TaxValue="CalculatorService.CalculateLumpSumTax(_calculationData)"
+                                     HealthContributionValue="CalculatorService.CalculateLumpSumHealthContribution(_calculationData)"
+                                     SocialContributionValue="CalculatorService.CalculateSocialContribution(_calculationData)" />
                 </MudCardContent>
             </MudCard>
         </MudItem>
@@ -37,7 +46,9 @@
                     <MudText Typo="Typo.h6">Skala podatkowa</MudText>
                 </MudCardHeader>
                 <MudCardContent>
-                    <CalculatorChart TaxValue="10" HealthContributionValue="20" SocialContributionValue="30" />
+                    <CalculatorChart TaxValue="CalculatorService.CalculateTaxScaleTax(_calculationData)"
+                                     HealthContributionValue="CalculatorService.CalculateTaxScaleHealthContribution(_calculationData)"
+                                     SocialContributionValue="CalculatorService.CalculateSocialContribution(_calculationData)" />
                 </MudCardContent>
             </MudCard>
         </MudItem>
@@ -47,7 +58,9 @@
                     <MudText Typo="Typo.h6">Podatek liniowy</MudText>
                 </MudCardHeader>
                 <MudCardContent>
-                    <CalculatorChart TaxValue="10" HealthContributionValue="20" SocialContributionValue="30" />
+                    <CalculatorChart TaxValue="CalculatorService.CalculateLinearTax(_calculationData)"
+                                     HealthContributionValue="7897.64M"
+                                     SocialContributionValue="CalculatorService.CalculateLinearTaxHealthContribution(_calculationData)" />
                 </MudCardContent>
             </MudCard>
         </MudItem>

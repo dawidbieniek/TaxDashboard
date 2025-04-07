@@ -30,7 +30,7 @@
                 </MudItem>
                 <MudItem xs="4">
                     @* General *@
-                    <MudCard Class="compact-card compact-card-divider" Elevation="4" Outlined>
+                    <MudCard Class="compact-card compact-card-divider" Elevation="4">
                         <MudCardHeader>
                             <MudText Typo="Typo.h6">Dane</MudText>
                         </MudCardHeader>
@@ -66,21 +66,21 @@
                 </MudItem>
                 <MudItem xs="4">
                     <MudStack Spacing="4">
-                    @* Subscription *@
-                    <MudCard Class="compact-card compact-card-divider" Elevation="4" Outlined>
-                        <MudCardHeader>
-                            <MudText Typo="Typo.h6">Abonament</MudText>
-                        </MudCardHeader>
-                        <MudCardContent>
-                            <MudStack Spacing="3">
-                                <MudTextField Label="Abonament" InputType="InputType.Text" @bind-Value="Client.Subscription" For="@(() => Client.Subscription)" />
-                                <MudNumericField Label="Kwota autoryzacyjna" @bind-Value="Client.AuthorizationPrice" For="@(() => Client.AuthorizationPrice)" Format="C2" T="decimal" Immediate="false" />
-                                <MudNumericField Label="Koszt abonamentu" @bind-Value="Client.SubscriptionPrice" For="@(() => Client.SubscriptionPrice)" Format="C2" T="decimal" Immediate="false" />
-                            </MudStack>
-                        </MudCardContent>
+                        @* Subscription *@
+                        <MudCard Class="compact-card compact-card-divider" Elevation="4">
+                            <MudCardHeader>
+                                <MudText Typo="Typo.h6">Abonament</MudText>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudStack Spacing="3">
+                                    <MudTextField Label="Abonament" InputType="InputType.Text" @bind-Value="Client.Subscription" For="@(() => Client.Subscription)" />
+                                    <MudNumericField Label="Kwota autoryzacyjna" @bind-Value="Client.AuthorizationPrice" For="@(() => Client.AuthorizationPrice)" Format="C2" T="decimal" Immediate="false" />
+                                    <MudNumericField Label="Koszt abonamentu" @bind-Value="Client.SubscriptionPrice" For="@(() => Client.SubscriptionPrice)" Format="C2" T="decimal" Immediate="false" />
+                                </MudStack>
+                            </MudCardContent>
                         </MudCard>
                         @* Tax settings *@
-                        <MudCard Class="compact-card compact-card-divider" Elevation="4" Outlined>
+                        <MudCard Class="compact-card compact-card-divider" Elevation="4">
                             <MudCardHeader>
                                 <MudText Typo="Typo.h6">Podatki</MudText>
                             </MudCardHeader>
@@ -99,13 +99,13 @@
                                         }
                                     </MudSelect>
                                     <MudStack Row Class="align-end">
-                                    <MudSwitch Label="Rozlicza VAT" @bind-Value="Client.VAT" />
-                                    <MudSelect Label="Sposób opłacania VAT" @bind-Value="Client.VATPaymentType" Disabled="!Client.VAT">
-                                        @foreach (var vat in Enum.GetValues<PaymentType>())
-                                        {
-                                            <MudSelectItem Value="@vat">@vat.GetDescriptor()</MudSelectItem>
-                                        }
-                                    </MudSelect>
+                                        <MudSwitch Label="Rozlicza VAT" @bind-Value="Client.VAT" />
+                                        <MudSelect Label="Sposób opłacania VAT" @bind-Value="Client.VATPaymentType" Disabled="!Client.VAT">
+                                            @foreach (var vat in Enum.GetValues<PaymentType>())
+                                            {
+                                                <MudSelectItem Value="@vat">@vat.GetDescriptor()</MudSelectItem>
+                                            }
+                                        </MudSelect>
                                     </MudStack>
                                 </MudStack>
                             </MudCardContent>
@@ -114,7 +114,7 @@
                 </MudItem>
                 <MudItem xs="4">
                     @* Reduction settings *@
-                    <MudCard Class="compact-card compact-card-divider" Elevation="4" Outlined>
+                    <MudCard Class="compact-card compact-card-divider" Elevation="4">
                         <MudCardHeader>
                             <MudText Typo="Typo.h6">Ulgi</MudText>
                         </MudCardHeader>
