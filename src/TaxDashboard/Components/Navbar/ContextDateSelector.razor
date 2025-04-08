@@ -1,5 +1,5 @@
 ﻿<div class="d-flex flex-row">
-    <MudSelect T="int" Class="me-2" Value="@_selectedYear" ValueChanged="ChangeSelectedYear">
+    <MudSelect T="int" Class="me-2 year-select" Value="@_selectedYear" ValueChanged="ChangeSelectedYear">
         @foreach (int year in SelectableYears)
         {
             <MudSelectItem Style="@(year < JoinDateTime.Year ? "color:var(--mud-palette-text-disabled)" : "")" Value="@year">@year</MudSelectItem>
