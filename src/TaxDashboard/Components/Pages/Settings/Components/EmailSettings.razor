@@ -5,86 +5,85 @@
 
 @inject EmailService EmailService
 
-<h5 class="card-title">Przypomnienia</h5>
-<LoadingContentsComponent Initialized="@(_emailLoginInfo is not null)">
-    <div class="list-group shadow">
-        <div class="list-group-item row">
-            <div class="col">
-                <div class="fw-bold">
-                    Konto
+<MudCard Elevation="3">
+    <MudCardHeader>
+        <MudText Typo="Typo.h6">Przypomnienia</MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <LoadingContentsComponent Initialized="@(_emailLoginInfo is not null)">
+            <MudStack Spacing="2">
+                <MudStack Row="true" Class="setting-item">
+                    <MudStack Spacing="0">
+                        <MudStack Row="true">
+                            <MudText Typo="Typo.body1"><b>Konto</b></MudText>
+                            @{
+                                string chipMessage = _emailLoginInfo!.LoggedIn ? $"Zalogowano - {_emailLoginInfo.LoginOption.GetDescriptor()}" : "Wylogowano";
+                                Color chipColor = _emailLoginInfo!.LoggedIn ? Color.Primary : Color.Warning;
+                            }
+                            <MudChip T="string" Size="Size.Small" Color="@chipColor" Class="ma-0">@chipMessage</MudChip>
+                        </MudStack>
+                        <MudText Typo="Typo.body2">Konto gmail używane przy wysyłaniu wiadomości</MudText>
+                    </MudStack>
+                    <MudSpacer />
                     @if (_emailLoginInfo!.LoggedIn)
                     {
-                        <span class="badge rounded-pill text-bg-success ms-2">Zalogowano - @(_emailLoginInfo.LoginOption.GetDescriptor())</span>
+                        <MudStack Row="true" Class="setting-data setting-data-fixed">
+                            <MudText Typo="Typo.body2">@_emailLoginInfo.EmailAddress</MudText>
+                            <MudSpacer/>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LogoutEmailAsync">Wyloguj</MudButton>
+                        </MudStack>
                     }
                     else
                     {
-                        <a href="/email/login" class="badge rounded-pill text-bg-warning text-decoration-none ms-2">Wylogowano</a>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="setting-data" Href="/email/login">Logowanie</MudButton>
                     }
-                </div>
-                <div class="text-muted">Konto gmail używane przy wysyłaniu wiadomości</div>
-            </div>
-            <div class="col-auto my-auto d-flex">
-                @if (_emailLoginInfo.LoggedIn)
-                {
-                    <input class="form-control me-2" value="@_emailLoginInfo.EmailAddress" disabled />
-                    <button class="btn btn-danger" @onclick="LogoutEmailAsync">Wyloguj</button>
-                }
-                else
-                {
-                    <a href="/email/login" class="btn btn-primary">Logowanie</a>
-                }
-            </div>
-        </div>
-        <div class="list-group-item row">
-            <div class="col">
-                <div class="fw-bold">Imię</div>
-                <div class="text-muted">Nazwa używana przy wysyłaniu wiadomości</div>
-            </div>
-            <div class="col-auto my-auto d-flex">
-                <InputText class="form-control" autocomplete="off"
-                           @bind-Value="EmailName" @bind-Value:after="@(() => Preferences.Set(GlobalSettings.PreferencesStorage.EmailNameKey, EmailName))"
-                           disabled="@(!_emailLoginInfo.LoggedIn)" />
-            </div>
-        </div>
-        <div class="list-group-item row flex-column">
-            <div class="row m-0 p-0 mb-2">
-                <div class="col">
-                    <div class="fw-bold">Szablon</div>
-                    <div class="text-muted">Treść szablonu używana przy wysyłaniu wiadomości</div>
-                </div>
-                <div class="col-auto d-flex">
-                    <div class="my-auto me-1">
-                        <TokenListIcon />
-                    </div>
-                    <TaxDashboard.Components.FormInputs.InputClassSelect class="form-select form-control my-auto me-2" style="max-width:16em"
-                                                                         Options="Enum.GetValues<EmailTemplateType>()" Selector="v => v.GetDescriptor()"
-                                                                         @bind-Value="_selectedTemplateType" @bind-Value:after="ChangeSelectedTemplateType"
-                                                                         disabled="@_editingEmailTemplate" />
-                    <button class="btn btn-primary my-auto" @onclick="@ChangeEditState">@(_editingEmailTemplate ? "Zapisz" : "Edytuj")</button>
-                </div>
-            </div>
-            <div class="row m-0 p-0">
-                <div class="col">
-                    <div class="input-group mb-1">
-                        <label for="subject" class="input-group-text">Temat</label>
-                        <InputText id="subject" class="form-control" style="margin-right:0" autocomplete="off"
-                                   @bind-Value="@_emailSubjectTemplate"
-                                   readonly="@(!_editingEmailTemplate)" disabled="@(!_editingEmailTemplate)" />
-                    </div>
-                </div>
-            </div>
-            <div class="row m-0 p-0">
-                <div class="col">
-                    <InputTextArea rows="8" class="form-control" style="resize:none;overflow-y:auto;"
-                                   @bind-Value="@_emailTemplate"
-                                   readonly="@(!_editingEmailTemplate)" disabled="@(!_editingEmailTemplate)" />
-                </div>
-            </div>
-        </div>
-    </div>
-</LoadingContentsComponent>
-<!-- Modal -->
-<PreventNavigationModal NavigationBlockCondition="@(() => _editingEmailTemplate)" />
+                </MudStack>
+                <MudDivider />
+                <MudStack Row="true" Class="setting-item">
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.body1"><b>Imię</b></MudText>
+                        <MudText Typo="Typo.body2">Nazwa używana przy wysyłaniu wiadomości</MudText>
+                    </MudStack>
+                    <MudSpacer />
+                    <MudTextField T="string" Typo="Typo.body2" Class="setting-data setting-data-fixed flex-grow-0" Label="Imię"
+                                  @bind-Value="EmailName" @bind-Value:after="@(() => Preferences.Set(GlobalSettings.PreferencesStorage.EmailNameKey, EmailName))"
+                                  Disabled="@(!_emailLoginInfo!.LoggedIn)" />
+                </MudStack>
+                <MudDivider />
+                <MudStack Spacing="1">
+                    <MudStack Row="true" Class="setting-item">
+                        <MudStack Spacing="0">
+                            <MudText Typo="Typo.body1"><b>Szablon</b></MudText>
+                            <MudText Typo="Typo.body2">Treść szablonu używana przy wysyłaniu wiadomości</MudText>
+                        </MudStack>
+                        <MudSpacer />
+                        <MudStack Row="true" Class="setting-data">
+                            <TokenListIcon />
+                            <MudSelect Label="Szablon" Style="width:320px"
+                                       @bind-Value="_selectedTemplateType" @bind-Value:after="ChangeSelectedTemplateType"
+                                       Disabled="@_editingEmailTemplate">
+                                @foreach (var template in Enum.GetValues<EmailTemplateType>())
+                                {
+                                    <MudSelectItem Value="@template">@template.GetDescriptor()</MudSelectItem>
+                                }
+                            </MudSelect>
+                            @{
+                                string buttonText = _editingEmailTemplate ? "Zapisz" : "Edytuj";
+                                Color buttonColor = _editingEmailTemplate ? Color.Secondary : Color.Primary;
+                            }
+                            <MudButton Variant="Variant.Filled" Color="@buttonColor" OnClick="ChangeEditState">@buttonText</MudButton>
+                        </MudStack>
+                    </MudStack>
+                    <MudTextField T="string" Typo="Typo.body1" Variant="Variant.Outlined" @bind-Value="_emailSubjectTemplate" Adornment="Adornment.Start" AdornmentText="Temat"
+                                  ReadOnly="@(!_editingEmailTemplate)" Disabled="@(!_editingEmailTemplate)" />
+                    <MudTextField T="string" Typo="Typo.body1" Variant="Variant.Outlined" @bind-Value="_emailTemplate" Lines="8"
+                                  ReadOnly="@(!_editingEmailTemplate)" Disabled="@(!_editingEmailTemplate)" />
+                </MudStack>
+            </MudStack>
+        </LoadingContentsComponent>
+    </MudCardContent>
+</MudCard>
+<TaxDashboard.Components.Dialogs.UnsavedContextChecker NavigationBlockCondition="() => _editingEmailTemplate" />
 
 @code {
     private bool _editingEmailTemplate = false;

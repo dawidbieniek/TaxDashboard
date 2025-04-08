@@ -1,64 +1,58 @@
-﻿@using TaxDashboard.Services.Notifications
-
-@implements IAsyncDisposable
+﻿@using System.ComponentModel.DataAnnotations
+@using TaxDashboard.Services.Notifications
 
 @inject ClientsService ClientsService
 @inject IJSRuntime JS
 
-<nav class="navbar navbar-expand sticky-top align-items-start bg-light border-black border-bottom border-2 px-2">
-    <div class="dropdown flex-grow-0 flex-shrink-0">
-        <input class="form-select@(_incorrectClientName ? " border border-1 border-danger" : "")" style="width:14rem;"
-               list="clientList"
-               type="text"
-               placeholder="@(_allClients.Any() ? "Klient" : "Brak klientów")"
-               autocomplete="on"
-               @onchange="ChangeSelectedClientAndBlurAsync"
-               onfocus="this.value.trim()!=''?this.setAttribute('placeholder',this.value):'';this.value='';"
-               onfocusout="if (this.value.trim() === '' && this.placeholder !== '' && this.placeholder !== 'Klient' && this.placeholder !== 'Brak klientów') { this.value = this.placeholder; }"
-               value="@(StartingClient?.FullName ?? "")"
-               onclick="this.select();" />
-        <datalist id="clientList">
-            @foreach (Client client in _allClients)
-            {
-                <option>@client.FullName</option>
-            }
-        </datalist>
-    </div>
+<div>
+    <MudAppBar Fixed>
+        <MudAutocomplete @ref="_autocompleteRef" T="Client" Class="client-selector"
+                         ToStringFunc="c => c?.FullName ?? string.Empty"
+                         @bind-Value="_autocompleteClient" @bind-Value:after="ChangeSelectedClientAndBlurAsync"
+                         SearchFunc="AutocompleteSearchFunction"
+                         CoerceText ResetValueOnEmptyText Clearable
+                         Placeholder="@(_allClients.Any() ? "Wybierz klienta" : "Brak klientów")" />
 
-    <button class="btn navigation-button" @onclick="@(() => ChangeSelectedClient(_selectedClientIndex - 1))"
-            disabled="@(LockClientNavigationButtons || _selectedClientIndex <= 0)">
-        <i class="bi-chevron-left" />
-    </button>
-    <button class="btn navigation-button" @onclick="@(() => ChangeSelectedClient(_selectedClientIndex + 1))"
-            disabled="@(LockClientNavigationButtons || _selectedClientIndex >= (_allClients.Count - 1) || _selectedClientIndex < 0)">
-        <i class="bi-chevron-right" />
-    </button>
+        <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
+                       OnClick="() => ChangeSelectedClientByIndex(_selectedClientIndex - 1)"
+                       Disabled="@(LockClientNavigationButtons || _selectedClientIndex <= 0)" />
+        <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
+                       OnClick="() => ChangeSelectedClientByIndex(_selectedClientIndex + 1)"
+                       Disabled="@(LockClientNavigationButtons || _selectedClientIndex >= (_allClients.Count - 1) || _selectedClientIndex < 0)" />
 
-    <div class="align-self-center flex-shrink-0 mx-2">
-        <ClientSelectorNotificationIcon @ref="@_notificationIconRef" SelectedClient="_selectedClient" />
-    </div>
+        <ClientSelectorNotificationIcon SelectedClient="_selectedClient" />
 
-    @if (ShowDateSelector && _selectedClient is not null)
-    {
-        <ContextDateSelector ClientSettlements="@(_selectedClient.Settlements)"
-                             StartingDateContext="@StartingDateContext" OnSelectedDateContextChanged="ChangeSelectedDateContext"
-                             JoinDateTime="@_selectedClient.JoinDateTime" />
-        <div class="flex-grow-1" />
-        <SettlementButton Client="@_selectedClient" ContextDate="@_contextDate?.Date" OnSettlementStateChanged="@(() => StateHasChanged())" Disabled="@(_contextDate?.IsValid ?? false)" />
-    }
-</nav>
+        @if (ShowDateSelector && _selectedClient is not null)
+        {
+            <ContextDateSelector ClientSettlements="@(_selectedClient.Settlements)"
+                                 StartingDateContext="@StartingDateContext" OnSelectedDateContextChanged="ChangeSelectedDateContext"
+                                 JoinDateTime="@_selectedClient.JoinDateTime" />
+            <MudSpacer />
+            <SettlementButton Client="@_selectedClient" ContextDate="@_contextDate?.Date" OnSettlementStateChanged="@(() => StateHasChanged())" Disabled="@(_contextDate?.IsValid ?? false)" />
+        }
+    </MudAppBar>
+</div>
 
 
 @code {
+    private Client? _autocompleteClient;
     private Client? _selectedClient;
     private ContextDate? _contextDate;
     private List<Client> _allClients = [];
-    private bool _incorrectClientName = false;
     private int _selectedClientIndex = -1;
 
-    private ClientSelectorNotificationIcon? _notificationIconRef;
+    private MudAutocomplete<Client> _autocompleteRef = default!;
 
-    private IJSObjectReference? _JSModule;
+    private Client? AutocompleteClient
+    {
+        get => _autocompleteClient;
+        set
+        {
+            _autocompleteClient = value;
+            if (value is not null)
+                _selectedClient = value;
+        }
+    }
 
     [Parameter]
     public Client? StartingClient { get; set; }
@@ -80,7 +74,7 @@
     public async Task RefreshAsync()
     {
         if (_selectedClient is not null)
-            _selectedClient = await ClientsService.GetAsync(_selectedClient.Id);
+            AutocompleteClient = await ClientsService.GetAsync(_selectedClient.Id);
 
         StateHasChanged();
     }
@@ -92,74 +86,48 @@
             .OrderBy(c => c.FullName)
             .ToList();
 
-        if (StartingClient is not null)
-        {
-            _selectedClient = StartingClient;
-            _selectedClientIndex = Math.Max(_allClients.Select(c => c.Id).ToList().IndexOf(_selectedClient.Id), 0);
-
-            _incorrectClientName = false;
-        }
-        else
-            _incorrectClientName = true;
+        AutocompleteClient = StartingClient;
+        _selectedClientIndex = GetClientIndex(_selectedClient);
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private void ChangeSelectedClientByIndex(int newClientIndex)
     {
-        if (firstRender)
-            _JSModule = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Navbar/ClientSelector.razor.js");
-    }
-
-    private void ChangeSelectedClient(int allClientIndex)
-    {
-        if (allClientIndex < 0 || allClientIndex >= _allClients.Count || LockClientNavigationButtons)
+        if (newClientIndex < 0 || newClientIndex >= _allClients.Count || LockClientNavigationButtons)
             return;
 
-        _selectedClient = _allClients[allClientIndex];
+        AutocompleteClient = _allClients[newClientIndex];
+        _selectedClientIndex = newClientIndex;
         OnSelectedClientChanged.InvokeAsync(_selectedClient);
-        _selectedClientIndex = allClientIndex;
-
-        _incorrectClientName = false;
     }
 
-    private async Task ChangeSelectedClientAndBlurAsync(ChangeEventArgs e)
+    private Task ChangeSelectedClientAndBlurAsync()
     {
-        bool clientFound = SelectClientFromName((string)e.Value!);
-        _incorrectClientName = !clientFound;
-        await _JSModule!.InvokeVoidAsync("blurInput");
+        if (AutocompleteClient is null)
+            return Task.CompletedTask;
+
+        _selectedClientIndex = GetClientIndex(_selectedClient);
+
+        return Task.WhenAll(
+            OnSelectedClientChanged.InvokeAsync(_selectedClient),
+            _autocompleteRef.BlurAsync().AsTask());
     }
 
-    private bool SelectClientFromName(string name)
+    private Task<IEnumerable<Client>> AutocompleteSearchFunction(string value, CancellationToken token) => Task.Run(() =>
     {
-        foreach (Client client in _allClients)
-        {
-            if (client.FullName.Equals(name, StringComparison.OrdinalIgnoreCase))
-            {
-                _selectedClient = client;
-                OnSelectedClientChanged.InvokeAsync(_selectedClient);
-                return true;
-            }
-        }
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return _allClients;
 
-        return false;
-    }
+        return _allClients.Where(x => x.FullName.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    });
+
+    private int GetClientIndex(Client? client) => client is not null
+        ? _allClients.FindIndex(c => c.Id == client.Id)
+        : -1;
 
     private async Task ChangeSelectedDateContext(ContextDate dateContext)
     {
         _contextDate = dateContext;
         await OnSelectedDateContextChanged.InvokeAsync(dateContext);
-    }
-
-    async ValueTask IAsyncDisposable.DisposeAsync()
-    {
-        if (_JSModule is not null)
-        {
-            try
-            {
-                await _JSModule.DisposeAsync();
-            }
-            catch (JSDisconnectedException)
-            {
-            }
-        }
     }
 }

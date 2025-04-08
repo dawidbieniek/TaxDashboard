@@ -4,9 +4,8 @@
 
 @inject ClientsService ClientsService
 
-<h5 class="card-title mb-2">Faktury</h5>
 <ElementRequiringLoad @ref="@_invoiceLoadingRef">
-    <ApexChart @ref="_invoiceChartRef" TItem="InvoiceData" Height="@("236px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _invoiceLoadingRef.HideLoadingIcon())">
+    <ApexChart @ref="_invoiceChartRef" TItem="InvoiceData" Height="@("261px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _invoiceLoadingRef.HideLoadingIcon())">
         <ApexPointSeries TItem="InvoiceData"
                          Name="Sprzedażowe"
                          Items="_sellInvoicesDataSeries"
@@ -22,16 +21,16 @@
                          XValue="@(e => DataDisplayHelper.GetMonthLabel(e.Month))"
                          YAggregate="@(e => e.Sum(e => e.Amount))" />
     </ApexChart>
-    <div class="d-flex gap-2">
-        <div>
-            <label class="form-label" for="sell">Sprzedażowe</label>
-            <InputNumber id="sell" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentSellInvoiceAmount" @bind-Value:after="UpdateClientAsync" autocomplete="off" disabled="@Disabled" onclick="this.select();" />
-        </div>
-        <div>
-            <label class="form-label" for="cost">Kosztowe</label>
-            <InputNumber id="cost" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentCostInvoiceAmount" @bind-Value:after="UpdateClientAsync" autocomplete="off" disabled="@Disabled" onclick="this.select();" />
-        </div>
-    </div>
+    <MudStack Row>
+        <MudNumericField Style="max-width:12rem;" Label="Sprzedażowe" Format="C2" T="int"
+                         @bind-Value="@CurrentSellInvoiceAmount" @bind-Value:after="UpdateClientAsync"
+                         Disabled="@Disabled" DebounceInterval="500" Immediate="false"
+                         onclick="this.select();" />
+        <MudNumericField Style="max-width:12rem;" Label="Kosztowe" Format="C2" T="int"
+                         @bind-Value="@CurrentCostInvoiceAmount" @bind-Value:after="UpdateClientAsync"
+                         Disabled="@Disabled" DebounceInterval="500" Immediate="false"
+                         onclick="this.select();" />
+    </MudStack>
 </ElementRequiringLoad>
 
 @code {

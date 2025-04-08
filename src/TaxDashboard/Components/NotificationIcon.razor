@@ -6,24 +6,19 @@
 
 @if (ShowWhenEmptyMessage || !string.IsNullOrEmpty(PopoverText))
 {
-    <i id="@_id" class="bi-exclamation-diamond @(Severity.TextClass())" style="font-size:@(Size.ToString(System.Globalization.CultureInfo.InvariantCulture))rem;"
-       data-bs-toggle="popover"
-       data-bs-html="true"
-       data-bs-placement="@PopoverLocation"
-       data-bs-title="Przypomnienie"
-       data-bs-content="@PopoverText" />
-}
-else if (OccupySpaceWhenEmptyMessage)
-{
-    <div class="flex-shrink-0" style="width:@(Size.ToString(System.Globalization.CultureInfo.InvariantCulture))rem" />
+    <MudIconButton id="@_id" Class="@(Dense ? "pa-0" : "")" Icon="@Icons.Material.Filled.NotificationImportant" Color="Severity.Color()" Size="Size" OnClick="() => _openPopover = !_openPopover" />
+    <MudOverlay @bind-Visible="_openPopover" AutoClose="true" />
+    <MudPopover Class="pa-2" Style="width:16rem" Open="_openPopover" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+        @((MarkupString)PopoverText)
+    </MudPopover>
 }
 
 @code {
     private string _id = Guid.NewGuid().ToString();
+    private bool _openPopover = false;
+
     private ChangeTracker<string> _popoverTextChangeTracker = new();
 
-    [Parameter]
-    public bool OccupySpaceWhenEmptyMessage { get; set; } = true;
     [Parameter]
     public bool ShowWhenEmptyMessage { get; set; } = false;
     [Parameter]
@@ -33,7 +28,9 @@ else if (OccupySpaceWhenEmptyMessage)
     [Parameter]
     public string PopoverLocation { get; set; } = "bottom";
     [Parameter]
-    public float Size { get; set; } = 1.25f;
+    public Size Size { get; set; } = Size.Medium;
+    [Parameter]
+    public bool Dense { get; set; } = false;
 
     public async ValueTask DisposeAsync()
     {

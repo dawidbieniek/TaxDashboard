@@ -1,6 +1,3 @@
-[submodule "src/BlazorTable"]
-	path = src/BlazorTable
-	url = git@github.com:dawidbieniek/BlazorTable.git
 [submodule "src/LifeManagers.Data"]
 	path = src/LifeManagers.Data
 	url = git@github.com:dawidbieniek/LifeManagers.Data.git

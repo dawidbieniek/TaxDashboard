@@ -1,0 +1,191 @@
+﻿@page "/dashboard"
+
+@using TaxDashboard.Components.Loading
+@using TaxDashboard.Components.Navbar
+@using ApexCharts
+@using TaxDashboard.Components.Pages.Dashboard.Components
+@using TaxDashboard.Components.Pages.Dashboard.Model
+@using TaxDashboard.Services.Emails
+
+@inherits DashboardPageBase
+
+<LoadingContentsComponent Initialized="@Initialized">
+    <ClientSelector StartingClient="@Client" StartingDateContext="@ContextDate?.Date" OnSelectedClientChanged="ChangeSelectedClient" OnSelectedDateContextChanged="ChangeDateContext" />
+
+    @if (Client is null)
+    {
+        <NoClientAlert />
+    }
+    else
+    {
+        <div class="topbar-page pa-2">
+            <MudGrid>
+                <MudItem xs="3">
+                    @* Gauges *@
+                    <MudStack Spacing="6">
+                        <MudCard Class="dashboard-card gauge-card">
+                            <GaugeChart Label="Limit do VAT" Value="@_vatIncomeSum" ValueLimit="@_vatGaugeLimit"
+                                        TooltipAdditionalText="@(Client.JoinDateTime.Year == ContextDate?.Date.Year ? $"Liczone od: {Client.JoinDateTime.ToShortDateString()}" : "")"
+                                        PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountVAT}'>tutaj</a>, aby go poinformować")"
+                                        PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountVATDanger}'>tutaj</a>, aby go poinformować")" />
+                        </MudCard>
+                        <MudCard Class="dashboard-card gauge-card">
+                            @if (Client.UseCashRegister)
+                            {
+                                <GaugeChart Label="Kasy fiskalne" Value="@_fiscalIncomeSum" ValueLimit="@ClientsService.FiscalLimit"
+                                            TooltipAdditionalText="@(Client.FirstCashRegisterUseDate.Year == ContextDate?.Date.Year ? $"Liczone od: {Client.FirstCashRegisterUseDate.ToShortDateString()}" : "")"
+                                            PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountFiscal}'>tutaj</a>, aby go poinformować")"
+                                            PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountFiscalDanger}'>tutaj</a>, aby go poinformować")" />
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body1" Class="mt-8 w-100 text-center">Klient nie używa kasy fiskalnej</MudText>
+                            }
+                        </MudCard>
+                        <MudCard Class="dashboard-card gauge-card">
+                            @if (Client.ReductionType == Data.Enums.ReductionType.ZUSPlus)
+                            {
+                                <GaugeChart Label="Mały ZUS Plus" Value="@_zusIncomeSum" ValueLimit="@ClientsService.ZusPlusLimit"
+                                            TooltipAdditionalText="@($"Liczone od: {ContextDate?.Date.FirstDayOfCurrentYear()} do {ContextDate?.Date.LastDayOfCurrentYear()}")"
+                                            PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
+                                            PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" />
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body1" Class="mt-8 w-100 text-center">Klient nie jest na Małym ZUSie Plus</MudText>
+                            }
+                        </MudCard>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="6">
+                    @* Charts *@
+                    <MudStack Spacing="6">
+                        <MudCard Class="dashboard-card">
+                            <IncomesCard Client="@Client" ContextDate="@ContextDate?.Date" Disabled="@(ContextDate?.IsValid ?? false)" OnYearlyIncomesChanged="@((v) => UpdateIncomes(v))" />
+                        </MudCard>
+                        <MudCard Class="dashboard-card">
+                            <InvoicesCard Client="@Client" ContextDate="@ContextDate?.Date" Disabled="@(ContextDate?.IsValid ?? false)" />
+                        </MudCard>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudCard Class="dashboard-card">
+                        <ButtonPanel Client="@Client" ContextDate="@ContextDate?.Date" Disabled="@(ContextDate?.IsValid ?? false)" />
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12">
+                    @* Buttons & Notes *@
+                    <MudGrid>
+                        <MudItem xs="6">
+                            <MudCard Class="dashboard-card">
+                                <MudTextField Label="Notatki" Variant="Variant.Filled" @bind-Value="@Client.Notes" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" Lines="8" />
+                            </MudCard>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudCard Class="dashboard-card">
+                                <MudTextField Label="Informacje" Variant="Variant.Filled" @bind-Value="@Client.Info" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" Lines="8" />
+                            </MudCard>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+            </MudGrid>
+        </div>
+    }
+</LoadingContentsComponent>
+
+@code {
+    private List<IncomeData> _currentYearIncomes = [];
+
+    private decimal _vatIncomeSum = 0;
+    private decimal _fiscalIncomeSum = 0;
+    private decimal _zusIncomeSum = 0;
+
+    private decimal _vatGaugeLimit = ClientsService.BaseVatLimit;
+
+    protected override Task OnAfterRequiredInitializedAsync()
+    {
+        UpdateIncomes();
+        return Task.CompletedTask;
+    }
+
+    protected override async Task ChangeDateContext(ContextDate date)
+    {
+        await base.ChangeDateContext(date);
+
+        UpdateIncomes();
+    }
+
+    protected override async Task ChangeSelectedClient(Client client)
+    {
+        await base.ChangeSelectedClient(client);
+
+        UpdateIncomes();
+    }
+
+    private void UpdateIncomes(List<IncomeData>? incomes = null)
+    {
+        _currentYearIncomes = incomes ?? GetCurrentYearIncomes(ContextDate?.Date);
+
+        UpdateVatIncome();
+        UpdateFiscalIncome();
+        UpdateZusIncome();
+    }
+
+    private void UpdateVatIncome()
+    {
+        if (Client is null || ContextDate is null)
+        {
+            _vatIncomeSum = 0;
+            _vatGaugeLimit = 0;
+            return;
+        }
+
+        _vatIncomeSum = ClientsService.GetVatIncomeSum(Client, ContextDate.Date);
+        _vatGaugeLimit = ClientsService.GetVatLimit(Client, ContextDate.Date);
+    }
+
+    private void UpdateFiscalIncome()
+    {
+        if (Client is null || ContextDate is null || ContextDate.Date.Year < Client.FirstDayOfFiscalIncome.Year)
+        {
+            _fiscalIncomeSum = 0;
+            return;
+        }
+
+        _fiscalIncomeSum = ClientsService.GetFiscalIncomeSum(Client, ContextDate.Date);
+    }
+
+    private void UpdateZusIncome()
+    {
+        if (Client is null || ContextDate is null || ContextDate.Date.Year < Client.FirstDayOfZusIncome.Year)
+        {
+            _zusIncomeSum = 0;
+            return;
+        }
+
+        _zusIncomeSum = ClientsService.GetZusIncomeSum(Client, ContextDate.Date);
+    }
+
+
+    private List<IncomeData> GetCurrentYearIncomes(DateOnly? date)
+    {
+        int year = date.HasValue ? date.Value.Year : 1;
+
+        IEnumerable<IncomeData> monthlyIncomes = Enumerable.Range(1, 12)
+            .Select(month => new IncomeData(month));
+
+        if (Client is null || !date.HasValue)
+            return [.. monthlyIncomes];
+
+        IEnumerable<Income> existingIncomes = Client!.Incomes
+            .Where(i => i.Date.Year == year);
+
+        return monthlyIncomes
+            .Select(monthlyIncome =>
+            {
+                Income? income = existingIncomes.FirstOrDefault(existingIncome => existingIncome.Date.Month == monthlyIncome.Month && existingIncome.Date.Year == year);
+                return income is not null ? new IncomeData(monthlyIncome.Month, income.Amount) : monthlyIncome;
+            })
+            .ToList();
+    }
+}

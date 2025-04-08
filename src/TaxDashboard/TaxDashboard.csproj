@@ -67,11 +67,11 @@
         <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+        <PackageReference Include="MudBlazor" Version="8.3.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\TaxDashboard.Data\TaxDashboard.Data.csproj" />
-      <ProjectReference Include="..\BlazorTable\src\BlazorTable\BlazorTable.csproj" />
       <ProjectReference Include="..\LifeManagers.Data\src\LifeManagers.Data.csproj" />
       <ProjectReference Include="..\TaxDashboard.Util\TaxDashboard.Util.csproj" />
     </ItemGroup>

@@ -1,0 +1,4 @@
+﻿::deep .suspended > td {
+    color: var(--mud-palette-dark) !important;
+    --mud-ripple-color: var(--mud-palette-dark) !important;
+}

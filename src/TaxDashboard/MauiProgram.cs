@@ -1,13 +1,14 @@
 ﻿using ApexCharts;
 
-using BlazorTable;
-
 using CommunityToolkit.Maui;
 
 using LifeManagers.Data;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+
+using MudBlazor;
+using MudBlazor.Services;
 
 using TaxDashboard.Data;
 
@@ -32,7 +33,13 @@ namespace TaxDashboard
                 .AddEnvironmentVariables();
 
             builder.Services.AddMauiBlazorWebView();
-            builder.Services.AddBlazorTable();
+            builder.Services.AddMudServices(opt =>
+            {
+                opt.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
+                opt.SnackbarConfiguration.PreventDuplicates = true;
+                opt.SnackbarConfiguration.NewestOnTop = true;
+                opt.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+            });
             builder.Services.AddAppServices();
             builder.Services.AddDataServices<AppDbContext>(opt =>
             {

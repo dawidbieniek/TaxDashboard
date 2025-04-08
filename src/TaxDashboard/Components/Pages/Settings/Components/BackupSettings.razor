@@ -2,8 +2,53 @@
 @using TaxDashboard.Util
 
 @inject BackupService BackupService
+@inject ISnackbar Snackbar
 
-<h5 class="card-title">Kopia zapasowa</h5>
+<MudCard Elevation="3">
+    <MudCardHeader>
+        <MudText Typo="Typo.h6">Kopia zapasowa</MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudStack Spacing="2">
+            <MudStack Row="true" Class="setting-item">
+                <MudStack Spacing="0">
+                    <MudStack Row="true">
+                        <MudText Typo="Typo.body1"><b>Ostatni zapis</b></MudText>
+                        <MudChip T="string" Size="Size.Small" Class="ma-0">Co @_backupPeriodString</MudChip>
+                    </MudStack>
+                    <MudText Typo="Typo.body2">Data i godzina ostatniej automatycznej kopii zapasowej</MudText>
+                </MudStack>
+                <MudSpacer />
+                <MudText Typo="Typo.body1" Class="setting-data setting-data-fixed">@_lastBackupDateTimeString</MudText>
+            </MudStack>
+            <MudDivider />
+            <MudStack Row="true" Class="setting-item">
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.body1"><b>Lokalizacja</b></MudText>
+                    <MudText Typo="Typo.body2">Miejsce zapisu danych</MudText>
+                </MudStack>
+                <MudSpacer />
+                <MudText Typo="Typo.body1" Class="setting-data setting-data-fixed overflow-x-auto">@FileSystem.Current.AppDataDirectory</MudText>
+            </MudStack>
+            <MudDivider />
+            <MudStack Row="true" Class="setting-item">
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.body1"><b>Zarządzaj</b></MudText>
+                    <MudSpacer/>
+                    <MudText Typo="Typo.body2">Twórz i przywracaj kopie zapasowe</MudText>
+                </MudStack>
+                <MudSpacer />
+                <MudStack Row="true" Class="setting-data setting-data-fixed">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateBackup">Stwórz kopię</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ApplyBackup">Przywróć dane</MudButton>
+                </MudStack>
+            </MudStack>
+        </MudStack>
+    </MudCardContent>
+</MudCard>
+
+
+@* <h5 class="card-title">Kopia zapasowa</h5>
 <div class="list-group shadow">
     <div class="list-group-item row">
         <div class="col">
@@ -34,14 +79,10 @@
         </div>
     </div>
 </div>
-<!-- Toast -->
-<Toast @ref="@_toastRef" Id="backupToast" Title="Kopia zapasowa" />
-
+ *@
 @code {
     private string _lastBackupDateTimeString = string.Empty;
     private string _backupPeriodString = string.Empty;
-
-    private Toast _toastRef = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -54,12 +95,18 @@
     private async Task CreateBackup()
     {
         BackupResult result = await BackupService.MakeBackupAsync();
-        await _toastRef.ShowTextAsync(result.IsSuccessful ? "Pomyślnie utworzono kopię zapasową" : result.Message);
+        if (result.IsSuccessful)
+            Snackbar.Add("Pomyślnie utworzono kopię zapasową");
+        else
+            Snackbar.Add(result.Message, Severity.Error);
     }
 
     private async Task ApplyBackup()
     {
         BackupResult result = await BackupService.LoadBackupFromFileAsyc();
-        await _toastRef.ShowTextAsync(result.IsSuccessful ? "Pomyślnie przywrócono kopię zapasową" : result.Message);
+        if (result.IsSuccessful)
+            Snackbar.Add("Pomyślnie przywrócono kopię zapasową");
+        else
+            Snackbar.Add(result.Message, Severity.Error);
     }
 }

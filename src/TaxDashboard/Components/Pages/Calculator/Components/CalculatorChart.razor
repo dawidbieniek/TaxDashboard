@@ -1,0 +1,29 @@
+﻿@using ApexCharts
+
+<ApexChart @ref="_chartRef" TItem="Data">
+    <ApexPointSeries TItem="Data"
+                     Name="Opłaty"
+                     Items="@([new("Podatek", Math.Round(TaxValue, 2)), new("Zdrowotna", Math.Round(HealthContributionValue, 2)), new("Społeczna", Math.Round(SocialContributionValue, 2))])"
+                     XValue="d => d.Name"
+                     YValue="d => d.Value"
+                     SeriesType="SeriesType.Bar" />
+</ApexChart>
+
+@code {
+    private ApexChart<Data> _chartRef = default!;
+
+    [Parameter]
+    public decimal TaxValue { get; set; }
+    [Parameter]
+    public decimal HealthContributionValue { get; set; }
+    [Parameter]
+    public decimal SocialContributionValue { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_chartRef is not null)
+            await _chartRef.UpdateSeriesAsync(true);
+    }
+
+    private record Data(string Name, decimal Value);
+}

@@ -1,6 +1,5 @@
 ﻿@page "/list"
 
-@using BlazorTable
 @using TaxDashboard.Components.Pages.ClientList.Components
 @using TaxDashboard.Components.Popups
 @using TaxDashboard.Util
@@ -9,86 +8,88 @@
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 
-<div class="client-table container-fluid flex-row pt-3">
-    <Table TableItem="Client" Items="@_allClients" ShowSearchBar="true" TableClass="table table-striped table-hover table-bordered table-sm small w-100 rounded" TableRowClass="@((c) => c.Suspended ? "suspended" : "")" OnNewPageRendered="@(() => EnableVisibleTooltipsAsync())" >
-        <Pager ShowPageNumber="true" ShowTotalCount="true" ShowPageSizes="true" PageSizes="[10, 15, 20]" />
-        <Column TableItem="Client" Title="Id" Field="@(x => x.Id)" Sortable="true" Filterable="true" DefaultSortColumn="true" Class="column-small" />
-        <Column TableItem="Client" Title="Imię" Field="@(x => x.FullName)" Sortable="true" Filterable="true" Class="column-big"/>
-        <Column TableItem="Client" Title="" Class="column-small">
-            <Template>
-                <NotificationsPanel Client="@context"/>
-            </Template>
-        </Column>
-        <Column TableItem="Client" Title="Płeć" Field="@(x => x.Gender)" Sortable="true" Filterable="true" Class="column-small" >
-            <Template>
-                <span>@context.Gender.GetDescriptor()![0]</span>
-            </Template>
-        </Column>
-        <Column TableItem="Client" Title="NIP" Field="@(x => x.NIP)" Sortable="true" Filterable="true" Class="column-medium"/>
-        <Column TableItem="Client" Title="Email" Field="@(x => x.Email)" Sortable="true" Filterable="true" Class="column-medium">
-            <Template>
-                <a href="/email/new?clientId=@(context.Id)">@context.Email</a>
-            </Template>
-        </Column>
-        <Column TableItem="Client" Title="Telefon" Field="@(x => x.PhoneNumber)" Sortable="true" Filterable="true" Class="column-medium" />
-        <Column TableItem="Client" Title="Zawieszony" Field="@(x => x.Suspended)" Sortable="true" Filterable="true" Class="column-small">
-            <Template>
-                <InputCheckbox class="form-check-input m-1" @bind-Value="@context.Suspended" @bind-Value:after="@(() => ClientsService.UpdateAsync(context))" />
-            </Template>
-        </Column>
-        <Column TableItem="Client" Title="Bank" Field="@(x => x.Bank.Name)" Sortable="true" Filterable="true" Class="column-medium"/>
-        <Column TableItem="Client" Title="Data założenia" Field="@(x => x.JoinDateTime)" Format="yyyy-MM-dd" Sortable="true" Filterable="true"  Class="column-medium"/>
-        <Column TableItem="Client" Title="Kasa fiskalna" Field="@(x => x.UseCashRegister)" Sortable="true" Filterable="true" Class="column-small" >
-            <Template>
-                <input class="form-check-input m-1" type="checkbox" disabled checked="@context.UseCashRegister" />
-            </Template>
-        </Column>
-        <Column TableItem="Client" Title="Umowa o pracę" Field="@(x => x.EmploymentContract)" Sortable="true" Filterable="true" Class="column-small" >
-            <Template>
-                <input class="form-check-input m-1" type="checkbox" disabled checked="@context.EmploymentContract" />
-            </Template>
-        </Column>
-        <Column TableItem="Client" Title="VAT" Field="@(x => x.VAT)" Sortable="true" Filterable="true"  Class="column-small">
-            <Template>
-                <input class="form-check-input m-1" type="checkbox" disabled checked="@context.VAT" />
-            </Template>
-        </Column>
-        <Column TableItem="Client" Title="Metoda kasowa" Field="@(x => x.CashMethod)" Sortable="true" Filterable="true" Class="column-small" >
-            <Template>
-                <input class="form-check-input m-1" type="checkbox" disabled checked="@context.CashMethod" />
-            </Template>
-        </Column>
-        <Column TableItem="Client" Title="Abonament" Field="@(x => x.Subscription)" Sortable="true" Filterable="true" Class="column-big" />
-        <Column TableItem="Client" Title="Koszt abonamentu" Field="@(x => x.SubscriptionPrice)" Format="C2" Sortable="true" Filterable="true" Class="column-medium" />
-        <Column TableItem="Client" Title="Kwota autoryzacyjna" Field="@(x => x.AuthorizationPrice)" Format="C2" Sortable="true" Filterable="true"  Class="column-medium"/>
-        <Column TableItem="Client" Title="Podatek" Field="@(x => x.TaxType)" Sortable="true" Filterable="true" Class="column-medium" >
-            <Template>@(context.TaxType.GetDescriptor())</Template>
-        </Column>
-        <Column TableItem="Client" Title="Ulga" Field="@(x => x.ReductionType)" Sortable="true" Filterable="true" Class="column-medium">
-            <Template>@(context.ReductionType.GetDescriptor())</Template>
-        </Column>
-        <Column TableItem="Client" Title="Rozliczanie PIT" Field="@(x => x.PITPaymentType)" Sortable="true" Filterable="true" Class="column-medium">
-            <Template>@(context.PITPaymentType.GetDescriptor())</Template>
-        </Column>
-        <Column TableItem="Client" Title="Opłacanie VAT" Field="@(x => x.VATPaymentType)" Sortable="true" Filterable="true" Class="column-medium">
-            <Template>@(context.VATPaymentType.GetDescriptor())</Template>
-        </Column>
-        <Column TableItem="Client" Title="" Align="Align.Center" Class="column-small" >
-            <Template><button class="btn btn-danger btn-icon" @onclick="@(async () => await ShowDeleteModalAsync(context))"><i class="bi-trash3 d-block" style="margin-top:-2px;" /></button></Template>
-        </Column>
-    </Table>
+<div class="pa-2">
+    <MudDataGrid T="Client" Items="_allClients" SortMode="SortMode.Single" Filterable="true" Dense="true" QuickFilter="@_quickFilter" RowContextMenuClick="OpenMenuContent" RowClassFunc="@((c, _) => c.Suspended ? "suspended" : "")">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Wszyscy klienci</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="@_searchString" Placeholder="Wyszukaj" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true" />
+        </ToolBarContent>
+        <Columns>
+            <HierarchyColumn />
+            <PropertyColumn Property="x => x.Id" Title="Id" Sortable="true" Filterable="false" />
+            <PropertyColumn Property="x => x.FullName" Title="Imię" Sortable="true" Filterable="true" />
+            <TemplateColumn>
+                <CellTemplate>
+                    <NotificationsPanel Client="@context.Item" />
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Płeć" Sortable="true" Filterable="true">
+                <CellTemplate>
+                    <MudText Typo="Typo.body2">@(context.Item.Gender == Data.Enums.Gender.Male ? "M" : "K")</MudText>
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.NIP" Title="NIP" Sortable="true" Filterable="true" />
+            <TemplateColumn Title="Bank" Sortable="true" Filterable="true">
+                <CellTemplate>
+                    <MudText Typo="Typo.body2">@context.Item.Bank.Name</MudText>
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.Email" Title="Email" Sortable="true" Filterable="true" />
+            <PropertyColumn Property="x => x.PhoneNumber" Title="Telefon" Sortable="true" Filterable="true" />
+        </Columns>
+        <ChildRowContent>
+            <ClientDetailsCard Client="@context.Item" />
+        </ChildRowContent>
+        <PagerContent>
+            @* RowsPerPageString="Ilość na stronę" InfoFormat="{first_item} - {last_item} / {all_items}" *@
+            <MudDataGridPager PageSizeOptions="[10, 15, 20, 30]" />
+        </PagerContent>
+    </MudDataGrid>
+    <MudMenu @ref="_contextMenuRef" PositionAtCursor="true">
+        @if (_menuContextClient is not null)
+        {
+            if (_menuContextClient.Suspended)
+            {
+                <MudMenuItem Icon="@Icons.Material.Filled.LockOpen" IconColor="Color.Success" OnClick="() => SuspendClient(_menuContextClient, false)">
+                    <MudText Typo="Typo.body1" Color="Color.Success">Odwieś @_menuContextClient.FullName</MudText>
+                </MudMenuItem>
+            }
+            else
+            {
+                <MudMenuItem Icon="@Icons.Material.Filled.Block" IconColor="Color.Warning" OnClick="() => SuspendClient(_menuContextClient)" >
+                    <MudText Typo="Typo.body1" Color="Color.Warning">Zawieś @_menuContextClient.FullName</MudText>
+                </MudMenuItem>
+            }
+            <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="@(() => ShowDeleteModalAsync(_menuContextClient))">
+                <MudText Typo="Typo.body1" Color="Color.Error">Usuń @_menuContextClient.FullName</MudText>
+            </MudMenuItem>
+        }
+    </MudMenu>
 </div>
 <!-- Modal -->
-<Modal @ref="_deleteClientModalRef"  Title="Usuwanie klienta" ButtonText="Usuń" ButtonClick="@DeleteModalClientAsync" BlockNavigationWhenShowing="true">
+@* <Modal @ref="_deleteClientModalRef" Title="Usuwanie klienta" ButtonText="Usuń" ButtonClick="@DeleteModalClientAsync" BlockNavigationWhenShowing="true">
     Czy na pewno chcesz usunąć <i class="text-danger">@(_deletedModalClient?.FullName ?? "(brak imienia)")</i>?
-</Modal>
+</Modal> *@
 
 @code
 {
     private List<Client> _allClients = [];
     private Client? _deletedModalClient;
 
-    private int _clientsInPage = 10;
+    private string _searchString = string.Empty;
+    private Func<Client, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+        if (x.FullName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    };
+
+    private MudMenu _contextMenuRef = default!;
+    private Client? _menuContextClient;
 
     private Modal _deleteClientModalRef = default!;
 
@@ -101,6 +102,17 @@
     {
         if (firstRender)
             await EnableVisibleTooltipsAsync();
+    }
+
+    private async Task OpenMenuContent(DataGridRowClickEventArgs<Client> args)
+    {
+        _menuContextClient = args.Item;
+        await _contextMenuRef.OpenMenuAsync(args.MouseEventArgs);
+    }
+    private async Task SuspendClient(Client client, bool suspend = true)
+    {
+        client.Suspended = suspend;
+        await ClientsService.UpdateAsync(client);
     }
 
     private ValueTask EnableVisibleTooltipsAsync() => JS.InvokeVoidAsync("enableTooltips");

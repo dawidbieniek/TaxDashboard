@@ -1,51 +1,30 @@
 ﻿@inherits LayoutComponentBase
-@implements IAsyncDisposable
 
-@inject IJSRuntime JS
-@inject NavigationManager Navigation
+<MudThemeProvider IsDarkMode="true" Theme="AppTheme.Theme" />
+<MudPopoverProvider />
+<MudDialogProvider BackdropClick="false" CloseOnEscapeKey="true" CloseButton="true" />
+<MudSnackbarProvider />
 
-<div class="page">
-    <aside class="aside border-end border-2 border-black">
-        <nav class="navbar navbar-vertical align-items-stretch">
-            <div class="container">
-                <span class="navbar-brand m-0 mb-2 fw-bold fs-4 p-0">TaxDashboard</span>
-                <nav class="navbar-nav nav-pills">
-                    <div class="nav-item">
-                        <a class="nav-link" data-bs-toggle="collapse" data-bs-target="#dashboards">
-                            <i class="bi-speedometer2"></i>
-                            Dashboard
-                        </a>
-                        <div id="dashboards" class="collapse show">
-                            <nav class="nav-pills">
-                                <a id="@(NavItemsIds[""])" class="nav-link" href="/">Rozliczenia</a>
-                                <a id="@(NavItemsIds["data"])" class="nav-link" href="/data">Dane</a>
-                            </nav>
-                        </div>
-                    </div>
-                    <div class="nav-item">
-                        <a id="@(NavItemsIds["list"])" class="nav-link" href="/list">
-                            <i class="bi-list"></i>
-                            Lista klientów
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a id="@(NavItemsIds["add"])" class="nav-link" href="/add">
-                            <i class="bi-plus-circle"></i>
-                            Dodaj klienta
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a id="@(NavItemsIds["settings"])" class="nav-link" href="/settings">
-                            <i class="bi-gear-fill"></i>
-                            Ustawienia
-                        </a>
-                    </div>
-                </nav>
-            </div>
-        </nav>
-    </aside>
+<MudLayout>
+    <MudDrawer Elevation="2" Open="true" Breakpoint="Breakpoint.Xs" Style="top:0">
+        <MudNavMenu Class="mud-width-full">
+            <MudText Typo="Typo.h5" Class="my-2" Align="Align.Center">TaxDashboard</MudText>
+            <MudDivider />
+            <MudNavGroup Title="Klient" Icon="@Icons.Material.Filled.Person" Expanded="true">
+                <MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+                <MudNavLink Href="/data" Icon="@Icons.Material.Filled.EditNote">Dane</MudNavLink>
+                <MudNavLink Href="/add" Icon="@Icons.Material.Filled.PersonAdd">Nowy</MudNavLink>
+            </MudNavGroup>
+            <MudNavLink Href="/calculator" Icon="@Icons.Material.Filled.Calculate">Kalkulator</MudNavLink>
+            <MudNavLink Href="/list" Icon="@Icons.Material.Filled.FormatListBulleted">Lista klientów</MudNavLink>
+            <MudNavLink Href="/settings" Icon="@Icons.Material.Filled.Settings">Ustawienia</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
 
-    <content>
+    <MudMainContent Class="pt-0">
+        @{
+            ErrorBoundary _errorBoundaryRef = default!;
+        }
         <ErrorBoundary @ref="@_errorBoundaryRef">
             <ChildContent>
                 @Body
@@ -54,55 +33,5 @@
                 <TaxDashboard.Components.Layout.Components.ErrorMessage DisplayedException="@context" OnRecoverClicked="@_errorBoundaryRef.Recover" />
             </ErrorContent>
         </ErrorBoundary>
-    </content>
-</div>
-
-@code {
-    private static readonly Dictionary<string, string> NavItemsIds = new()
-        {
-            [""] = "homeLink",
-            ["data"] = "dataLink",
-            ["list"] = "listLink",
-            ["add"] = "addLink",
-            ["settings"] = "settingsLink",
-        };
-
-    private IJSObjectReference _JSModule = default!;
-
-    private ErrorBoundary _errorBoundaryRef = default!;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _JSModule = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/Layout/MainLayout.razor.js");
-            Navigation.LocationChanged += OnLocationChanged;
-
-            SetActiveNavLinkToCurrentUrl(Navigation.Uri);
-        }
-
-        base.OnAfterRender(firstRender);
-    }
-
-    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e) => SetActiveNavLinkToCurrentUrl(e.Location);
-
-    private void SetActiveNavLinkToCurrentUrl(string currentLocation)
-    {
-        string? navLinkId = NavItemsIds.GetValueOrDefault(Navigation.ToBaseRelativePath(currentLocation));
-        _JSModule.InvokeVoidAsync("setActiveNavLink", navLinkId);
-    }
-
-    async ValueTask IAsyncDisposable.DisposeAsync()
-    {
-        if (_JSModule is not null)
-        {
-            try
-            {
-                Navigation.LocationChanged -= OnLocationChanged;
-                await _JSModule.DisposeAsync();
-            }
-            catch (JSDisconnectedException)
-            { }
-        }
-    }
-}
+    </MudMainContent>
+</MudLayout>

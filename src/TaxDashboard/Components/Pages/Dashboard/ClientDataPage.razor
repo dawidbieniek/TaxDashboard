@@ -12,7 +12,6 @@
 @inherits DashboardPageBase
 
 @inject BanksService BanksService
-@inject IJSRuntime JS
 
 <LoadingContentsComponent Initialized="@Initialized">
     <ClientSelector @ref="_clientSelectorRef" ShowDateSelector="false" StartingClient="@Client" OnSelectedClientChanged="ChangeSelectedClient" LockClientNavigationButtons="@(_clientEditContext.IsModified())" />
@@ -23,189 +22,134 @@
     }
     else
     {
-        <EditForm EditContext="_clientEditContext" class="container-fluid flex-row mt-2" OnValidSubmit="UpdateClientAsync" onkeypress="if(event.keyCode==13){document.activeElement.blur();return false;}">
+        <EditForm EditContext="_clientEditContext" class="topbar-page pa-2" OnValidSubmit="UpdateClientAsync" onkeypress="if(event.keyCode==13){document.activeElement.blur();return false;}">
             <DataAnnotationsValidator />
-            <div class="row mb-2">
-                <div class="col-12 d-flex flex-row">
-                    <button class="btn btn-primary@(_clientEditContext.IsModified() && !_clientEditContext.GetValidationMessages().Any() ? "" : " disabled")" style="width:9rem;" type="submit">Zapisz zmiany</button>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 col-lg-6 col-xl-4">
+            <MudGrid Spacing="4">
+                <MudItem xs="12">
+                    <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled" Disabled="!_clientEditContext.IsModified() && !_clientEditContext.GetValidationMessages().Any()">Zapisz zmiany</MudButton>
+                </MudItem>
+                <MudItem xs="4">
                     @* General *@
-                    <div class="card bg-light mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Dane</h5>
-                            <p class="text-body-secondary mb-2">Ogólne informacje o kliencie</p>
-                            <div class="d-flex gap-2">
-                                <div class="col mb-2">
-                                    <label class="form-label" for="name">Imię</label>
-                                    <InputText id="name" class="form-control" @bind-Value="Client.Name" onclick="this.select();" required />
-                                    <ValidationMessage For="@(()=> Client.Name)" />
-                                </div>
-                                <div class="col mb-2">
-                                    <label class="form-label" for="surname">Nazwisko</label>
-                                    <InputText id="surname" class="form-control" @bind-Value="Client.Surname" onclick="this.select();" required />
-                                    <ValidationMessage For="@(()=> Client.Surname)" />
-                                </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <div class="col mb-2">
-                                    <label class="form-label" for="phone">Telefon</label>
-                                    <InputText id="phone" class="form-control" type="tel" @bind-Value="Client.PhoneNumber" autocomplete="off" onclick="this.select();" />
-                                    <ValidationMessage For="@(()=> Client.PhoneNumber)" />
-                                </div>
-                                <div class="col mb-2">
-                                    <label class="form-label" for="email">Email</label>
-                                    <InputText id="email" class="form-control" type="email" @bind-Value="Client.Email" autocomplete="off" onclick="this.select();" />
-                                    <ValidationMessage For="@(()=> Client.Email)" />
-                                </div>
-                            </div>
-                            <div class="col mb-2">
-                                <label class="form-label" for="gender">Płeć</label>
-                                <InputClassSelect id="gender" class="form-select" @bind-Value="Client.Gender" Options="@(Enum.GetValues<Gender>())" Selector="v => v.GetDescriptor()"/>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <div class="col mb-2">
-                                    <label class="form-label" for="date">Data założenia</label>
-                                    <InputDate id="date" class="form-control" @bind-Value="Client.JoinDateTime" />
-                                    <ValidationMessage For="@(()=> Client.JoinDateTime)" />
-                                </div>
-                                <div class="col mb-2">
-                                    <label class="form-label" for="nip">NIP</label>
-                                    <InputText id="nip" class="form-control" @bind-Value="Client.NIP" autocomplete="off" onclick="this.select();" />
-                                    <ValidationMessage For="@(()=> Client.NIP)" />
-                                </div>
-                            </div>
-                            <div class="col mb-3">
-                                <label class="form-label" for="bank">Bank</label>
-                                <InputClassSelect id="bank" class="form-select" @bind-Value="@Client.Bank" Options="@_allBanks" Selector="v => v.Name" />
-                                <ValidationMessage For="@(()=> Client.Bank)" />
-                            </div>
-                            <div class="col mb-3 form-check form-switch" style="margin-top:26px;">
-                                <label class="form-check-label" for="employmentContract">Umowa o pracę</label>
-                                <InputCheckbox id="employmentContract" class="form-check-input" type="checkbox" @bind-Value="Client.EmploymentContract" />
-                            </div>
-                            <div class="col form-check form-switch">
-                                <label class="form-check-label" for="cashMethod">Metoda kasowa</label>
-                                <InputCheckbox id="cashMethod" class="form-check-input" type="checkbox" @bind-Value="Client.CashMethod" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-lg-6 col-xl-4">
-                    @* Subscription *@
-                    <div class="card bg-light mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Abonament</h5>
-                            <p class="text-body-secondary mb-2">Dane abonamentu klienta</p>
-                            <div class="col mb-2">
-                                <label class="form-label" for="subscription">Typ abonamentu</label>
-                                <InputText id="subscription" class="form-control" @bind-Value="Client.Subscription" onclick="this.select();" />
-                                <ValidationMessage For="@(()=> Client.Subscription)" />
-                            </div>
-                            <div class="col mb-2">
-                                <label class="form-label" for="authCost">Kwota autoryzacyjna</label>
-                                <InputText id="authCost" class="form-control" @bind-Value="AuthorizationPrice" onclick="this.select();" />
-                                <ValidationMessage For="@(()=> Client.AuthorizationPrice)" />
-                            </div>
-                            <div class="col mb-2">
-                                <label class="form-label" for="subCost">Koszt abonamentu</label>
-                                <InputText id="subCost" class="form-control" @bind-Value="SubscriptionPrice" onclick="this.select();" />
-                                <ValidationMessage For="@(()=> Client.SubscriptionPrice)" />
-                            </div>
-                        </div>
-                    </div>
-                    @* VAT *@
-                    <div class="card bg-light mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">VAT</h5>
-                            <p class="text-body-secondary mb-2">Dane VAT klienta</p>
-                            <div class="col mb-2 form-check form-switch">
-                                <label class="form-check-label" for="vat">Rozlicza VAT</label>
-                                <InputCheckbox id="vat" class="form-check-input" type="checkbox" @bind-Value="Client.VAT" />
-                            </div>
-                            <div class="col mb-2">
-                                <label class="form-label" for="vatType">Sposób opłacania VAT</label>
-                                <InputClassSelect disabled="@(!Client.VAT)" id="vatType" class="form-select" @bind-Value="@Client.VATPaymentType" Options="@(Enum.GetValues<PaymentType>())" Selector="v => v.GetDescriptor()" />
-                                <ValidationMessage For="@(()=> Client.VATPaymentType)" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-lg-6 col-xl-4">
-                    @* Tax settings *@
-                    <div class="card bg-light mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Ustawienia podatkowe</h5>
-                            <p class="text-body-secondary mb-2">Dane rozliczania podatku klienta</p>
-                            <div class="col mb-2">
-                                <label class="form-label" for="taxType">Podatek</label>
-                                <InputClassSelect id="taxType" class="form-select" @bind-Value="@Client.TaxType" Options="@(Enum.GetValues<TaxType>())" Selector="v => v.GetDescriptor()" />
-                                <ValidationMessage For="@(()=> Client.TaxType)" />
-                            </div>
-                            <div class="col mb-2">
-                                <label class="form-label" for="pit">Sposób rozliczania PIT</label>
-                                <InputClassSelect id="pit" class="form-select" @bind-Value="@Client.PITPaymentType" Options="@(Enum.GetValues<PaymentType>())" Selector="v => v.GetDescriptor()" />
-                                <ValidationMessage For="@(()=> Client.PITPaymentType)" />
-                            </div>
-                        </div>
-                    </div>
+                    <MudCard Class="compact-card compact-card-divider" Elevation="4">
+                        <MudCardHeader>
+                            <MudText Typo="Typo.h6">Dane</MudText>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudStack Spacing="3">
+                                <MudStack Row="true">
+                                    <MudTextField Label="Imię" InputType="InputType.Text" @bind-Value="Client.Name" For="@(() => Client.Name)" Required />
+                                    <MudTextField Label="Nazwisko" InputType="InputType.Text" @bind-Value="Client.Surname" For="@(() => Client.Surname)" Required />
+                                </MudStack>
+                                <MudStack Row="true">
+                                    <MudTextField Label="Telefon" InputType="InputType.Telephone" @bind-Value="Client.PhoneNumber" For="@(() => Client.PhoneNumber)" />
+                                    <MudTextField Label="Email" InputType="InputType.Email" @bind-Value="Client.Email" For="@(() => Client.Email)" />
+                                </MudStack>
+                                <MudSelect Label="Płeć" @bind-Value="Client.Gender" For="() => Client.Gender">
+                                    @foreach (var gender in Enum.GetValues<Gender>())
+                                    {
+                                        <MudSelectItem Value="@gender">@gender.GetDescriptor()</MudSelectItem>
+                                    }
+                                </MudSelect>
+                                <MudDatePicker Label="Data założenia" @bind-Date="Client.JoinDateTimeNullable" For="() => Client.JoinDateTimeNullable" ShowToolbar="false" Clearable="true" />
+                                <MudTextField Label="NIP" InputType="InputType.Text" @bind-Value="@Client.NIP" For="@(() => Client.NIP)" Mask="@(new PatternMask("000-000-00-00"))" Immediate="true" MaxLength="13" Clearable="true" />
+                                <MudSelect Label="Bank" @bind-Value="Client.Bank" For="() => Client.Bank">
+                                    @foreach (var bank in _allBanks)
+                                    {
+                                        <MudSelectItem Value="@bank">@bank.Name</MudSelectItem>
+                                    }
+                                </MudSelect>
+                                <MudSwitch Label="Umowa o pracę" @bind-Value="Client.EmploymentContract" For="() => Client.EmploymentContract" />
+                                <MudSwitch Label="Metoda kasowa" @bind-Value="Client.CashMethod" For="() => Client.CashMethod" />
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="4">
+                    <MudStack Spacing="4">
+                        @* Subscription *@
+                        <MudCard Class="compact-card compact-card-divider" Elevation="4">
+                            <MudCardHeader>
+                                <MudText Typo="Typo.h6">Abonament</MudText>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudStack Spacing="3">
+                                    <MudTextField Label="Abonament" InputType="InputType.Text" @bind-Value="Client.Subscription" For="@(() => Client.Subscription)" />
+                                    <MudNumericField Label="Kwota autoryzacyjna" @bind-Value="Client.AuthorizationPrice" For="@(() => Client.AuthorizationPrice)" Format="C2" T="decimal" Immediate="false" />
+                                    <MudNumericField Label="Koszt abonamentu" @bind-Value="Client.SubscriptionPrice" For="@(() => Client.SubscriptionPrice)" Format="C2" T="decimal" Immediate="false" />
+                                </MudStack>
+                            </MudCardContent>
+                        </MudCard>
+                        @* Tax settings *@
+                        <MudCard Class="compact-card compact-card-divider" Elevation="4">
+                            <MudCardHeader>
+                                <MudText Typo="Typo.h6">Podatki</MudText>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudStack Spacing="3">
+                                    <MudSelect Label="Podatek" @bind-Value="Client.TaxType" For="() => Client.TaxType">
+                                        @foreach (var taxType in Enum.GetValues<TaxType>())
+                                        {
+                                            <MudSelectItem Value="@taxType">@taxType.GetDescriptor()</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                    <MudSelect Label="Sposób rozliczania PIT" @bind-Value="Client.PITPaymentType" For="() => Client.PITPaymentType">
+                                        @foreach (var pit in Enum.GetValues<PaymentType>())
+                                        {
+                                            <MudSelectItem Value="@pit">@pit.GetDescriptor()</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                    <MudStack Row Class="align-end">
+                                        <MudSwitch Label="Rozlicza VAT" @bind-Value="Client.VAT" For="() => Client.VAT" />
+                                        <MudSelect Label="Sposób opłacania VAT" @bind-Value="Client.VATPaymentType" For="() => Client.VATPaymentType" Disabled="!Client.VAT">
+                                            @foreach (var vat in Enum.GetValues<PaymentType>())
+                                            {
+                                                <MudSelectItem Value="@vat">@vat.GetDescriptor()</MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    </MudStack>
+                                    <MudSwitch Label="Używa kasy fiskalnej" @bind-Value="Client.UseCashRegister" For="() => Client.UseCashRegister" />
+                                </MudStack>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="4">
                     @* Reduction settings *@
-                    <div class="card bg-light mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title" style="margin-bottom:27px;">Ulgi</h5>
-                            <div class="d-flex gap-2">
-                                <div class="col mb-2">
-                                    <InputClassSelect id="reductionType" class="form-select" @bind-Value="@Client.ReductionType" @bind-Value:after="@UpdateReductionWarning" Options="@(Enum.GetValues<ReductionType>())" Selector="v => v.GetDescriptor()" />
-                                    <ValidationMessage For="@(()=> Client.ReductionType)" />
-                                </div>
-                                <div class="col-auto my-auto">
+                    <MudCard Class="compact-card compact-card-divider" Elevation="4">
+                        <MudCardHeader>
+                            <MudText Typo="Typo.h6">Ulgi</MudText>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudStack Spacing="3">
+                                <MudStack Row="true">
+                                    <MudSelect Label="Ulga" @bind-Value="Client.ReductionType" For="() => Client.ReductionType">
+                                        @foreach (var reductionType in Enum.GetValues<ReductionType>())
+                                        {
+                                            <MudSelectItem Value="@reductionType">@reductionType.GetDescriptor()</MudSelectItem>
+                                        }
+                                    </MudSelect>
                                     @if (_showReductionWarning)
                                     {
                                         <NotificationIcon PopoverText="@($"Klient przekroczył {ClientsService.ZusPlusLimit} w roku {Client.ReductionChangeDate.Year - 1}")" Severity="@NotificationSeverity.Danger" />
                                     }
-                                </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <div class="col mb-2">
-                                    <label class="form-label" for="endDate">Koniec ulgi</label>
-                                    <input id="endDate" class="form-control" value="@(Client.LastDayOfReduction)" disabled />
-                                </div>
-                                <div class="col mb-2">
-                                    <label class="form-label" for="reductionDate">Data przejścia</label>
-                                    @if(Client.ReductionType == ReductionType.ZUSPlus)
-                                    {
-                                        <InputDate id="reductionDate" class="form-control" @bind-Value="Client.ReductionChangeDate" @bind-Value:after="@UpdateReductionWarning" required />
-                                        <ValidationMessage For="@(()=> Client.ReductionChangeDate)" />
-                                    }
-                                    else
-                                    {
-                                        <input id="reductionDate" class="form-control" disabled data-bs-toggle="tooltip" data-bs-title="Klient nie jest na Małym ZUSie Plus" />
-                                    }
-                                </div>
-                            </div>
-                            <div class="col mb-2">
-                                <label class="form-label" for="transactionDate">Data pierwszej transakcji fiskalnej</label>
-                                @if (Client.UseCashRegister)
-                                {
-                                    <InputDate id="transactionDate" class="form-control" @bind-Value="Client.FirstCashRegisterUseDate" required />
-                                }
-                                else
-                                {
-                                    <input type="date" id="transactionDate" class="form-control" disabled data-bs-toggle="tooltip" data-bs-title="Klient nie używa kas fiskalnych" />
-                                }
-                                <ValidationMessage For="@(()=> Client.FirstCashRegisterUseDate)" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                                </MudStack>
+                                <MudTooltip Text="Klient nie jest na Małym ZUSie Plus" ShowOnHover="Client.ReductionType != ReductionType.ZUSPlus">
+                                    <MudDatePicker Label="Data przejścia" @bind-Date="Client.ReductionChangeDateNullable" For="() => Client.ReductionChangeDateNullable" ShowToolbar="false" Disabled="Client.ReductionType != ReductionType.ZUSPlus" />
+                                </MudTooltip>
+                                <MudTooltip Text="Klient nie używa kas fiskalnych" ShowOnHover="!Client.UseCashRegister">
+                                    <MudDatePicker Label="Data pierwszej transakcji fiskalnej" @bind-Date="Client.FirstCashRegisterUseDateNullable" For="() => Client.FirstCashRegisterUseDateNullable" ShowToolbar="false" Disabled="!Client.UseCashRegister" />
+                                </MudTooltip>
+                                <MudDatePicker Label="Koniec ulgi" Date="Client.LastDayOfReductionNullable" For="() => Client.LastDayOfReductionNullable" Disabled="true" />
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
         </EditForm>
     }
 </LoadingContentsComponent>
 <!-- Modal -->
-<PreventNavigationModal NavigationBlockCondition="@(() => _clientEditContext is not null && _clientEditContext.IsModified())" />
+<TaxDashboard.Components.Dialogs.UnsavedContextChecker NavigationBlockCondition="@(() => _clientEditContext is not null && _clientEditContext.IsModified())" />
 
 @code {
     private List<Bank> _allBanks = [];
@@ -230,26 +174,6 @@
         }
     }
 
-    private string AuthorizationPrice
-    {
-        get => Client!.AuthorizationPrice.ToString("C2");
-        set
-        {
-            if (Decimal.TryParse(value, GlobalSettings.CurrencyNumberStyles, GlobalSettings.CurrencyCulture, out decimal currency))
-                Client!.AuthorizationPrice = Math.Round(currency, 2);
-        }
-    }
-
-    private string SubscriptionPrice
-    {
-        get => Client!.SubscriptionPrice.ToString("C2");
-        set
-        {
-            if (Decimal.TryParse(value, GlobalSettings.CurrencyNumberStyles, GlobalSettings.CurrencyCulture, out decimal currency))
-                Client!.SubscriptionPrice = Math.Round(currency, 2);
-        }
-    }
-
     public ClientDataPage()
     {
         // Even if form is not displayed, edit context must be initialized
@@ -260,14 +184,6 @@
     {
         _allBanks = [.. await BanksService.GetAllAsync()];
         await base.OnInitializedAsync();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-            await JS.InvokeVoidAsync("enableTooltips");
-
-        await base.OnAfterRenderAsync(firstRender);
     }
 
     private async Task UpdateClientAsync()
@@ -281,13 +197,12 @@
         }
     }
 
-    private void UpdateReductionWarning() 
+    private void UpdateReductionWarning()
     {
         _showReductionWarning = Client is null
         ? false
         : Client.ReductionType != ReductionType.ZUSPlus
             ? false
             : ClientsService.GetZusIncomeSum(Client, Client.ReductionChangeDate.AddYears(-1)) > ClientsService.ZusPlusLimit;
-        ;
     }
 }

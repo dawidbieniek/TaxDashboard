@@ -1,39 +1,19 @@
-﻿::deep .list-group-item {
-    display: flex;
+﻿::deep .setting-item {
     flex-wrap: nowrap;
-    margin-left: 0;
-    margin-right: 0;
+    white-space: nowrap;
+    overflow-x: hidden;
 }
 
-    ::deep .list-group-item div {
-        white-space: nowrap;
-        overflow: hidden;
+    ::deep .setting-item .setting-data {
+        margin-top: auto;
+        margin-bottom: auto;
     }
 
-    ::deep .list-group-item .col {
-        padding: 0 1px;
+        ::deep .setting-item .setting-data > * {
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+    ::deep .setting-item .setting-data-fixed {
+        width: 320px;
     }
-
-    ::deep .list-group-item .col-auto {
-        padding: 0 1px;
-    }
-
-    ::deep .list-group-item .col-flex {
-        padding: 0 1px;
-    }
-
-::deep .form-control {
-    background-color: var(--bs-light) !important;
-}
-
-    ::deep .form-control:disabled {
-        background-color: var(--bs-dark) !important;
-    }
-
-    ::deep .form-control.disabled {
-        background-color: var(--bs-dark) !important;
-    }
-
-::deep .list-group-item input {
-    width: 260px;
-}

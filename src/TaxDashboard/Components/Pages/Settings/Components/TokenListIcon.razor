@@ -1,21 +1,23 @@
-﻿@inject IJSRuntime JS
-
-<div id="tokenTooltip" class="bi-info-circle px-1" style="font-size:1.5rem;" data-bs-toggle="tooltip" data-bs-html="true" data-bs-original-title="@_tooltipContent" />
+﻿<MudTooltip Arrow Style="text-align:left">
+    <ChildContent>
+        <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Large"/>
+    </ChildContent>
+    <TooltipContent>
+        <MudText Typo="Typo.body1" Style="width:16rem">
+            W szablonie można używać tokenów, które zostaną zastąpione wartościami specyficznymi dla danego klienta. <b>Np. {panPani}</b>
+            <br /><br />Dostępne tokeny:
+        </MudText>
+        <ul>
+            @foreach (var token in EmailTemplatesService.AvailableTokens)
+            {
+                <li>
+                    <MudText Typo="Typo.body1">@token</MudText>
+                </li>
+            }
+        </ul>
+    </TooltipContent>
+</MudTooltip>
 
 @code {
-    private string _tooltipContent = string.Empty;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-            await JS.InvokeVoidAsync("enableTooltip", "tokenTooltip");
-    }
-
-    protected override void OnInitialized()
-    {
-        string tokenList = string.Concat(EmailTemplatesService.AvailableTokens.Select(v => $"<li>{v}</li>"));
-        _tooltipContent = $"<div>W szablonie można używać tokenów, które zostaną zastąpione wartościami specyficznymi dla danego klienta.<br/><b>Format tokena: {{nazwaTokena}}</b></div><br/><div>Dostępne tokeny: {tokenList}</div>";
-    }
-
     protected override bool ShouldRender() => false;
 }

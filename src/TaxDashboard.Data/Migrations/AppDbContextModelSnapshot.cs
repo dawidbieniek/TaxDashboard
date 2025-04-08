@@ -63,6 +63,10 @@ namespace TaxDashboard.Data.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Info")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("Invoiced")
                         .HasColumnType("INTEGER");
 
