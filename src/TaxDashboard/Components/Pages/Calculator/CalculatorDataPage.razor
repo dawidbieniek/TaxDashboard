@@ -34,21 +34,23 @@
                     <MudText Typo="Typo.h6">Ryczałt</MudText>
                 </MudCardHeader>
                 <MudCardContent>
-                    <CalculatorChart TaxValue="CalculatorService.CalculateLumpSumTax(_calculationData)"
-                                     HealthContributionValue="CalculatorService.CalculateLumpSumHealthContribution(_calculationData)"
-                                     SocialContributionValue="CalculatorService.CalculateSocialContribution(_calculationData)" />
+                    <CalculatorChart TaxValue="_lumpSumTax"
+                                     HealthContributionValue="_lumpSumHealthContribution"
+                                     SocialContributionValue="_lumpSumSocialContribution" />
+                    <MudText Color="_lumpSumColor" Typo="Typo.h5" Class="text-center">@_lumpSumTotal zł</MudText>
                 </MudCardContent>
             </MudCard>
         </MudItem>
         <MudItem xs="4">
             <MudCard Class="compact-card" Elevation="4">
                 <MudCardHeader>
-                    <MudText Typo="Typo.h6">Skala podatkowa</MudText>
+                    <MudText Typo="Typo.h5">Skala podatkowa</MudText>
                 </MudCardHeader>
                 <MudCardContent>
-                    <CalculatorChart TaxValue="CalculatorService.CalculateTaxScaleTax(_calculationData)"
-                                     HealthContributionValue="CalculatorService.CalculateTaxScaleHealthContribution(_calculationData)"
-                                     SocialContributionValue="CalculatorService.CalculateSocialContribution(_calculationData)" />
+                    <CalculatorChart TaxValue="_taxScaleTax"
+                                     HealthContributionValue="_taxScaleHealthContribution"
+                                     SocialContributionValue="_taxScaleSocialContribution" />
+                    <MudText Color="_taxScaleColor" Typo="Typo.h5" Class="text-center">@_taxScaleTotal zł</MudText>
                 </MudCardContent>
             </MudCard>
         </MudItem>
@@ -58,9 +60,10 @@
                     <MudText Typo="Typo.h6">Podatek liniowy</MudText>
                 </MudCardHeader>
                 <MudCardContent>
-                    <CalculatorChart TaxValue="CalculatorService.CalculateLinearTax(_calculationData)"
-                                     HealthContributionValue="7897.64M"
-                                     SocialContributionValue="CalculatorService.CalculateLinearTaxHealthContribution(_calculationData)" />
+                    <CalculatorChart TaxValue="_linearTax"
+                                     HealthContributionValue="_linearHealthContribution"
+                                     SocialContributionValue="_linearSocialContribution" />
+                    <MudText Color="_linearColor" Typo="Typo.h5" Class="text-center">@_linearTotal zł</MudText>
                 </MudCardContent>
             </MudCard>
         </MudItem>
@@ -69,4 +72,52 @@
 
 @code {
     private CalculationData _calculationData = new();
+
+    private decimal _lumpSumTax;
+    private decimal _lumpSumHealthContribution;
+    private decimal _lumpSumSocialContribution;
+    private decimal _lumpSumTotal;
+
+    private decimal _taxScaleTax;
+    private decimal _taxScaleHealthContribution;
+    private decimal _taxScaleSocialContribution;
+    private decimal _taxScaleTotal;
+
+    private decimal _linearTax;
+    private decimal _linearHealthContribution;
+    private decimal _linearSocialContribution;
+    private decimal _linearTotal;
+
+    private MudBlazor.Color _lumpSumColor = MudBlazor.Color.Default;
+    private MudBlazor.Color _taxScaleColor = MudBlazor.Color.Default;
+    private MudBlazor.Color _linearColor = MudBlazor.Color.Default;
+
+    protected override void OnParametersSet()
+    {
+        _lumpSumTax = CalculatorService.CalculateLumpSumTax(_calculationData);
+        _lumpSumHealthContribution = CalculatorService.CalculateLumpSumHealthContribution(_calculationData);
+        _lumpSumSocialContribution = CalculatorService.CalculateSocialContribution(_calculationData);
+        _lumpSumTotal = _lumpSumTax + _lumpSumHealthContribution + _lumpSumSocialContribution;
+
+        _taxScaleTax = CalculatorService.CalculateTaxScaleTax(_calculationData);
+        _taxScaleHealthContribution = CalculatorService.CalculateTaxScaleHealthContribution(_calculationData);
+        _taxScaleSocialContribution = CalculatorService.CalculateSocialContribution(_calculationData);
+        _taxScaleTotal = _taxScaleTax + _taxScaleHealthContribution + _taxScaleSocialContribution;
+
+        _linearTax = CalculatorService.CalculateLinearTax(_calculationData);
+        _linearHealthContribution = CalculatorService.CalculateLinearTaxHealthContribution(_calculationData);
+        _linearSocialContribution = CalculatorService.CalculateLinearTaxHealthContribution(_calculationData);
+        _linearTotal = _linearTax + _linearHealthContribution + _linearSocialContribution;
+
+        SetColors();
+    }
+
+    private void SetColors()
+    {
+        var minTotal = Math.Min(_lumpSumTotal, Math.Min(_taxScaleTotal, _linearTotal));
+
+        _lumpSumColor = _lumpSumTotal == minTotal ? MudBlazor.Color.Success : MudBlazor.Color.Default;
+        _taxScaleColor = _taxScaleTotal == minTotal ? MudBlazor.Color.Success : MudBlazor.Color.Default;
+        _linearColor = _linearTotal == minTotal ? MudBlazor.Color.Success : MudBlazor.Color.Default;
+    }
 }
