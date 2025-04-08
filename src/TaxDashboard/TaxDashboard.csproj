@@ -72,7 +72,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\TaxDashboard.Data\TaxDashboard.Data.csproj" />
-      <ProjectReference Include="..\BlazorTable\src\BlazorTable\BlazorTable.csproj" />
       <ProjectReference Include="..\LifeManagers.Data\src\LifeManagers.Data.csproj" />
       <ProjectReference Include="..\TaxDashboard.Util\TaxDashboard.Util.csproj" />
     </ItemGroup>

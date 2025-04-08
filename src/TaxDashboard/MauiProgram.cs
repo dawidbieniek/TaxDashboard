@@ -1,7 +1,5 @@
 ﻿using ApexCharts;
 
-using BlazorTable;
-
 using CommunityToolkit.Maui;
 
 using LifeManagers.Data;
@@ -35,7 +33,6 @@ namespace TaxDashboard
                 .AddEnvironmentVariables();
 
             builder.Services.AddMauiBlazorWebView();
-            builder.Services.AddBlazorTable();
             builder.Services.AddMudServices(opt =>
             {
                 opt.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
