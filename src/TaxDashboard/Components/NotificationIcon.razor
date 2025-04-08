@@ -6,7 +6,7 @@
 
 @if (ShowWhenEmptyMessage || !string.IsNullOrEmpty(PopoverText))
 {
-    <MudIconButton id="@_id" Icon="@Icons.Material.Filled.NotificationImportant" Color="Severity.Color()" Size="Size" OnClick="() => _openPopover = !_openPopover" />
+    <MudIconButton id="@_id" Class="@(Dense ? "pa-0" : "")" Icon="@Icons.Material.Filled.NotificationImportant" Color="Severity.Color()" Size="Size" OnClick="() => _openPopover = !_openPopover" />
     <MudOverlay @bind-Visible="_openPopover" AutoClose="true" />
     <MudPopover Class="pa-2" Style="width:16rem" Open="_openPopover" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
         @((MarkupString)PopoverText)
@@ -29,6 +29,8 @@
     public string PopoverLocation { get; set; } = "bottom";
     [Parameter]
     public Size Size { get; set; } = Size.Medium;
+    [Parameter]
+    public bool Dense { get; set; } = false;
 
     public async ValueTask DisposeAsync()
     {

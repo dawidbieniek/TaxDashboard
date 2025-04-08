@@ -44,22 +44,22 @@
                                     <MudTextField Label="Telefon" InputType="InputType.Telephone" @bind-Value="Client.PhoneNumber" For="@(() => Client.PhoneNumber)" />
                                     <MudTextField Label="Email" InputType="InputType.Email" @bind-Value="Client.Email" For="@(() => Client.Email)" />
                                 </MudStack>
-                                <MudSelect Label="Płeć" @bind-Value="Client.Gender">
+                                <MudSelect Label="Płeć" @bind-Value="Client.Gender" For="() => Client.Gender">
                                     @foreach (var gender in Enum.GetValues<Gender>())
                                     {
                                         <MudSelectItem Value="@gender">@gender.GetDescriptor()</MudSelectItem>
                                     }
                                 </MudSelect>
-                                <MudDatePicker Label="Data założenia" @bind-Date="Client.JoinDateTimeNullable" ShowToolbar="false" Clearable="true" />
+                                <MudDatePicker Label="Data założenia" @bind-Date="Client.JoinDateTimeNullable" For="() => Client.JoinDateTimeNullable" ShowToolbar="false" Clearable="true" />
                                 <MudTextField Label="NIP" InputType="InputType.Text" @bind-Value="@Client.NIP" For="@(() => Client.NIP)" Mask="@(new PatternMask("000-000-00-00"))" Immediate="true" MaxLength="13" Clearable="true" />
-                                <MudSelect Label="Bank" @bind-Value="Client.Bank">
+                                <MudSelect Label="Bank" @bind-Value="Client.Bank" For="() => Client.Bank">
                                     @foreach (var bank in _allBanks)
                                     {
                                         <MudSelectItem Value="@bank">@bank.Name</MudSelectItem>
                                     }
                                 </MudSelect>
-                                <MudSwitch Label="Umowa o pracę" @bind-Value="Client.EmploymentContract" />
-                                <MudSwitch Label="Metoda kasowa" @bind-Value="Client.CashMethod" />
+                                <MudSwitch Label="Umowa o pracę" @bind-Value="Client.EmploymentContract" For="() => Client.EmploymentContract" />
+                                <MudSwitch Label="Metoda kasowa" @bind-Value="Client.CashMethod" For="() => Client.CashMethod" />
                             </MudStack>
                         </MudCardContent>
                     </MudCard>
@@ -86,28 +86,28 @@
                             </MudCardHeader>
                             <MudCardContent>
                                 <MudStack Spacing="3">
-                                    <MudSelect Label="Podatek" @bind-Value="Client.TaxType">
+                                    <MudSelect Label="Podatek" @bind-Value="Client.TaxType" For="() => Client.TaxType">
                                         @foreach (var taxType in Enum.GetValues<TaxType>())
                                         {
                                             <MudSelectItem Value="@taxType">@taxType.GetDescriptor()</MudSelectItem>
                                         }
                                     </MudSelect>
-                                    <MudSelect Label="Sposób rozliczania PIT" @bind-Value="Client.PITPaymentType">
+                                    <MudSelect Label="Sposób rozliczania PIT" @bind-Value="Client.PITPaymentType" For="() => Client.PITPaymentType">
                                         @foreach (var pit in Enum.GetValues<PaymentType>())
                                         {
                                             <MudSelectItem Value="@pit">@pit.GetDescriptor()</MudSelectItem>
                                         }
                                     </MudSelect>
                                     <MudStack Row Class="align-end">
-                                        <MudSwitch Label="Rozlicza VAT" @bind-Value="Client.VAT" />
-                                        <MudSelect Label="Sposób opłacania VAT" @bind-Value="Client.VATPaymentType" Disabled="!Client.VAT">
+                                        <MudSwitch Label="Rozlicza VAT" @bind-Value="Client.VAT" For="() => Client.VAT" />
+                                        <MudSelect Label="Sposób opłacania VAT" @bind-Value="Client.VATPaymentType" For="() => Client.VATPaymentType" Disabled="!Client.VAT">
                                             @foreach (var vat in Enum.GetValues<PaymentType>())
                                             {
                                                 <MudSelectItem Value="@vat">@vat.GetDescriptor()</MudSelectItem>
                                             }
                                         </MudSelect>
                                     </MudStack>
-                                    <MudSwitch Label="Używa kasy fiskalnej" @bind-Value="Client.UseCashRegister" />
+                                    <MudSwitch Label="Używa kasy fiskalnej" @bind-Value="Client.UseCashRegister" For="() => Client.UseCashRegister" />
                                 </MudStack>
                             </MudCardContent>
                         </MudCard>
@@ -122,7 +122,7 @@
                         <MudCardContent>
                             <MudStack Spacing="3">
                                 <MudStack Row="true">
-                                    <MudSelect Label="Ulga" @bind-Value="Client.ReductionType">
+                                    <MudSelect Label="Ulga" @bind-Value="Client.ReductionType" For="() => Client.ReductionType">
                                         @foreach (var reductionType in Enum.GetValues<ReductionType>())
                                         {
                                             <MudSelectItem Value="@reductionType">@reductionType.GetDescriptor()</MudSelectItem>
@@ -134,12 +134,12 @@
                                     }
                                 </MudStack>
                                 <MudTooltip Text="Klient nie jest na Małym ZUSie Plus" ShowOnHover="Client.ReductionType != ReductionType.ZUSPlus">
-                                    <MudDatePicker Label="Data przejścia" @bind-Date="Client.ReductionChangeDateNullable" ShowToolbar="false" Disabled="Client.ReductionType != ReductionType.ZUSPlus" />
+                                    <MudDatePicker Label="Data przejścia" @bind-Date="Client.ReductionChangeDateNullable" For="() => Client.ReductionChangeDateNullable" ShowToolbar="false" Disabled="Client.ReductionType != ReductionType.ZUSPlus" />
                                 </MudTooltip>
                                 <MudTooltip Text="Klient nie używa kas fiskalnych" ShowOnHover="!Client.UseCashRegister">
-                                    <MudDatePicker Label="Data pierwszej transakcji fiskalnej" @bind-Date="Client.FirstCashRegisterUseDateNullable" ShowToolbar="false" Disabled="!Client.UseCashRegister" />
+                                    <MudDatePicker Label="Data pierwszej transakcji fiskalnej" @bind-Date="Client.FirstCashRegisterUseDateNullable" For="() => Client.FirstCashRegisterUseDateNullable" ShowToolbar="false" Disabled="!Client.UseCashRegister" />
                                 </MudTooltip>
-                                <MudDatePicker Label="Koniec ulgi" Date="Client.LastDayOfReductionNullable" Disabled="true" />
+                                <MudDatePicker Label="Koniec ulgi" Date="Client.LastDayOfReductionNullable" For="() => Client.LastDayOfReductionNullable" Disabled="true" />
                             </MudStack>
                         </MudCardContent>
                     </MudCard>

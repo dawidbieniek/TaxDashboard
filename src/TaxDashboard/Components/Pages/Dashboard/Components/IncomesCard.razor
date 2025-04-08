@@ -5,7 +5,7 @@
 @inject ClientsService ClientsService
 
 <ElementRequiringLoad @ref="@_incomeLoadingRef">
-    <ApexChart @ref="_incomeChartRef" TItem="IncomeData" Height="@("236px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _incomeLoadingRef.HideLoadingIcon())">
+    <ApexChart @ref="_incomeChartRef" TItem="IncomeData" Height="@("261px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _incomeLoadingRef.HideLoadingIcon())">
         <ApexPointSeries TItem="IncomeData"
                          Name="Przychody"
                          Items="@_incomesDataSeries"

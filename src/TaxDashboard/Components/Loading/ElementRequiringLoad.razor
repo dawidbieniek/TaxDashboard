@@ -1,10 +1,10 @@
-﻿<div class="h-100 position-relative">
+﻿<div class="relative h-100">
     <div style="@(_showLoadingIcon ? "visibility:hidden;" : "")">
         @ChildContent
     </div>
     @if (_showLoadingIcon)
     {
-        <div class="position-absolute top-50 start-50 translate-middle">
+        <div class="absolute" style="top:50%; left:50%; transform:translate(-50%)">
             <LoadingIcon />
         </div>
     }

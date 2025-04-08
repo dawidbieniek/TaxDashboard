@@ -76,6 +76,13 @@ h1:focus {
     }
 }
 
+.w-100 {
+    width:100%;
+}
+.h-100 {
+    height:100%;
+}
+
 .form-switch {
     padding-left: 3rem;
 }
@@ -196,6 +203,7 @@ label {
 
 .dashboard-card {
     padding: 12px;
+    overflow: hidden;
 }
 .topbar-page {
     margin-top: var(--mud-appbar-height);

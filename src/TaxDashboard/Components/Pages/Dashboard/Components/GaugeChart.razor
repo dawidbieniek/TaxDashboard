@@ -4,8 +4,9 @@
 
 @inject IJSRuntime JS
 
-<div class="d-flex flex-column align-items-center justify-content-center h-100">
-    <ElementRequiringLoad @ref="@_loadingRef">
+<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%">
+<ElementRequiringLoad @ref="@_loadingRef">
+    <MudStack Class="h-100">
         <ApexChart @ref="@_chartRef" TItem="GaugeValue" OnBeforeMount="@(() => _loadingRef.HideLoadingIcon())">
             <ApexPointSeries TItem="GaugeValue"
                              SeriesType=SeriesType.RadialBar
@@ -14,14 +15,26 @@
                              XValue="@(e => e.Label)"
                              YValue="@(e => e.Percentage)" />
         </ApexChart>
-        <div id="@_tooltipId" class="h5 w-100 text-center @(_valueClass)"
-             data-bs-toggle="tooltip"
-             data-bs-html="true"
-             data-bs-original-title="@($"{Value:C} / {ValueLimit:C}{(string.IsNullOrEmpty(TooltipAdditionalText) ? "" : $"<br/>{TooltipAdditionalText}")}")">
-            @Value.ToString("C2", GlobalSettings.CurrencyCulture)
-            <NotificationIcon ShowWhenEmptyMessage="false" PopoverLocation="right" PopoverText="@_notificationText" Severity="@_notificationSeverity" />
+        <div class="mx-auto">
+            <MudTooltip Arrow Placement="Placement.Top">
+                <ChildContent>
+                    <MudStack Row Class="align-center">
+                        <MudText Typo="Typo.body1">@Value.ToString("C2", GlobalSettings.CurrencyCulture)</MudText>
+                        <NotificationIcon Dense ShowWhenEmptyMessage="false" PopoverLocation="right" PopoverText="@_notificationText" Severity="@_notificationSeverity" />
+                    </MudStack>
+                </ChildContent>
+                <TooltipContent>
+                    <MudText Typo="Typo.body1">@Value.ToString("C") / @ValueLimit.ToString("C")</MudText>
+                    @if (!string.IsNullOrEmpty(TooltipAdditionalText))
+                    {
+                        <br />
+                        <MudText Typo="Typo.body1">@TooltipAdditionalText</MudText>
+                    }
+                </TooltipContent>
+            </MudTooltip>
         </div>
-    </ElementRequiringLoad>
+    </MudStack>
+</ElementRequiringLoad>
 </div>
 
 @code {
