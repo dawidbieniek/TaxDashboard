@@ -1,12 +1,27 @@
-﻿::deep .month-group {
-    align-items: center;
-}
-
-::deep .year-select {
+﻿::deep .year-select {
     width: 5rem;
 }
 
 ::deep .month-button {
     min-width: 48px;
     padding: 4px 8px;
+}
+
+::deep .month-group {
+    align-items: center;
+}
+
+::deep .month-select {
+    width: 8rem;
+    display: none;
+}
+
+@media (max-width: 1492px) {
+    ::deep .month-group {
+        display: none !important;
+    }
+
+    ::deep .month-select {
+        display: block !important;
+    }
 }

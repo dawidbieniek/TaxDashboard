@@ -25,6 +25,15 @@
             }
         }
     </MudStack>
+    <MudSelect T="int" Class="ms-2 month-select" Value="@_selectedMonth" ValueChanged="ChangeSelectedMonth">
+        @for (int i = 1; i <= 12; i++)
+        {
+            int monthValue = i;
+            <MudSelectItem Style="@GetMonthSelectItemColorStyle(monthValue)" Value="@i">
+                @DataDisplayHelper.GetMonthFullLabel(monthValue)
+            </MudSelectItem>
+        }
+    </MudSelect>
 </div>
 @code {
 
@@ -78,9 +87,14 @@
     }
 
     private MudBlazor.Color GetMonthButtonColor(int monthValue) => IsMonthDisabled(monthValue) ? Color.Default
-    : ClientSettlements.Any(s => s.ContextDate.Year == _selectedYear && s.ContextDate.Month == monthValue)
+        : ClientSettlements.Any(s => s.ContextDate.Year == _selectedYear && s.ContextDate.Month == monthValue)
             ? Color.Success
             : Color.Warning;
+
+    private string GetMonthSelectItemColorStyle(int monthValue) => IsMonthDisabled(monthValue) ? "color:var(--mud-palette-text-disabled)"
+        : ClientSettlements.Any(s => s.ContextDate.Year == _selectedYear && s.ContextDate.Month == monthValue)
+            ? "color:var(--mud-palette-success)"
+            : "color:var(--mud-palette-warning)";
 
     private bool IsMonthDisabled(int monthValue) => IsDateDisabled(monthValue, _selectedYear);
     private bool IsDateDisabled(int monthValue, int year) => year < JoinDateTime.Year || (year == JoinDateTime.Year && monthValue < JoinDateTime.Month);
