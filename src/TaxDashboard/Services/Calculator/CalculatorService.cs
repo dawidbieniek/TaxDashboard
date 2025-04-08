@@ -48,59 +48,59 @@ public static class CalculatorService
         } * 12;
     }
 
-    public static decimal CalculateLumpSumHealthContribution(CalculationData data)
+    public static (decimal Tax, decimal HealthContribution, decimal SocialContribution) CalculateLumpSumValues(CalculationData data)
     {
-        decimal healthContributionBaseValue = Math.Max(data.Income - CalculateSocialContribution(data), 0);
-        return GetLumpSumHealthContribution(healthContributionBaseValue);
+        decimal socialContribution = CalculateSocialContribution(data);
+
+        decimal healthContributionBaseValue = Math.Max(data.Income - socialContribution, 0);
+        decimal healthContribution = GetLumpSumHealthContribution(healthContributionBaseValue);
+
+        decimal healthContributionToReduce = healthContribution / 2;
+        decimal taxBaseValue = data.Income - healthContributionToReduce - socialContribution;
+        decimal tax = Math.Max(taxBaseValue * data.Rate.AsPercentageValue(), 0);
+
+        return (tax, healthContribution, socialContribution);
     }
 
-    public static decimal CalculateLumpSumTax(CalculationData data)
+    public static (decimal Tax, decimal HealthContribution, decimal SocialContribution) CalculateTaxScaleValues(CalculationData data)
     {
-        decimal healthContributionToReduce = CalculateLumpSumHealthContribution(data) / 2;
-        decimal taxBaseValue = data.Income - healthContributionToReduce - CalculateSocialContribution(data);
-        return Math.Max(taxBaseValue * data.Rate.AsPercentageValue(), 0);
-    }
-    public static decimal CalculateTaxScaleHealthContribution(CalculationData data)
-    {
+        decimal socialContribution = CalculateSocialContribution(data);
+
         decimal net = data.Income - data.Expenses;
-        decimal healthContributionBaseValue = Math.Max(net - CalculateSocialContribution(data), 0);
-        return healthContributionBaseValue > TaxScaleHealthContributionMonthlyThreshold * 12
-            ? healthContributionBaseValue * TaxScaleHealthContributionThresholdPercentageValue
+        decimal baseValue = Math.Max(net - socialContribution, 0);
+
+        decimal healthContribution = baseValue > TaxScaleHealthContributionMonthlyThreshold * 12
+            ? baseValue * TaxScaleHealthContributionThresholdPercentageValue
             : FirstBracketHealthContributionMonthlyValue * 12;
-    }
 
-    public static decimal CalculateTaxScaleTax(CalculationData data)
-    {
-        decimal net = data.Income - data.Expenses;
-        decimal taxBaseValue = Math.Max(net - CalculateSocialContribution(data), 0);
-        decimal tax12 = Math.Min(taxBaseValue * TaxScaleFirstBracketPercentageValue, TaxScaleFirstBracketThreshold * TaxScaleFirstBracketPercentageValue);
-        decimal tax32 = taxBaseValue > TaxScaleFirstBracketThreshold
-            ? (taxBaseValue - TaxScaleFirstBracketThreshold) * TaxScaleSecondBracketPercentageValue
+        decimal tax12 = Math.Min(baseValue * TaxScaleFirstBracketPercentageValue, TaxScaleFirstBracketThreshold * TaxScaleFirstBracketPercentageValue);
+        decimal tax32 = baseValue > TaxScaleFirstBracketThreshold
+            ? (baseValue - TaxScaleFirstBracketThreshold) * TaxScaleSecondBracketPercentageValue
             : 0;
-        decimal reduction = taxBaseValue < TaxScaleReductionThreshold
-            ? taxBaseValue * TaxScaleFirstBracketPercentageValue
+        decimal reduction = baseValue < TaxScaleReductionThreshold
+            ? baseValue * TaxScaleFirstBracketPercentageValue
             : TaxScaleReductionAmount;
+        decimal tax = Math.Max(tax12 + tax32 - reduction, 0);
 
-        return Math.Max(tax12 + tax32 - reduction, 0);
+        return (tax, healthContribution, socialContribution);
     }
 
-    public static decimal CalculateLinearTaxHealthContribution(CalculationData data)
+    public static (decimal Tax, decimal HealthContribution, decimal SocialContribution) CalculateLinearTaxValues(CalculationData data)
     {
+        decimal socialContribution = CalculateSocialContribution(data);
+
         decimal net = data.Income - data.Expenses;
-        decimal healthContributionBaseValue = Math.Max(net - CalculateSocialContribution(data), 0);
-        return healthContributionBaseValue > LinearTaxHealtContributionMonthlyThreshold * 12
+        decimal healthContributionBaseValue = Math.Max(net - socialContribution, 0);
+        decimal healthContribution = healthContributionBaseValue > LinearTaxHealtContributionMonthlyThreshold * 12
             ? healthContributionBaseValue * LinearTaxHealtContributionPercentageValue
             : FirstBracketHealthContributionMonthlyValue * 12;
-    }
 
-    public static decimal CalculateLinearTax(CalculationData data)
-    {
-        decimal net = data.Income - data.Expenses;
-        decimal healthContributionReduction = Math.Min(CalculateLinearTaxHealthContribution(data), LinearTaxHealthReductionThreshold);
-        decimal taxBaseValue = net - CalculateSocialContribution(data) - healthContributionReduction;
-        return Math.Max(taxBaseValue * LinearTaxPercentageValue, 0);
-    }
+        decimal healthContributionReduction = Math.Min(healthContribution, LinearTaxHealthReductionThreshold);
+        decimal taxBaseValue = net - socialContribution - healthContributionReduction;
+        decimal tax = Math.Max(taxBaseValue * LinearTaxPercentageValue, 0);
 
+        return (tax, healthContribution, socialContribution);
+    }
 
     private static decimal GetLumpSumHealthContribution(decimal baseValue)
     {

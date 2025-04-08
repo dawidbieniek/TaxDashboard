@@ -35,8 +35,8 @@
                 </MudCardHeader>
                 <MudCardContent>
                     <CalculatorChart TaxValue="_lumpSumTax"
-                                     HealthContributionValue="_lumpSumHealthContribution"
-                                     SocialContributionValue="_lumpSumSocialContribution" />
+                    HealthContributionValue="_lumpSumHealthContribution"
+                    SocialContributionValue="_lumpSumSocialContribution" />
                     <MudText Color="_lumpSumColor" Typo="Typo.h5" Class="text-center">@_lumpSumTotal zł</MudText>
                 </MudCardContent>
             </MudCard>
@@ -48,8 +48,8 @@
                 </MudCardHeader>
                 <MudCardContent>
                     <CalculatorChart TaxValue="_taxScaleTax"
-                                     HealthContributionValue="_taxScaleHealthContribution"
-                                     SocialContributionValue="_taxScaleSocialContribution" />
+                    HealthContributionValue="_taxScaleHealthContribution"
+                    SocialContributionValue="_taxScaleSocialContribution" />
                     <MudText Color="_taxScaleColor" Typo="Typo.h5" Class="text-center">@_taxScaleTotal zł</MudText>
                 </MudCardContent>
             </MudCard>
@@ -61,8 +61,8 @@
                 </MudCardHeader>
                 <MudCardContent>
                     <CalculatorChart TaxValue="_linearTax"
-                                     HealthContributionValue="_linearHealthContribution"
-                                     SocialContributionValue="_linearSocialContribution" />
+                    HealthContributionValue="_linearHealthContribution"
+                    SocialContributionValue="_linearSocialContribution" />
                     <MudText Color="_linearColor" Typo="Typo.h5" Class="text-center">@_linearTotal zł</MudText>
                 </MudCardContent>
             </MudCard>
@@ -94,19 +94,12 @@
 
     protected override void OnParametersSet()
     {
-        _lumpSumTax = CalculatorService.CalculateLumpSumTax(_calculationData);
-        _lumpSumHealthContribution = CalculatorService.CalculateLumpSumHealthContribution(_calculationData);
-        _lumpSumSocialContribution = CalculatorService.CalculateSocialContribution(_calculationData);
+        (_lumpSumTax, _lumpSumHealthContribution, _lumpSumSocialContribution) = CalculatorService.CalculateLumpSumValues(_calculationData);
+        (_taxScaleTax, _taxScaleHealthContribution, _taxScaleSocialContribution) = CalculatorService.CalculateTaxScaleValues(_calculationData);
+        (_linearTax, _linearHealthContribution, _linearSocialContribution) = CalculatorService.CalculateLinearTaxValues(_calculationData);
+
         _lumpSumTotal = _lumpSumTax + _lumpSumHealthContribution + _lumpSumSocialContribution;
-
-        _taxScaleTax = CalculatorService.CalculateTaxScaleTax(_calculationData);
-        _taxScaleHealthContribution = CalculatorService.CalculateTaxScaleHealthContribution(_calculationData);
-        _taxScaleSocialContribution = CalculatorService.CalculateSocialContribution(_calculationData);
         _taxScaleTotal = _taxScaleTax + _taxScaleHealthContribution + _taxScaleSocialContribution;
-
-        _linearTax = CalculatorService.CalculateLinearTax(_calculationData);
-        _linearHealthContribution = CalculatorService.CalculateLinearTaxHealthContribution(_calculationData);
-        _linearSocialContribution = CalculatorService.CalculateLinearTaxHealthContribution(_calculationData);
         _linearTotal = _linearTax + _linearHealthContribution + _linearSocialContribution;
 
         SetColors();
