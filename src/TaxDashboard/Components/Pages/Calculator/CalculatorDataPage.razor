@@ -1,0 +1,124 @@
+﻿@page "/calculator"
+
+@using ApexCharts
+@using TaxDashboard.Components.Pages.Calculator.Components
+@using TaxDashboard.Services.Calculator
+
+<MudStack Class="pa-2">
+    <MudContainer MaxWidth="MaxWidth.Small">
+        <MudCard Class="compact-card" Elevation="4">
+            <MudCardContent>
+                <MudStack Spacing="3">
+                    <MudNumericField Label="Przychody" @bind-Value="_calculationData.Income" @bind-Value:after="UpdateCharts" For="@(() => _calculationData.Income)" Format="C2" T="decimal" Immediate="false" Required />
+                    <MudNumericField Label="Koszty" @bind-Value="_calculationData.Expenses" @bind-Value:after="UpdateCharts" For="@(() => _calculationData.Expenses)" Format="C2" T="decimal" Immediate="false" Required />
+                    <MudSelect Label="Stawka" @bind-Value="_calculationData.Rate" @bind-Value:after="UpdateCharts" Required>
+                        @foreach (var rate in Enum.GetValues<LumpSumRate>())
+                        {
+                            <MudSelectItem Value="@rate">@rate.GetDescriptor()</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudSelect Label="Składka społeczna" @bind-Value="_calculationData.ContributionVariant" @bind-Value:after="UpdateCharts" Required>
+                        @foreach (var variant in Enum.GetValues<ContributionVariant>())
+                        {
+                            <MudSelectItem Value="@variant">@variant.GetDescriptor()</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudContainer>
+    <MudGrid>
+        <MudItem xs="4">
+            <MudCard Class="compact-card" Elevation="4">
+                <MudCardHeader>
+                    <MudText Typo="Typo.h6">Ryczałt</MudText>
+                </MudCardHeader>
+                <MudCardContent>
+                    <CalculatorChart TaxValue="_lumpSumTax"
+                    HealthContributionValue="_lumpSumHealthContribution"
+                    SocialContributionValue="_lumpSumSocialContribution" />
+                    <MudText Color="_lumpSumColor" Typo="Typo.h5" Class="text-center">@_lumpSumTotal.ToString("C2")</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="4">
+            <MudCard Class="compact-card" Elevation="4">
+                <MudCardHeader>
+                    <MudText Typo="Typo.h5">Skala podatkowa</MudText>
+                </MudCardHeader>
+                <MudCardContent>
+                    <CalculatorChart TaxValue="_taxScaleTax"
+                    HealthContributionValue="_taxScaleHealthContribution"
+                    SocialContributionValue="_taxScaleSocialContribution" />
+                    <MudText Color="_taxScaleColor" Typo="Typo.h5" Class="text-center">@_taxScaleTotal.ToString("C2")</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="4">
+            <MudCard Class="compact-card" Elevation="4">
+                <MudCardHeader>
+                    <MudText Typo="Typo.h6">Podatek liniowy</MudText>
+                </MudCardHeader>
+                <MudCardContent>
+                    <CalculatorChart TaxValue="_linearTax"
+                    HealthContributionValue="_linearHealthContribution"
+                    SocialContributionValue="_linearSocialContribution" />
+                    <MudText Color="_linearColor" Typo="Typo.h5" Class="text-center">@_linearTotal.ToString("C2")</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudStack>
+
+@code {
+
+
+
+    private CalculationData _calculationData = new();
+
+    private decimal _lumpSumTax;
+    private decimal _lumpSumHealthContribution;
+    private decimal _lumpSumSocialContribution;
+    private decimal _lumpSumTotal;
+
+    private decimal _taxScaleTax;
+    private decimal _taxScaleHealthContribution;
+    private decimal _taxScaleSocialContribution;
+    private decimal _taxScaleTotal;
+
+    private decimal _linearTax;
+    private decimal _linearHealthContribution;
+    private decimal _linearSocialContribution;
+    private decimal _linearTotal;
+
+    private MudBlazor.Color _lumpSumColor = MudBlazor.Color.Default;
+    private MudBlazor.Color _taxScaleColor = MudBlazor.Color.Default;
+    private MudBlazor.Color _linearColor = MudBlazor.Color.Default;
+
+
+
+    protected override void OnInitialized() => UpdateCharts();
+
+
+    private void UpdateCharts()
+    {
+        (_lumpSumTax, _lumpSumHealthContribution, _lumpSumSocialContribution) = CalculatorService.CalculateLumpSumValues(_calculationData);
+        (_taxScaleTax, _taxScaleHealthContribution, _taxScaleSocialContribution) = CalculatorService.CalculateTaxScaleValues(_calculationData);
+        (_linearTax, _linearHealthContribution, _linearSocialContribution) = CalculatorService.CalculateLinearTaxValues(_calculationData);
+
+        _lumpSumTotal = _lumpSumTax + _lumpSumHealthContribution + _lumpSumSocialContribution;
+        _taxScaleTotal = _taxScaleTax + _taxScaleHealthContribution + _taxScaleSocialContribution;
+        _linearTotal = _linearTax + _linearHealthContribution + _linearSocialContribution;
+
+        SetColors();
+    }
+
+    private void SetColors()
+    {
+        var minTotal = Math.Min(_lumpSumTotal, Math.Min(_taxScaleTotal, _linearTotal));
+
+        _lumpSumColor = _lumpSumTotal == minTotal ? MudBlazor.Color.Success : MudBlazor.Color.Default;
+        _taxScaleColor = _taxScaleTotal == minTotal ? MudBlazor.Color.Success : MudBlazor.Color.Default;
+        _linearColor = _linearTotal == minTotal ? MudBlazor.Color.Success : MudBlazor.Color.Default;
+    }
+}

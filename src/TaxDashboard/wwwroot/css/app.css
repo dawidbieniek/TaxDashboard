@@ -76,6 +76,13 @@ h1:focus {
     }
 }
 
+.w-100 {
+    width:100%;
+}
+.h-100 {
+    height:100%;
+}
+
 .form-switch {
     padding-left: 3rem;
 }
@@ -111,7 +118,7 @@ input[type="checkbox"]:checked + .toggle-button {
 }
 
 .gauge-card {
-    height: 15.5rem !important;
+    height: 14rem !important;
 }
 
 .chart-card {
@@ -165,4 +172,51 @@ label {
 
 .form-control {
     margin: 1px;
+}
+
+.compact-card.mud-card {
+    --compact-card-horizontal-padding: 12px;
+    padding: 4px var(--compact-card-horizontal-padding);
+    position: relative;
+}
+
+    .compact-card.mud-card .mud-card-header {
+        padding: 0;
+        display: block;
+    }
+
+    .compact-card.mud-card .mud-card-actions {
+        padding: 8px 0;
+    }
+
+        .compact-card.mud-card.compact-card-divider .mud-card-header::after {
+            content: "";
+            display: block;
+            border-bottom: solid var(--mud-palette-dark) 3px;
+            margin: 0 calc(-1 * var(--compact-card-horizontal-padding));
+            width: auto;
+        }
+
+    .compact-card.mud-card .mud-card-content {
+        padding: 8px 0;
+    }
+
+.dashboard-card {
+    padding: 12px;
+    overflow: hidden;
+}
+.topbar-page {
+    margin-top: var(--mud-appbar-height);
+    margin-left: var(--mud-drawer-width-left);
+    position: absolute;
+    left: 0;
+    right: 0
+}
+
+.mud-popover-provider a {
+    color: var(--mud-palette-primary);
+}
+
+.text-center {
+    text-align: center;
 }

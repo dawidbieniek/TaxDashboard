@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>TaxDashboard</title>
     <base href="/" />
-    <link rel="stylesheet" href="lib/bootstrap/bootstrap.min.css" />
+    <!--<link rel="stylesheet" href="lib/bootstrap/bootstrap.min.css" />-->
     <link rel="stylesheet" href="lib/bootstrap/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="css/app.css" />
-    <link rel="stylesheet" href="css/tableConfig.css" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="TaxDashboard.styles.css" />
     <link rel="icon" href="data:,">
 </head>
@@ -16,7 +17,7 @@
 <body ondragstart="return false;" ondrop="return false;">
     <div class="status-bar-safe-area"></div>
 
-    <div id="app" class="h-100 bg-dark bg-gradient">
+    <div id="app">
         <div class="container h-100">
             <div class="row h-100 justify-content-center align-items-center text-center">
                 <div class="spinner-border text-primary" style="width:3rem; height:3rem;" role="status">
@@ -33,6 +34,7 @@
     </div>
 
     <script src="_framework/blazor.webview.js" autostart="false"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="lib/popper/popper.min.js"></script>
     <script src="lib/bootstrap/bootstrap.min.js"></script>
     <script src="_content/BlazorTable/BlazorTable.min.js"></script>

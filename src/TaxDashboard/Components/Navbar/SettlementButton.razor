@@ -1,11 +1,11 @@
 ﻿@inject ClientsService ClientsService
 
-<div class="flex-grow-0 flex-shrink-0 ms-2">
-    <input type="checkbox" class="btn-check visually-hidden" id="settlement" disabled="@Disabled" @bind="@CurrentSettlementValue">
-    <label class="btn btn-outline-secondary toggle-button" style="height:38px; width:8rem;" for="settlement" disabled="@(ContextDate is null)">
-        <b>@(CurrentSettlementValue ? "Rozliczony" : "Nierozliczony")</b>
-        </label>
-</div>
+<MudButton Class="ms-2 flex-shrink-0" Style="height:38px; width:8rem;"
+           Variant="ButtonChecked ? Variant.Filled : Variant.Outlined" Color=" ButtonChecked ? Color.Success : Color.Warning"
+           OnClick="ChangeSettlementState"
+           Disabled="@DisableButton">
+    @(ButtonChecked ? "Rozliczony" : "Nierozliczony")
+</MudButton>
 
 @code {
     private Settlement? _currentSettlement;
@@ -21,26 +21,9 @@
     [Parameter]
     public EventCallback OnSettlementStateChanged { get; set; }
 
+    private bool DisableButton => ContextDate is null || Disabled;
+    private bool ButtonChecked => _currentSettlement is not null;
 
-    private bool CurrentSettlementValue
-    {
-        get => _currentSettlement is not null;
-        set
-        {
-            if (value && _currentSettlement is null)
-            {
-                _currentSettlement = new() { ContextDate = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1), };
-                Client.Settlements.Add(_currentSettlement);
-                UpdateSettlement();
-            }
-            else if (_currentSettlement is not null)
-            {
-                Client.Settlements.Remove(_currentSettlement);
-                _currentSettlement = null;
-                UpdateSettlement();
-            }
-        }
-    }
 
     protected override void OnParametersSet()
     {
@@ -48,7 +31,23 @@
             _currentSettlement = ContextDate.HasValue ? Client.Settlements.FirstOrDefault(s => s.ContextDate == ContextDate) : null;
     }
 
-    private async void UpdateSettlement()
+    private async Task ChangeSettlementState()
+    {
+        if (ButtonChecked)
+        {
+            Client.Settlements.Remove(_currentSettlement!);
+            _currentSettlement = null;
+            await UpdateSettlement();
+        }
+        else
+        {
+            _currentSettlement = new() { ContextDate = ContextDate ?? new(DateTime.Today.Year, DateTime.Today.Month, 1), };
+            Client.Settlements.Add(_currentSettlement);
+            await UpdateSettlement();
+        }
+    }
+
+    private async Task UpdateSettlement()
     {
         await ClientsService.UpdateWithRelatedEntitiesAsync(Client);
         await OnSettlementStateChanged.InvokeAsync();

@@ -1,12 +1,19 @@
 ﻿@using TaxDashboard.Services.Notifications
 
-<NotificationIcon PopoverText="@_notificationText" Severity="@_notificationSeverity" ShowWhenEmptyMessage="false" OccupySpaceWhenEmptyMessage="true" />
+@if (_notificationSeverity == NotificationSeverity.None)
+{
+    <div style="width:48px; flex:0 0 48px;"/>
+}
+else
+{
+    <NotificationIcon PopoverText="@_notificationText" Severity="@_notificationSeverity" ShowWhenEmptyMessage="false" />
+}
 
 @code {
     private string? _notificationText = string.Empty;
     private NotificationSeverity _notificationSeverity = NotificationSeverity.None;
 
-    private ClassFieldChangeTracker<Client> _selectedClientChangeTracker = new(c => c.FullName, c => c.ReductionType, c=>c.ReductionChangeDate);
+    private ClassFieldChangeTracker<Client> _selectedClientChangeTracker = new(c => c.FullName, c => c.ReductionType, c => c.ReductionChangeDate);
 
     [Parameter]
     public Client? SelectedClient { get; set; }

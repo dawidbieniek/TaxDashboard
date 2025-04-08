@@ -2,44 +2,29 @@
 
 @using TaxDashboard.Components.Pages.Settings.Components
 
-<div class="container pt-3 floating-card" style="max-width:1000px;">
-    <div class="row">
-        <div class="col-12">
-            @* Backups *@
-            <div class="card bg-light mb-4 shadow">
-                <div class="card-body">
-                    <BackupSettings/>
-                </div>
-            </div>
-        </div>
-        <div class="col-12">
-            @* Mail *@
-            <div class="card bg-light mb-4">
-                <div class="card-body">
-                    <EmailSettings/>
-                </div>
-            </div>
-        </div>
-        <div class="col-12">
-            @* Application *@
-            <div class="card bg-light mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Aplikacja</h5>
-                    <div class="list-group shadow">
-                        <div class="list-group-item row">
-                            <div class="col">
-                                <div class="fw-bold">Wersja</div>
-                                <div class="text-muted">Obecna wersja aplikacji</div>
-                            </div>
-                            <div class="col-auto my-auto d-flex">
-                                <input type="text" class="form-control" value="@_version" disabled/>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+@* Wrapping div is necessary for isolated CSS *@
+<div>
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="pa-2">
+        <MudStack Spacing="4">
+            <BackupSettings />
+            <EmailSettings />
+            <MudCard Elevation="3">
+                <MudCardHeader>
+                    <MudText Typo="Typo.h6">Aplikacja</MudText>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudStack Row="true" Class="setting-item">
+                        <MudStack Spacing="0">
+                            <MudText Typo="Typo.body1"><b>Wersja</b></MudText>
+                            <MudText Typo="Typo.body2">Obecna wersja aplikacji</MudText>
+                        </MudStack>
+                        <MudSpacer />
+                        <MudText Typo="Typo.body1" Class="setting-data setting-data-fixed">@_version</MudText>
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudStack>
+    </MudContainer>
 </div>
 
 @code {
@@ -47,6 +32,6 @@
 
     protected override void OnInitialized()
     {
-        _version = ('v' + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString()) ?? string.Empty;
+        _version = ('v' + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString()) ?? "???";
     }
 }

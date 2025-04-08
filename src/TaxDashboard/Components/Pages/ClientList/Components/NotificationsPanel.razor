@@ -7,7 +7,7 @@
     }
     @foreach (var notification in _notifications)
     {
-        <NotificationIcon Size="1" OccupySpaceWhenEmptyMessage="false" ShowWhenEmptyMessage="false" Severity="@notification.Severity" PopoverText="@notification.Message" />
+        <NotificationIcon Size="Size.Small" ShowWhenEmptyMessage="false" Severity="@notification.Severity" PopoverText="@notification.Message" />
     }
 </span>
 

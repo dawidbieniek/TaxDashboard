@@ -1,0 +1,27 @@
+﻿<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Niezapisane zmiany</MudText>
+    </TitleContent>
+    <DialogContent>
+        Zmiany nie zostały zapisane. Opuszczenie strony spowoduje ich utratę!
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Cancel">Zamknij</MudButton>
+        <MudButton Color="Color.Secondary" OnClick="DiscardAsync">Odrzuć zmiany</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance Dialog { get; set; } = default!;
+    [Parameter]
+    public EventCallback OnDiscardChanges { get; set; }
+
+    private void Cancel() => Dialog.Cancel();
+
+    private async Task DiscardAsync()
+    {
+        await OnDiscardChanges.InvokeAsync();
+        Dialog.Close(DialogResult.Ok(true));
+    }
+}
