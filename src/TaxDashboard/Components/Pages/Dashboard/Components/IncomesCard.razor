@@ -4,7 +4,6 @@
 
 @inject ClientsService ClientsService
 
-<h5 class="card-title">Miesięczne przychody</h5>
 <ElementRequiringLoad @ref="@_incomeLoadingRef">
     <ApexChart @ref="_incomeChartRef" TItem="IncomeData" Height="@("236px")" XAxisType="XAxisType.Category" OnBeforeMount="@(() => _incomeLoadingRef.HideLoadingIcon())">
         <ApexPointSeries TItem="IncomeData"
@@ -15,8 +14,10 @@
                          XValue="@(e => DataDisplayHelper.GetMonthLabel(e.Month))"
                          YAggregate="@(e => e.Sum(e => e.Amount))" />
     </ApexChart>
-    <label class="form-label" for="income">Przychody w tym miesiącu</label>
-    <InputText id="income" class="form-control" style="max-width:12rem;" @bind-Value="@CurrentMonthIncomeAmount" @bind-Value:after="UpdateClientAsync" autocomplete="off" disabled="@Disabled" onclick="this.select();" />
+    <MudNumericField Style="max-width:12rem;" Label="Przychody w tym miesiącu" Format="C2" T="decimal"
+                     @bind-Value="@CurrentMonthIncome" @bind-Value:after="UpdateClientAsync"
+                     Disabled="@Disabled" DebounceInterval="500" Immediate="false"
+                     onclick="this.select();" />
 </ElementRequiringLoad>
 
 @code {
@@ -38,36 +39,33 @@
     [Parameter]
     public EventCallback<List<IncomeData>> OnYearlyIncomesChanged { get; set; }
 
-    private string CurrentMonthIncomeAmount
+    private decimal CurrentMonthIncome
     {
-        get => (_currentMonthIncome?.Amount ?? 0).ToString("C2");
+        get => _currentMonthIncome?.Amount ?? 0;
         set
         {
             if (Client is null || !ContextDate.HasValue)
                 return;
 
-            if (Decimal.TryParse(value, GlobalSettings.CurrencyNumberStyles, GlobalSettings.CurrencyCulture, out decimal currency))
+            if (value == 0)
             {
-                if (currency == 0)
+                if (_currentMonthIncome is not null)
                 {
-                    if (_currentMonthIncome is not null)
-                    {
-                        Client.Incomes.Remove(_currentMonthIncome);
-                        _currentMonthIncome = null;
-                    }
+                    Client.Incomes.Remove(_currentMonthIncome);
+                    _currentMonthIncome = null;
                 }
+            }
+            else
+            {
+                if (_currentMonthIncome is not null)
+                    _currentMonthIncome.Amount = Math.Round(value, 2);
                 else
                 {
-                    if (_currentMonthIncome is not null)
-                        _currentMonthIncome.Amount = Math.Round(currency, 2);
-                    else
-                    {
-                        _currentMonthIncome = new() { Date = ContextDate.Value };
-                        Client.Incomes.Add(_currentMonthIncome);
-                    }
-
-                    _currentMonthIncome.Amount = Math.Round(currency, 2);
+                    _currentMonthIncome = new() { Date = ContextDate.Value };
+                    Client.Incomes.Add(_currentMonthIncome);
                 }
+
+                _currentMonthIncome.Amount = Math.Round(value, 2);
             }
         }
     }

@@ -1,39 +1,46 @@
-﻿@inject ClientsService ClientsService
+﻿@using TaxDashboard.Components.FormInputs
 
-<div class="card-body row row-cols-2 row-cols-md-3 row-cols-lg-2 row-cols-xl-3 row-cols-xxl-4 gy-3">
-    <div class="col">
-        <input type="checkbox" class="btn-check visually-hidden" id="vatR" @bind="@Client.VATRHandled" @bind:after="@UpdateClientAsync">
-        <label class="btn btn-outline-secondary toggle-button" for="vatR"><b>VAT-R</b></label>
-    </div>
-    <div class="col">
-        <input type="checkbox" class="btn-check visually-hidden" id="ceidg1" @bind="@Client.CEIDG1Handled" @bind:after="@UpdateClientAsync">
-        <label class="btn btn-outline-secondary toggle-button" for="ceidg1"><b>CEIDG-1</b></label>
-    </div>
-    <div class="col">
-        <input type="checkbox" class="btn-check visually-hidden" id="zus" @bind="@Client.ZUSHandled" @bind:after="@UpdateClientAsync">
-        <label class="btn btn-outline-secondary toggle-button" for="zus"><b>ZUS</b></label>
-    </div>
-    <div class="col">
-        <input type="checkbox" class="btn-check visually-hidden" id="invoiced" @bind="@Client.Invoiced" @bind:after="@UpdateClientAsync">
-        <label class="btn btn-outline-secondary toggle-button" for="invoiced"><b>Zafakturowany</b></label>
-    </div>
-    <div class="col">
-        <input type="checkbox" class="btn-check visually-hidden" id="zusDra" checked="@(Client.ZUSDraHandledDate is not null)" @onchange="@ChangeZusDra">
-        <label class="btn btn-outline-secondary toggle-button" for="zusDra"><b>ZUS DRA</b>@(Client.ZUSDraHandledDate is not null ? Client.ZUSDraHandledDate.Value.ToString(DateFormat) : "")</label>
-    </div>
-    <div class="col">
-        <input type="checkbox" class="btn-check visually-hidden" id="tax" checked="@(Client.TaxHandledDate is not null)" @onchange="@ChangeTax">
-        <label class="btn btn-outline-secondary toggle-button" for="tax"><b>Podatek</b>@(Client.TaxHandledDate is not null ? Client.TaxHandledDate.Value.ToString(DateFormat) : "")</label>
-    </div>
-    <div class="col">
-        <input type="checkbox" class="btn-check visually-hidden" id="jpkv7" disabled="@Disabled" @bind="@CurrentJpkV7Exists" @bind:after="UpdateClientAsync">
-        <label class="btn btn-outline-secondary toggle-button" for="jpkv7"><b>JPK V7</b>@(_currentJpkV7 is not null ? _currentJpkV7.ChangedDateTime.ToString(DateFormat) : "")</label>
-    </div>
-    <div class="col">
-        <input type="checkbox" class="btn-check visually-hidden" id="vatue" disabled="@Disabled" @bind="@CurrentVatUeExists" @bind:after="UpdateClientAsync">
-        <label class="btn btn-outline-secondary toggle-button" for="vatue"><b>VAT UE</b>@(_currentVatUe is not null ? _currentVatUe.ChangedDateTime.ToString(DateFormat) : "")</label>
-    </div>
-</div>
+@inject ClientsService ClientsService
+
+<MudGrid>
+    <MudItem xs="6">
+        <CheckButton Class="toggle-button" Label="VAT-R" @bind-Value="Client.VATRHandled" @bind-Value:after="@UpdateClientAsync" />
+    </MudItem>
+    <MudItem xs="6">
+        <CheckButton Class="toggle-button" Label="CEIDG-1" @bind-Value="Client.CEIDG1Handled" @bind-Value:after="@UpdateClientAsync" />
+    </MudItem>
+    <MudItem xs="6">
+        <CheckButton Class="toggle-button" Label="ZUS" @bind-Value="Client.ZUSHandled" @bind-Value:after="@UpdateClientAsync" />
+    </MudItem>
+    <MudItem xs="6">
+        <CheckButton Class="toggle-button" Label="Zafakturowany" @bind-Value="Client.Invoiced" @bind-Value:after="@UpdateClientAsync" />
+    </MudItem>
+
+    <MudItem xs="6">
+        @{
+            string zusDraAdditionalText = Client.ZUSDraHandledDate is not null ? Client.ZUSDraHandledDate.Value.ToString(DateFormat) : "";
+            <CheckButton Class="toggle-button" Label="@($"ZUS DRA {zusDraAdditionalText}")" @bind-Value="ZusDraValue" @bind-Value:after="@UpdateClientAsync" />
+        }
+    </MudItem>
+    <MudItem xs="6">
+        @{
+            string taxAdditionalText = Client.TaxHandledDate is not null ? Client.TaxHandledDate.Value.ToString(DateFormat) : "";
+            <CheckButton Class="toggle-button" Label="@($"Podatek {taxAdditionalText}")" @bind-Value="TaxValue" @bind-Value:after="@UpdateClientAsync" />
+        }
+    </MudItem>
+    <MudItem xs="6">
+        @{
+            string jpkAdditionalText = _currentJpkV7 is not null ? _currentJpkV7.ChangedDateTime.ToString(DateFormat) : "";
+            <CheckButton Class="toggle-button" Label="@($"JPK V7 {jpkAdditionalText}")" @bind-Value="CurrentJpkV7Exists" @bind-Value:after="@UpdateClientAsync" />
+        }
+    </MudItem>
+    <MudItem xs="6">
+        @{
+            string vatUeAdditionalText = _currentVatUe is not null ? _currentVatUe.ChangedDateTime.ToString(DateFormat) : "";
+            <CheckButton Class="toggle-button" Label="@($"VAT UE {vatUeAdditionalText}")" @bind-Value="CurrentVatUeExists" @bind-Value:after="@UpdateClientAsync" />
+        }
+    </MudItem>
+</MudGrid>
 
 @code {
     private const string DateFormat = "\nyyyy-MM-dd\nHH:mm";
@@ -108,6 +115,18 @@
         }
     }
 
+    private bool TaxValue
+    {
+        get => Client.TaxHandledDate is not null;
+        set => Client.TaxHandledDate = value ? DateTime.Now : null;
+    }
+
+    private bool ZusDraValue
+    {
+        get => Client.ZUSDraHandledDate is not null;
+        set => Client.ZUSDraHandledDate = value ? DateTime.Now : null;
+    }
+
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
@@ -133,18 +152,6 @@
     }
 
     private Task UpdateClientAsync() => ClientsService.UpdateWithRelatedEntitiesAsync(Client);
-
-    private async Task ChangeZusDra(ChangeEventArgs e)
-    {
-        Client.ZUSDraHandledDate = (bool)e.Value! ? DateTime.Now : null;
-        await UpdateClientAsync();
-    }
-
-    private async Task ChangeTax(ChangeEventArgs e)
-    {
-        Client.TaxHandledDate = (bool)e.Value! ? DateTime.Now : null;
-        await UpdateClientAsync();
-    }
 
     private void UpdateContextBoundDates()
     {

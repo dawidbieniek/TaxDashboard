@@ -18,95 +18,77 @@
     }
     else
     {
-        <div class="container-fluid flex-row mt-3">
-            <div class="row">
-                <div class="col-12 col-xl-3">
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-1">
-                        @* VAT gauge *@
-                        <div class="col">
-                            <div class="card bg-light mb-4">
-                                <div class="card-body gauge-card">
-                                    <div style="height:25px" />
-                                    <GaugeChart Label="Limit do VAT" Value="@_vatIncomeSum" ValueLimit="@_vatGaugeLimit"
-                                    TooltipAdditionalText="@(Client.JoinDateTime.Year == ContextDate?.Date.Year ? $"Liczone od: {Client.JoinDateTime.ToShortDateString()}" : "")"
-                                    PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountVAT}'>tutaj</a>, aby go poinformować")"
-                                    PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountVATDanger}'>tutaj</a>, aby go poinformować")" />
-                                </div>
-                            </div>
-                        </div>
-                        @* Fiscal gauge *@
-                        <div class="col">
-                            <div class="card bg-light mb-4">
-                                <div class="card-body gauge-card">
-                                    <div class="col form-check form-switch" style="margin-top:-.5rem;">
-                                        <label class="form-check-label overflow-hidden" style="height:1.5rem;" for="cashMethod">Używaj kasy fiskalnej</label>
-                                        <InputCheckbox id="cashMethod" class="form-check-input" type="checkbox" @bind-Value="Client.UseCashRegister" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" />
-                                    </div>
-                                    @if (Client.UseCashRegister)
-                                    {
-                                        <GaugeChart Label="Kasy fiskalne" Value="@_fiscalIncomeSum" ValueLimit="@ClientsService.FiscalLimit"
-                                        TooltipAdditionalText="@(Client.FirstCashRegisterUseDate.Year == ContextDate?.Date.Year ? $"Liczone od: {Client.FirstCashRegisterUseDate.ToShortDateString()}" : "")"
-                                        PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountFiscal}'>tutaj</a>, aby go poinformować")"
-                                        PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountFiscalDanger}'>tutaj</a>, aby go poinformować")" />
-                                    }
-                                    else
-                                    {
-                                        <div class="text-secondary text-center w-100 mt-5">Klient nie używa kasy fiskalnej</div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                        @* ZUS gauge *@
-                        <div class="col">
-                            <div class="card bg-light mb-4">
-                                <div class="card-body gauge-card">
-                                    <div style="height:25px" />
-                                    @if (Client.ReductionType == Data.Enums.ReductionType.ZUSPlus)
-                                    {
-                                        <GaugeChart Label="Mały ZUS Plus" Value="@_zusIncomeSum" ValueLimit="@ClientsService.ZusPlusLimit"
-                                        TooltipAdditionalText="@($"Liczone od: {ContextDate?.Date.FirstDayOfCurrentYear()} do {ContextDate?.Date.LastDayOfCurrentYear()}")"
-                                        PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
-                                        PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" />
-                                    }
-                                    else
-                                    {
-                                        <div class="text-secondary text-center w-100 mt-5">Klient nie jest na Małym ZUSie Plus</div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-xl-9">
-                    @* Income chart *@
-                    <div class="card bg-light mb-4">
-                        <div class="card-body chart-card">
+        <div class="topbar-page pa-2">
+            <MudGrid>
+                <MudItem xs="3">
+                    @* Gauges *@
+                    <MudStack Spacing="6">
+                        <MudCard Class="dashboard-card gauge-card">
+                            <GaugeChart Label="Limit do VAT" Value="@_vatIncomeSum" ValueLimit="@_vatGaugeLimit"
+                                        TooltipAdditionalText="@(Client.JoinDateTime.Year == ContextDate?.Date.Year ? $"Liczone od: {Client.JoinDateTime.ToShortDateString()}" : "")"
+                                        PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountVAT}'>tutaj</a>, aby go poinformować")"
+                                        PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit VAT.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountVATDanger}'>tutaj</a>, aby go poinformować")" />
+                        </MudCard>
+                        <MudCard Class="dashboard-card gauge-card">
+                            @if (Client.UseCashRegister)
+                            {
+                                <GaugeChart Label="Kasy fiskalne" Value="@_fiscalIncomeSum" ValueLimit="@ClientsService.FiscalLimit"
+                                            TooltipAdditionalText="@(Client.FirstCashRegisterUseDate.Year == ContextDate?.Date.Year ? $"Liczone od: {Client.FirstCashRegisterUseDate.ToShortDateString()}" : "")"
+                                            PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountFiscal}'>tutaj</a>, aby go poinformować")"
+                                            PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit kasowy.<br/>Kliknij <a href='/email/new?clientId={Client.Id}&templateType={(int)EmailTemplateType.AmountFiscalDanger}'>tutaj</a>, aby go poinformować")" />
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body1" Class="mt-8 w-100 text-center">Klient nie używa kasy fiskalnej</MudText>
+                            }
+                        </MudCard>
+                        <MudCard Class="dashboard-card gauge-card">
+                            @if (Client.ReductionType == Data.Enums.ReductionType.ZUSPlus)
+                            {
+                                <GaugeChart Label="Mały ZUS Plus" Value="@_zusIncomeSum" ValueLimit="@ClientsService.ZusPlusLimit"
+                                            TooltipAdditionalText="@($"Liczone od: {ContextDate?.Date.FirstDayOfCurrentYear()} do {ContextDate?.Date.LastDayOfCurrentYear()}")"
+                                            PopoverWarningText="@($"Klient <i>{Client.FullName}</i> niedługo przekroczy limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")"
+                                            PopoverDangerText="@($"Klient <i>{Client.FullName}</i> przekroczył limit ZUS.<br/>Kliknij <a href='/email/new?clientId={Client.Id}'>tutaj</a>, aby go poinformować")" />
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body1" Class="mt-8 w-100 text-center">Klient nie jest na Małym ZUSie Plus</MudText>
+                            }
+                        </MudCard>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="6">
+                    @* Charts *@
+                    <MudStack Spacing="6">
+                        <MudCard Class="dashboard-card">
                             <IncomesCard Client="@Client" ContextDate="@ContextDate?.Date" Disabled="@(ContextDate?.IsValid ?? false)" OnYearlyIncomesChanged="@((v) => UpdateIncomes(v))" />
-                        </div>
-                    </div>
-                    @* Invoices *@
-                    <div class="card bg-light mb-4">
-                        <div class="card-body chart-card">
+                        </MudCard>
+                        <MudCard Class="dashboard-card">
                             <InvoicesCard Client="@Client" ContextDate="@ContextDate?.Date" Disabled="@(ContextDate?.IsValid ?? false)" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg">
-                    @* Button panel *@
-                    <div class="card bg-light mb-4 mb-lg-2">
+                        </MudCard>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudCard Class="dashboard-card">
                         <ButtonPanel Client="@Client" ContextDate="@ContextDate?.Date" Disabled="@(ContextDate?.IsValid ?? false)" />
-                    </div>
-                </div>
-                <div class="col-lg mb-2">
-                    @* Notes *@
-                    <div class="card bg-light h-100 p-3" style="min-height:224px">
-                        <h5 class="card-title">Notatki</h5>
-                        <InputTextArea class="form-control h-100" style="resize:none;overflow-y:auto" @bind-Value="@Client.Notes" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" autocomplete="off" />
-                    </div>
-                </div>
-            </div>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12">
+                    @* Buttons & Notes *@
+                    <MudGrid>
+                        <MudItem xs="6">
+                            <MudCard Class="dashboard-card">
+                                <MudTextField Label="Notatki" Variant="Variant.Filled" @bind-Value="@Client.Notes" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" Lines="8" />
+                            </MudCard>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudCard Class="dashboard-card">
+                                <MudTextField Label="Informacje" Variant="Variant.Filled" @bind-Value="@Client.Info" @bind-Value:after="@(() => ClientsService.UpdateAsync(Client))" Lines="8" />
+                            </MudCard>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+            </MudGrid>
         </div>
     }
 </LoadingContentsComponent>

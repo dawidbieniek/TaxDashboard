@@ -32,7 +32,7 @@ public class Client : Entity
 
     public bool UseCashRegister { get; set; } = false;
     public DateOnly FirstCashRegisterUseDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
-    [MaxLength(64, ErrorMessage = "Typ abonamenu jest zbyt długi (max 64)")]
+    [MaxLength(64, ErrorMessage = "Typ abonamentu jest zbyt długi (max 64)")]
     public string Subscription { get; set; } = string.Empty;
     public required Bank Bank { get; set; }
     public bool EmploymentContract { get; set; } = false;
@@ -47,6 +47,7 @@ public class Client : Entity
     public PaymentType VATPaymentType { get; set; } = PaymentType.Monthly;
 
     public string Notes { get; set; } = string.Empty;
+    public string Info { get; set; } = string.Empty;
 
     public bool VATRHandled { get; set; } = false;
     public bool CEIDG1Handled { get; set; } = false;
