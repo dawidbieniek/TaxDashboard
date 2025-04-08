@@ -1,26 +1,30 @@
 ﻿@page "/settings"
 
 @using TaxDashboard.Components.Pages.Settings.Components
-<div class="pa-2">
-    <MudStack Spacing="4">
-        <BackupSettings />
-        <EmailSettings />
-        <MudCard Elevation="3">
-            <MudCardHeader>
-                <MudText Typo="Typo.h6">Aplikacja</MudText>
-            </MudCardHeader>
-            <MudCardContent>
-                <MudStack Row="true" Class="setting-item">
-                    <MudStack Spacing="0">
-                        <MudText Typo="Typo.body1"><b>Wersja</b></MudText>
-                        <MudText Typo="Typo.body2">Obecna wersja aplikacji</MudText>
+
+@* Wrapping div is necessary for isolated CSS *@
+<div>
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="pa-2">
+        <MudStack Spacing="4">
+            <BackupSettings />
+            <EmailSettings />
+            <MudCard Elevation="3">
+                <MudCardHeader>
+                    <MudText Typo="Typo.h6">Aplikacja</MudText>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudStack Row="true" Class="setting-item">
+                        <MudStack Spacing="0">
+                            <MudText Typo="Typo.body1"><b>Wersja</b></MudText>
+                            <MudText Typo="Typo.body2">Obecna wersja aplikacji</MudText>
+                        </MudStack>
+                        <MudSpacer />
+                        <MudText Typo="Typo.body1" Class="setting-data setting-data-fixed">@_version</MudText>
                     </MudStack>
-                    <MudSpacer />
-                    <MudText Typo="Typo.body1" Class="setting-data setting-data-fixed">@_version</MudText>
-                </MudStack>
-            </MudCardContent>
-        </MudCard>
-    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudStack>
+    </MudContainer>
 </div>
 
 @code {

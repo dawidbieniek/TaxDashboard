@@ -22,7 +22,7 @@
     protected override async Task OnParametersSetAsync()
     {
         if (_chartRef is not null)
-            await _chartRef.UpdateSeriesAsync(false);
+            await _chartRef.UpdateSeriesAsync(true);
     }
 
     private record Data(string Name, decimal Value);
