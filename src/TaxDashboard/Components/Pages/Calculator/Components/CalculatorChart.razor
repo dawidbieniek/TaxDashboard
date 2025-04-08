@@ -3,7 +3,7 @@
 <ApexChart @ref="_chartRef" TItem="Data">
     <ApexPointSeries TItem="Data"
                      Name="Opłaty"
-                     Items="@([new("Podatek", TaxValue), new("Zdrowotna", HealthContributionValue), new("Społeczna", SocialContributionValue)])"
+                     Items="@([new("Podatek", Math.Round(TaxValue, 2)), new("Zdrowotna", Math.Round(HealthContributionValue, 2)), new("Społeczna", Math.Round(SocialContributionValue, 2))])"
                      XValue="d => d.Name"
                      YValue="d => d.Value"
                      SeriesType="SeriesType.Bar" />
